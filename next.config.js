@@ -28,7 +28,7 @@ const nextConfig = {
         hostname: 'files.catbox.moe',
       },
       {
-        protocol: 'https',
+        protocol: 'https://',
         hostname: 'portfolio-hicham-ten.vercel.app',
       },
     ],
