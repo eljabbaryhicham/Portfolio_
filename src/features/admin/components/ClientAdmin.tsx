@@ -417,11 +417,11 @@ export default function ClientAdmin() {
                                 </TableCell>
                                 <TableCell className="flex justify-center">
                                     <Image
-                                    src={client.logoUrl}
-                                    alt={client.name}
-                                    width={100}
-                                    height={40}
-                                    className="object-contain h-10 w-24 grayscale brightness-0 invert"
+                                      src={client.logoUrl}
+                                      alt={client.name}
+                                      width={100}
+                                      height={40}
+                                      className="object-contain h-10 w-auto grayscale brightness-0 invert"
                                     />
                                 </TableCell>
                                 <TableCell className="font-medium max-w-[100px] md:max-w-xs truncate">{client.name}</TableCell>
@@ -512,3 +512,5 @@ export default function ClientAdmin() {
     </>
   );
 }
+
+    
