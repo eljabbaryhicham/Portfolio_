@@ -66,7 +66,11 @@ export function AppNav() {
     const isSpecialButton = isAdminButton || isTestButton;
 
     const navButtonContent = (
-      <div className="relative">
+      <motion.div 
+        className="relative"
+        whileHover={{ scale: 1.1, rotate: [0, 10, -5, 0] }}
+        transition={{ duration: 0.3 }}
+      >
         <Link
           href={item.href}
           className={cn(
@@ -98,7 +102,7 @@ export function AppNav() {
             )}
           />
         </Link>
-      </div>
+      </motion.div>
     );
 
     if (isMobile) {
