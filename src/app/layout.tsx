@@ -11,7 +11,7 @@ import { doc } from 'firebase/firestore';
 import type { PortfolioItem } from '@/features/portfolio/data/portfolio-data';
 import { usePathname } from 'next/navigation';
 import Image from 'next/image';
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 
 interface HomePageSettings {
     homePageBackgroundType?: 'video' | 'image';
@@ -32,6 +32,11 @@ function SiteBackground() {
     const pathname = usePathname();
     const isHomePage = pathname === '/';
     
+    const [isClient, setIsClient] = useState(false);
+    useEffect(() => {
+        setIsClient(true);
+    }, []);
+
     const settingsDocRef = useMemoFirebase(
       () => (firestore ? doc(firestore, 'homepage', 'settings') : null),
       [firestore]
@@ -65,6 +70,10 @@ function SiteBackground() {
     const mediaUrl = backgroundType === 'video' 
       ? backgroundProject?.sourceUrl
       : backgroundMedia?.url;
+      
+    if (!isClient) {
+        return <div className="absolute inset-0 -z-10 w-full h-full bg-black"></div>;
+    }
 
     return (
         <div className="absolute inset-0 -z-10 w-full h-full">
@@ -144,7 +153,14 @@ function DynamicThemeStyles() {
     );
     const { data: homeSettings } = useDoc<HomePageSettings>(settingsDocRef);
     
-    const themeColor = homeSettings?.themeColor || '#d81e38'; // Default red
+    const [themeColor, setThemeColor] = useState('#d81e38');
+    
+    useEffect(() => {
+        if (homeSettings?.themeColor) {
+            setThemeColor(homeSettings.themeColor);
+        }
+    }, [homeSettings]);
+    
     const primaryHsl = hexToHsl(themeColor);
   
     return primaryHsl ? (
