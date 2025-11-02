@@ -281,8 +281,8 @@ export default function MediaAdmin(props: MediaAdminProps) {
   const handleLibraryChoiceAndUpload = useCallback(async (libraryId: 'primary' | 'extented') => {
     setIsChoosingLibrary(false);
     
-    const suffix = libraryId === 'primary' ? '_1' : '_2';
-    const cloudName = process.env[`NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME${suffix}`];
+    const isPrimary = libraryId === 'primary';
+    const cloudName = isPrimary ? process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME_1 : process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME_2;
     
     if (!cloudName) {
         toast({
@@ -303,7 +303,7 @@ export default function MediaAdmin(props: MediaAdminProps) {
 
         const timestamp = Math.round((new Date()).getTime() / 1000);
         
-        const uploadPreset = libraryId === 'primary'
+        const uploadPreset = isPrimary
             ? process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET_1
             : process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET_2;
 
