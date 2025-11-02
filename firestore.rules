@@ -1,0 +1,68 @@
+
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Helper function to identify the superadmin
+    function isSuperAdmin() {
+      return request.auth != null && request.auth.token.email == 'eljabbaryhicham@example.com';
+    }
+
+    // Helper function to check if a user is signed in
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    // SUPERADMIN OVERRIDE: Superadmin has universal read/write access to everything.
+    // This rule is checked first and provides a master key.
+    match /{document=**} {
+      allow read, write: if isSuperAdmin();
+    }
+
+    // Projects: Publicly readable, writable by admins.
+    match /projects/{projectId} {
+      allow get, list: if true;
+      // Allow write for non-superadmin users if they are authenticated.
+      // Superadmin access is already granted by the global rule.
+      allow write: if isSignedIn() && !isSuperAdmin();
+    }
+
+    // Contact: Publicly readable, writable by admins.
+    match /contact/{contactId} {
+      allow get, list: if true;
+      allow write: if isSignedIn() && !isSuperAdmin();
+    }
+
+    // Homepage: Publicly readable, writable by admins.
+    match /homepage/{settingsId} {
+      allow get, list: if true;
+      allow write: if isSignedIn() && !isSuperAdmin();
+    }
+
+    // Media: Readable by admins, with specific create/delete permissions.
+    match /media/{mediaId} {
+      // Allow list/get for non-superadmins if they are authenticated.
+      allow list, get: if isSignedIn() && !isSuperAdmin();
+      // Allow create for non-superadmins if their user document says they can.
+      allow create: if isSignedIn() && !isSuperAdmin() && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.permissions.canUploadMedia == true;
+      // Allow delete for non-superadmins if their user document says they can.
+      allow delete: if isSignedIn() && !isSuperAdmin() && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.permissions.canDeleteMedia == true;
+      allow update: if false; // No one should update media documents directly.
+    }
+
+    // Users:
+    match /users/{userId} {
+      // Admins can read their own user document.
+      allow get: if isSignedIn() && request.auth.uid == userId;
+      // Allow LIST for non-superadmins if they are authenticated (for the admin management page).
+      allow list: if isSignedIn() && !isSuperAdmin();
+      // Allow creation of a user document only if the user is creating their own.
+      allow create: if isSignedIn() && request.auth.uid == userId;
+      // Allow admins to update their own document, or a superadmin to update any.
+      allow update: if isSignedIn() && request.auth.uid == userId;
+      // Prevent non-superadmins from deleting user documents.
+      allow delete: if false;
+    }
+  }
+}

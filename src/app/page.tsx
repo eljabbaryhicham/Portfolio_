@@ -1,9 +1,7 @@
-import CodeEnvironment from '@/components/code-environment';
 
-export default function Home() {
-  return (
-    <main className="min-h-screen bg-background">
-      <CodeEnvironment />
-    </main>
-  );
+'use client'
+import HomePageContent from "@/features/portfolio/components/HomePage";
+
+export default function HomePage() {
+    return <HomePageContent />;
 }

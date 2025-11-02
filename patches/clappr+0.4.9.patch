@@ -1,0 +1,12 @@
+diff --git a/node_modules/clappr/package.json b/node_modules/clappr/package.json
+index 1d17180..e398d5c 100644
+--- a/node_modules/clappr/package.json
++++ b/node_modules/clappr/package.json
+@@ -1,5 +1,6 @@
+ {
+   "name": "clappr",
++  "type": "module",
+   "version": "0.4.9",
+   "description": "An extensible media player for the web",
+   "main": "dist/clappr.js",
+

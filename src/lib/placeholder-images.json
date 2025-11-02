@@ -1,3 +1,40 @@
 {
-  "placeholderImages": []
+  "placeholderImages": [
+    {
+      "id": "img1",
+      "description": "Abstract colorful shapes",
+      "imageUrl": "https://images.unsplash.com/photo-1751136740718-6689e54e1ff1?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw0fHxhYnN0cmFjdCUyMGNvbG9yZnVsfGVufDB8fHx8MTc2MTk2ODYyMnww&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "abstract colorful"
+    },
+    {
+      "id": "img2",
+      "description": "Woman portrait with flowers",
+      "imageUrl": "https://images.unsplash.com/photo-1610655507808-a59293f4e332?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw2fHx3b21hbiUyMHBvcnRyYWl0fGVufDB8fHx8MTc2MjAzMDE4OXww&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "woman portrait"
+    },
+    {
+      "id": "img3",
+      "description": "Serene landscape with mountains and a lake",
+      "imageUrl": "https://images.unsplash.com/photo-1759164317124-a4ded88c0cb6?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw1fHxzZXJlbmUlMjBsYW5kc2NhcGV8ZW58MHx8fHwxNzYyMDE4ODQ5fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "serene landscape"
+    },
+    {
+      "id": "img4",
+      "description": "Close up of a neon sign",
+      "imageUrl": "https://images.unsplash.com/photo-1503876466-1fc5143eda57?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw4fHxuZW9uJTIwc2lnbnxlbnwwfHx8fDE3NjIwMTY2MTJ8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "neon sign"
+    },
+    {
+      "id": "vid1-thumb",
+      "description": "Thumbnail for a dynamic motion graphics video",
+      "imageUrl": "https://images.unsplash.com/photo-1620641788421-7a1c342ea42e?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw4fHxtb3Rpb24lMjBncmFwaGljc3xlbnwwfHx8fDE3NjIwNTYyNTd8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "motion graphics"
+    },
+    {
+      "id": "vid2-thumb",
+      "description": "Thumbnail for a cinematic short film",
+      "imageUrl": "https://images.unsplash.com/photo-1694701585524-04e025185de2?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw3fHxjaW5lbWF0aWMlMjBmaWxtfGVufDB8fHx8MTc2MjA1NjI1N3ww&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "cinematic film"
+    }
+  ]
 }

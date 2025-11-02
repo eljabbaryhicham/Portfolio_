@@ -1,4 +1,6 @@
-import { config } from 'dotenv';
-config();
 
-import './flows';
+import * as dotenv from 'dotenv';
+dotenv.config();
+
+// Flows will be imported for their side effects in this file.
+import './flows/upload-media-from-url';

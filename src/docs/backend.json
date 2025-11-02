@@ -1,0 +1,469 @@
+
+{
+  "entities": {
+    "Project": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Project",
+      "type": "object",
+      "description": "Represents a project in the portfolio.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the Project entity."
+        },
+        "title": {
+          "type": "string",
+          "description": "The title of the project."
+        },
+        "description": {
+          "type": "string",
+          "description": "A brief description of the project."
+        },
+        "type": {
+          "type": "string",
+          "enum": ["image", "video"]
+        },
+        "thumbnailUrl": {
+          "type": "string",
+          "format": "uri",
+          "description": "URL of the project's thumbnail image for the grid view."
+        },
+        "thumbnailVttUrl": {
+          "type": "string",
+          "format": "uri",
+          "description": "URL of the VTT file for video timeline thumbnails."
+        },
+        "sourceUrl": {
+          "type": "string",
+          "format": "uri",
+          "description": "URL of the main media file (full-size image or video)."
+        },
+        "thumbnailHint": {
+            "type": "string",
+            "description": "A 1-2 word hint for AI image generation services."
+        },
+        "details": {
+            "type": "string",
+            "description": "More detailed information about the project, can include Markdown."
+        },
+        "useVideoFrameAsPoster": {
+          "type": "boolean",
+          "description": "If true, the player will generate a thumbnail from the video. If false, it will use the thumbnailUrl as a poster."
+        },
+        "order": {
+          "type": "number",
+          "description": "The order in which the project will be displayed."
+        },
+        "isVisible": {
+          "type": "boolean",
+          "description": "Controls the visibility of the project on the public portfolio."
+        }
+      },
+      "required": [
+        "id",
+        "title",
+        "thumbnailUrl",
+        "type",
+        "order"
+      ]
+    },
+    "ContactInfo": {
+      "title": "Contact Info",
+      "description": "Stores contact information for the portfolio owner.",
+      "type": "object",
+      "properties": {
+        "avatarUrl": {
+          "type": "string",
+          "format": "uri"
+        },
+        "name": {
+          "type": "string"
+        },
+        "title": {
+          "type": "string"
+        },
+        "email": {
+          "type": "string",
+          "format": "email"
+        },
+        "whatsApp": {
+          "type": "string"
+        },
+        "behanceUrl": {
+          "type": "string",
+          "format": "uri"
+        },
+        "linkedinUrl": {
+          "type": "string",
+          "format": "uri"
+        },
+        "fiverrUrl": {
+          "type": "string",
+          "format": "uri"
+        },
+        "instagramUrl": {
+          "type": "string",
+          "format": "uri"
+        },
+        "facebookUrl": {
+          "type": "string",
+          "format": "uri"
+        },
+        "twitterUrl": {
+          "type": "string",
+          "format": "uri"
+        },
+        "logoUrl": {
+          "type": "string",
+          "format": "uri",
+          "description": "URL for the main site logo."
+        }
+      },
+      "required": [
+        "avatarUrl",
+        "name",
+        "title",
+        "email"
+      ]
+    },
+    "HomePageSettings": {
+      "title": "Home Page Settings",
+      "description": "Stores settings for the homepage, like background videos.",
+      "type": "object",
+      "properties": {
+        "homePageBackgroundType": {
+            "type": "string",
+            "enum": ["video", "image"],
+            "description": "The type of media to use for the homepage background."
+        },
+        "homePageBackgroundMediaId": {
+          "type": "string",
+          "description": "The ID of the project or media asset to use for the homepage background."
+        },
+        "websiteBackgroundType": {
+            "type": "string",
+            "enum": ["video", "image"],
+            "description": "The type of media to use for the website background."
+        },
+        "websiteBackgroundMediaId": {
+          "type": "string",
+          "description": "The ID of the project or media asset to use for the sitewide background."
+        },
+        "isHomePageVideoEnabled": {
+          "type": "boolean",
+          "description": "Controls whether the homepage video background is enabled."
+        },
+        "isWebsiteVideoEnabled": {
+          "type": "boolean",
+          "description": "Controls whether the video background for other pages is enabled."
+        },
+        "workPagePlayer": {
+          "type": "string",
+          "enum": ["plyr", "clappr"],
+          "description": "The video player to use on the Work page."
+        },
+        "isTestPageEnabled": {
+          "type": "boolean",
+          "description": "Controls whether the test page link is visible in the navigation."
+        },
+        "homePageLogoUrl": {
+            "type": "string",
+            "format": "uri",
+            "description": "URL for the homepage logo."
+        },
+        "isHomePageLogoVisible": {
+            "type": "boolean",
+            "description": "Controls whether the homepage logo is visible."
+        },
+        "themeColor": {
+          "type": "string",
+          "description": "The primary theme color for the website (hex code)."
+        }
+      }
+    },
+    "AboutPageContent": {
+      "title": "About Page Content",
+      "description": "Stores the editable content for the About Us page.",
+      "type": "object",
+      "properties": {
+        "title": {
+          "type": "string",
+          "description": "The main heading for the about section."
+        },
+        "content": {
+          "type": "string",
+          "description": "The paragraph content for the about section."
+        },
+        "imageUrl": {
+          "type": "string",
+          "format": "uri",
+          "description": "URL of the image for the about section."
+        },
+        "logoUrl": {
+            "type": "string",
+            "format": "uri",
+            "description": "URL of the logo for the about section."
+        },
+        "logoScale": {
+            "type": "number",
+            "description": "The scale of the logo on the about page."
+        }
+      },
+      "required": [
+        "title",
+        "content",
+        "imageUrl"
+      ]
+    },
+    "MediaAsset": {
+      "title": "Media Asset",
+      "description": "Stores metadata about an uploaded media file.",
+      "type": "object",
+      "properties": {
+        "public_id": {
+          "type": "string",
+          "description": "The public ID from Cloudinary."
+        },
+        "url": {
+          "type": "string",
+          "format": "uri",
+          "description": "The secure URL of the uploaded file."
+        },
+        "resource_type": {
+          "type": "string",
+          "enum": ["image", "video", "raw"],
+          "description": "The type of the media file."
+        },
+        "videoFormat": {
+            "type": "string",
+            "enum": ["mp4", "m3u8"],
+            "description": "The format for video delivery (optimized MP4 or adaptive HLS)."
+        },
+        "created_at": {
+          "type": "string",
+          "format": "date-time",
+          "description": "The timestamp when the file was uploaded."
+        },
+        "libraryId": {
+            "type": "string",
+            "enum": ["primary", "extented"],
+            "description": "The ID of the Cloudinary library the asset belongs to."
+        }
+      },
+      "required": ["public_id", "url", "resource_type", "created_at", "libraryId"]
+    },
+    "User": {
+      "title": "User",
+      "description": "Represents an administrator user in the system.",
+      "type": "object",
+      "properties": {
+        "uid": {
+          "type": "string",
+          "description": "The unique ID from Firebase Authentication."
+        },
+        "username": {
+          "type": "string",
+          "description": "The user's chosen username."
+        },
+        "email": {
+          "type": "string",
+          "format": "email",
+          "description": "The user's email address."
+        },
+        "role": {
+          "type": "string",
+          "enum": ["admin", "superadmin"],
+          "description": "The role of the user."
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "The timestamp when the user was created."
+        },
+        "permissions": {
+          "type": "object",
+          "description": "Granular permissions for the admin user.",
+          "properties": {
+            "canUploadMedia": {
+              "type": "boolean",
+              "description": "Whether the user can upload new media files."
+            },
+            "canDeleteMedia": {
+              "type": "boolean",
+              "description": "Whether the user can delete existing media files."
+            },
+            "canEditProjects": {
+              "type": "boolean",
+              "description": "Whether the user can edit portfolio projects."
+            },
+            "canEditAbout": {
+              "type": "boolean",
+              "description": "Whether the user can edit the about page."
+            },
+            "canEditContact": {
+              "type": "boolean",
+              "description": "Whether the user can edit contact page settings."
+            },
+            "canEditHome": {
+              "type": "boolean",
+              "description": "Whether the user can edit home page settings."
+            }
+          }
+        }
+      },
+      "required": ["uid", "username", "email", "role", "createdAt"]
+    },
+    "Client": {
+      "title": "Client",
+      "description": "Represents a client or brand.",
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "The name of the client."
+        },
+        "logoUrl": {
+          "type": "string",
+          "description": "URL of the client's logo.",
+          "format": "uri"
+        },
+        "order": {
+          "type": "number",
+          "description": "The order in which the client will be displayed."
+        },
+        "isVisible": {
+          "type": "boolean",
+          "description": "Controls the visibility of the client on the public about page."
+        }
+      },
+      "required": [
+        "name",
+        "logoUrl"
+      ]
+    }
+  },
+  "auth": {
+    "providers": [
+      "password",
+      "anonymous"
+    ]
+  },
+  "firestore": {
+    "structure": [
+      {
+        "path": "/projects/{projectId}",
+        "definition": {
+          "entityName": "Project",
+          "schema": {
+            "$ref": "#/backend/entities/Project"
+          },
+          "description": "Stores project information.",
+          "params": [
+            {
+              "name": "projectId",
+              "description": "The unique identifier for the project."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/contact/{contactId}",
+        "definition": {
+          "entityName": "ContactInfo",
+          "schema": {
+            "$ref": "#/backend/entities/ContactInfo"
+          },
+          "description": "Stores contact page information.",
+          "params": [
+            {
+              "name": "contactId",
+              "description": "The unique identifier for the contact document."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/homepage/{settingsId}",
+        "definition": {
+          "entityName": "HomePageSettings",
+          "schema": {
+            "$ref": "#/backend/entities/HomePageSettings"
+          },
+          "description": "Stores homepage settings.",
+          "params": [
+            {
+              "name": "settingsId",
+              "description": "The unique identifier for the homepage settings document."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/about/{contentId}",
+        "definition": {
+          "entityName": "AboutPageContent",
+          "schema": {
+            "$ref": "#/backend/entities/AboutPageContent"
+          },
+          "description": "Stores the content for the About Us page.",
+          "params": [
+            {
+              "name": "contentId",
+              "description": "The unique identifier for the about page content document."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/media/{mediaId}",
+        "definition": {
+            "entityName": "MediaAsset",
+            "schema": {
+                "$ref": "#/backend/entities/MediaAsset"
+            },
+            "description": "Stores metadata for uploaded Cloudinary assets.",
+            "params": [
+                {
+                    "name": "mediaId",
+                    "description": "The unique identifier for the media asset."
+                }
+            ]
+        }
+      },
+      {
+        "path": "/users/{userId}",
+        "definition": {
+            "entityName": "User",
+            "schema": {
+                "$ref": "#/backend/entities/User"
+            },
+            "description": "Stores administrator user data.",
+            "params": [
+                {
+                    "name": "userId",
+                    "description": "The unique identifier for the user, matching their Firebase Auth UID."
+                }
+            ]
+        }
+      },
+      {
+        "path": "/clients/{clientId}",
+        "definition": {
+            "entityName": "Client",
+            "schema": {
+                "$ref": "#/backend/entities/Client"
+            },
+            "description": "Stores client logos and names.",
+            "params": [
+                {
+                    "name": "clientId",
+                    "description": "The unique identifier for the client."
+                }
+            ]
+        }
+      }
+    ]
+  }
+}
+
+    
