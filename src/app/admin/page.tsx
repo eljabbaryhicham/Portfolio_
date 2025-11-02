@@ -38,7 +38,12 @@ function AdminPage() {
   const [isPortfolioSheetOpen, setIsPortfolioSheetOpen] = useState(false);
   const [isLibraryOpen, setIsLibraryOpen] = useState(false);
   const [librarySelectionConfig, setLibrarySelectionConfig] = useState<{ onSelect: (url: string, type: 'image' | 'video', filename: string) => void } | null>(null);
-  const [activeTab, setActiveTab] = useState('home');
+  const [activeTab, setActiveTab] = useState(() => {
+    if (typeof window !== 'undefined') {
+      return localStorage.getItem('adminActiveTab') || 'home';
+    }
+    return 'home';
+  });
   const [fromMediaLibrary, setFromMediaLibrary] = useState(false);
   const [newlyUploadedId, setNewlyUploadedId] = useState<string | null>(null);
   const [dialogActiveTab, setDialogActiveTab] = useState<'images' | 'videos'>('images');
@@ -48,13 +53,6 @@ function AdminPage() {
   const isSuperAdmin = typedUser?.email === 'eljabbaryhicham@example.com';
   
   const canEditProjects = isSuperAdmin || (typedUser?.permissions?.canEditProjects ?? true);
-  
-  useEffect(() => {
-    const savedTab = localStorage.getItem('adminActiveTab');
-    if (savedTab) {
-      setActiveTab(savedTab);
-    }
-  }, []);
   
   useEffect(() => {
     localStorage.setItem('adminActiveTab', activeTab);
@@ -283,6 +281,8 @@ function AdminPage() {
 }
 
 export default AdminPage;
+
+    
 
     
 
