@@ -282,9 +282,7 @@ export default function MediaAdmin(props: MediaAdminProps) {
     setIsChoosingLibrary(false);
     
     const suffix = libraryId === 'primary' ? '_1' : '_2';
-    const cloudName = libraryId === 'primary' 
-        ? process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME_1 
-        : process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME_2;
+    const cloudName = process.env[`NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME${suffix}`];
     
     if (!cloudName) {
         toast({

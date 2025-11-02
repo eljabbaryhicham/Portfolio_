@@ -52,9 +52,7 @@ const uploadMediaFromUrlFlow = ai.defineFlow(
       const { libraryId, videoFormat } = input;
       const suffix = libraryId === 'primary' ? '_1' : '_2';
       
-      const cloudName = libraryId === 'primary' 
-        ? process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME_1 
-        : process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME_2;
+      const cloudName = process.env[`NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME${suffix}`];
       const apiKey = process.env[`CLOUDINARY_API_KEY${suffix}`];
       const apiSecret = process.env[`CLOUDINARY_API_SECRET${suffix}`];
 
