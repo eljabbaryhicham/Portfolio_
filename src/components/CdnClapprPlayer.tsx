@@ -39,6 +39,25 @@ const loadScript = (src: string, id: string): Promise<void> => {
     });
 };
 
+const waitForGlobal = (name: string, timeout = 3000): Promise<void> => {
+    return new Promise((resolve, reject) => {
+        let waited = 0;
+        const interval = 100;
+        const check = () => {
+            if ((window as any)[name]) {
+                resolve();
+            } else if (waited >= timeout) {
+                reject(new Error(`Timed out waiting for global variable '${name}'`));
+            } else {
+                waited += interval;
+                setTimeout(check, interval);
+            }
+        };
+        check();
+    });
+};
+
+
 export default function CdnClapprPlayer({ source, poster, autoPlay = true, watermark }: CdnClapprPlayerProps) {
   const playerContainerRef = useRef<HTMLDivElement>(null);
   const playerRef = useRef<any>(null);
@@ -57,6 +76,7 @@ export default function CdnClapprPlayer({ source, poster, autoPlay = true, water
 
       try {
         await loadScript('https://cdn.jsdelivr.net/npm/@clappr/player@latest/dist/clappr.min.js', 'clappr-script');
+        await waitForGlobal('Clappr');
         
         if (!isMounted) return;
 
