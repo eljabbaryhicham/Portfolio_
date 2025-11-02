@@ -32,6 +32,7 @@ import ContactForm from '@/features/contact/components/ContactForm';
 import type { AppUser } from '@/firebase/auth/use-user';
 import PlyrPlayer from '@/components/PlyrPlayer';
 import CdnClapprPlayer from '@/components/CdnClapprPlayer';
+import { debounce } from 'lodash';
 
 const MemoizedImage = memo(Image);
 const MemoizedPlyrPlayer = memo(PlyrPlayer);
@@ -302,7 +303,7 @@ export default function WorkPage() {
     return allItems.filter(item => item.type === filter);
   }, [allItems, filter]);
   
-  const calculateAndSetItems = useCallback(() => {
+  const calculateAndSetItems = useCallback(debounce(() => {
     if (isMobile) {
         const mobileInitialLoad = 8;
         setItemsPerLoad(mobileInitialLoad);
@@ -326,7 +327,7 @@ export default function WorkPage() {
         setItemsPerLoad(calculatedCount);
         setVisibleItemsCount(prev => prev === null ? calculatedCount - 1 : prev);
     }
-  }, [isMobile]);
+  }, 200), [isMobile]);
 
   useEffect(() => {
     // Only run this on the client
