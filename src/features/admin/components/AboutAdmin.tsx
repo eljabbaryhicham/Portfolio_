@@ -63,6 +63,9 @@ export default function AboutAdmin() {
   const [isLibraryOpen, setIsLibraryOpen] = useState(false);
   const [librarySelectionConfig, setLibrarySelectionConfig] = useState<{ onSelect: (url: string, type: 'image' | 'video', filename: string) => void; field: 'imageUrl' | 'logoUrl' } | null>(null);
 
+  const [dialogActiveTab, setDialogActiveTab] = useState<'images' | 'videos' | 'files'>('images');
+  const [dialogActiveLibrary, setDialogActiveLibrary] = useState<'primary' | 'extented'>('primary');
+
   const aboutContentRef = useMemoFirebase(
     () => (firestore ? doc(firestore, 'about', 'content') : null),
     [firestore]
@@ -281,8 +284,10 @@ export default function AboutAdmin() {
           setIsLibraryOpen(false);
           setLibrarySelectionConfig(null);
         }}
-        activeTab={'images'}
-        setActiveTab={() => {}}
+        activeTab={dialogActiveTab}
+        setActiveTab={setDialogActiveTab}
+        activeLibrary={dialogActiveLibrary}
+        setActiveLibrary={setDialogActiveLibrary}
         newlyUploadedId={null}
       />
     </>

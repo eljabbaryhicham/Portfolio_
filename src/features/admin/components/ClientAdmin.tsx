@@ -157,6 +157,9 @@ export default function ClientAdmin() {
   
   const [isLibraryOpen, setIsLibraryOpen] = useState(false);
   const [librarySelectionConfig, setLibrarySelectionConfig] = useState<{ onSelect: (url: string, type: 'image' | 'video', filename: string) => void } | null>(null);
+  
+  const [dialogActiveTab, setDialogActiveTab] = useState<'images' | 'videos' | 'files'>('images');
+  const [dialogActiveLibrary, setDialogActiveLibrary] = useState<'primary' | 'extented'>('primary');
 
   const draggingItem = useRef<string | null>(null);
   const dragOverItem = useRef<string | null>(null);
@@ -500,8 +503,10 @@ export default function ClientAdmin() {
               setIsLibraryOpen(false);
               setLibrarySelectionConfig(null);
           }}
-          activeTab={'images'}
-          setActiveTab={() => {}} // Only show images for logos
+          activeTab={dialogActiveTab}
+          setActiveTab={setDialogActiveTab}
+          activeLibrary={dialogActiveLibrary}
+          setActiveLibrary={setDialogActiveLibrary}
           newlyUploadedId={null}
       />
     </>
