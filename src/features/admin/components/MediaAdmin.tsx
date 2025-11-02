@@ -281,105 +281,129 @@ export default function MediaAdmin(props: MediaAdminProps) {
   const handleLibraryChoiceAndUpload = useCallback(async (libraryId: 'primary' | 'extented') => {
     setIsChoosingLibrary(false);
     
-    let cloudName, uploadPreset;
-
-    if (libraryId === 'primary') {
-        cloudName = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME_1;
-        uploadPreset = process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET_1;
-    } else { // extented
-        cloudName = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME_2;
-        uploadPreset = process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET_2;
-    }
-
-    if (!cloudName || !uploadPreset || uploadPreset.includes("your_unsigned_preset")) {
-      toast({
-        variant: 'destructive',
-        title: 'Configuration Error',
-        description: `Cloudinary settings for ${libraryId === 'primary' ? 'Library Primary' : 'Library Extented'} are not set. Please add them to your .env file.`,
-        duration: 10000,
-      });
-      setFilesToUpload([]);
-      return;
+    const suffix = libraryId === 'primary' ? '_1' : '_2';
+    const cloudName = process.env[`NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME${suffix}`];
+    
+    if (!cloudName) {
+        toast({
+            variant: 'destructive',
+            title: 'Configuration Error',
+            description: `Cloudinary cloud name for library '${libraryId}' is not set.`,
+            duration: 10000,
+        });
+        setFilesToUpload([]);
+        return;
     }
 
     setIsUploading(true);
 
     for (const file of filesToUpload) {
-      setUploadingFileName(file.name);
-      setUploadProgress(0);
+        setUploadingFileName(file.name);
+        setUploadProgress(0);
 
-      const formData = new FormData();
-      formData.append('file', file);
-      formData.append('upload_preset', uploadPreset);
-
-      const xhr = new XMLHttpRequest();
-      xhr.open('POST', `https://api.cloudinary.com/v1_1/${cloudName}/auto/upload`, true);
-
-      xhr.upload.onprogress = (event) => {
-        if (event.lengthComputable) {
-          const progress = Math.round((event.loaded / event.total) * 100);
-          setUploadProgress(progress);
+        const timestamp = Math.round((new Date()).getTime() / 1000);
+        
+        const paramsToSign = {
+            timestamp: timestamp,
+            upload_preset: process.env[`NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET${suffix}`] || '',
+        };
+        
+        let signatureResponse, apiKey;
+        try {
+            const sigRes = await fetch('/api/cloudinary-signature', {
+                method: 'POST',
+                body: JSON.stringify({ paramsToSign, libraryId }),
+                headers: { 'Content-Type': 'application/json' },
+            });
+            if (!sigRes.ok) throw new Error('Failed to get signature from server.');
+            const sigData = await sigRes.json();
+            if (!sigData.success) throw new Error(sigData.message);
+            signatureResponse = sigData.signature;
+            apiKey = sigData.apiKey;
+        } catch (error: any) {
+            toast({
+                variant: 'destructive',
+                title: `Upload Failed for ${file.name}`,
+                description: `Could not get upload signature: ${error.message}`,
+            });
+            continue; // Skip to next file
         }
-      };
 
-      xhr.onload = async () => {
-        if (xhr.status === 200) {
-          const response = JSON.parse(xhr.responseText);
+        const formData = new FormData();
+        formData.append('file', file);
+        formData.append('api_key', apiKey);
+        Object.entries(paramsToSign).forEach(([key, value]) => {
+            formData.append(key, value.toString());
+        });
+        formData.append('signature', signatureResponse);
 
-          let finalUrl = response.secure_url;
-          if (response.resource_type === 'video' && uploadVideoFormat === 'm3u8') {
-             finalUrl = `https://res.cloudinary.com/${cloudName}/video/upload/sp_auto/v${response.version}/${response.public_id}.m3u8`;
-          } else if (response.resource_type === 'video' || response.resource_type === 'image') {
-             finalUrl = finalUrl.replace(`/upload/`, `/upload/f_auto,q_auto/`);
-          }
-          
-          if(firestore) {
-              const mediaData = {
-                  public_id: response.public_id,
-                  url: finalUrl,
-                  resource_type: response.resource_type,
-                  created_at: response.created_at,
-                  filename: file.name,
-                  libraryId: libraryId,
-                  ...(response.resource_type === 'video' && { videoFormat: uploadVideoFormat }),
-              };
-              
-              const docRefPromise = addDocumentNonBlocking(collection(firestore, 'media'), mediaData);
+        const xhr = new XMLHttpRequest();
+        xhr.open('POST', `https://api.cloudinary.com/v1_1/${cloudName}/auto/upload`, true);
 
-              const docRef = await docRefPromise as DocumentReference | undefined;
+        xhr.upload.onprogress = (event) => {
+            if (event.lengthComputable) {
+                const progress = Math.round((event.loaded / event.total) * 100);
+                setUploadProgress(progress);
+            }
+        };
 
-              if (docRef && !props.isDialog && props.onUploadComplete) {
-                  props.onUploadComplete(docRef.id, response.resource_type, libraryId);
-              }
-          }
+        xhr.onload = async () => {
+            if (xhr.status === 200) {
+                const response = JSON.parse(xhr.responseText);
 
-          toast({
-            title: 'Upload successful',
-            description: `${file.name} has been uploaded to ${libraryId === 'primary' ? 'Library Primary' : 'Library Extented'}.`,
-          });
-        } else {
-          const error = JSON.parse(xhr.responseText).error;
-          toast({
-            variant: 'destructive',
-            title: `Upload Failed for ${file.name}`,
-            description: error.message || 'An unknown error occurred.',
-          });
-        }
-      };
-      
-      xhr.onerror = () => {
-         toast({
-            variant: 'destructive',
-            title: `Upload Failed for ${file.name}`,
-            description: 'A network error occurred during upload.',
-          });
-      }
+                let finalUrl = response.secure_url;
+                if (response.resource_type === 'video' && uploadVideoFormat === 'm3u8') {
+                    finalUrl = `https://res.cloudinary.com/${cloudName}/video/upload/sp_auto/v${response.version}/${response.public_id}.m3u8`;
+                } else if (response.resource_type === 'video' || response.resource_type === 'image') {
+                    finalUrl = finalUrl.replace(`/upload/`, `/upload/f_auto,q_auto/`);
+                }
 
-      xhr.send(formData);
+                if (firestore) {
+                    const mediaData = {
+                        public_id: response.public_id,
+                        url: finalUrl,
+                        resource_type: response.resource_type,
+                        created_at: response.created_at,
+                        filename: file.name,
+                        libraryId: libraryId,
+                        ...(response.resource_type === 'video' && { videoFormat: uploadVideoFormat }),
+                    };
 
-      await new Promise(resolve => {
-        xhr.onloadend = resolve;
-      });
+                    const docRefPromise = addDocumentNonBlocking(collection(firestore, 'media'), mediaData);
+                    const docRef = await docRefPromise as DocumentReference | undefined;
+
+                    if (docRef && !props.isDialog && props.onUploadComplete) {
+                        props.onUploadComplete(docRef.id, response.resource_type, libraryId);
+                    }
+                }
+
+                toast({
+                    title: 'Upload successful',
+                    description: `${file.name} has been uploaded to ${libraryId === 'primary' ? 'Library Primary' : 'Library Extented'}.`,
+                });
+            } else {
+                const error = JSON.parse(xhr.responseText).error;
+                toast({
+                    variant: 'destructive',
+                    title: `Upload Failed for ${file.name}`,
+                    description: error.message || 'An unknown error occurred.',
+                });
+            }
+        };
+
+        xhr.onerror = () => {
+            toast({
+                variant: 'destructive',
+                title: `Upload Failed for ${file.name}`,
+                description: 'A network error occurred during upload.',
+            });
+        };
+
+        xhr.send(formData);
+
+        await new Promise(resolve => {
+            xhr.onloadend = resolve;
+        });
     }
 
     setIsUploading(false);

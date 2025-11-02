@@ -52,12 +52,12 @@ const uploadMediaFromUrlFlow = ai.defineFlow(
       const { libraryId, videoFormat } = input;
       const suffix = libraryId === 'primary' ? '_1' : '_2';
       
-      const cloudName = process.env[`CLOUDINARY_CLOUD_NAME${suffix}`];
+      const cloudName = process.env[`NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME${suffix}`];
       const apiKey = process.env[`CLOUDINARY_API_KEY${suffix}`];
       const apiSecret = process.env[`CLOUDINARY_API_SECRET${suffix}`];
 
       if (!cloudName || !apiKey || !apiSecret) {
-        const errorMessage = `Cloudinary credentials for ${libraryId} library are missing. Please check your .env file for CLOUDINARY_CLOUD_NAME${suffix}, CLOUDINARY_API_KEY${suffix}, and CLOUDINARY_API_SECRET${suffix}.`;
+        const errorMessage = `Cloudinary credentials for ${libraryId} library are missing. Please check your .env file for NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME${suffix}, CLOUDINARY_API_KEY${suffix}, and CLOUDINARY_API_SECRET${suffix}.`;
         console.error('Error in uploadMediaFromUrlFlow:', errorMessage);
         return {
           success: false,
