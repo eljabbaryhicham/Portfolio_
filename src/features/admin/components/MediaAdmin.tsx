@@ -282,7 +282,9 @@ export default function MediaAdmin(props: MediaAdminProps) {
     setIsChoosingLibrary(false);
     
     const suffix = libraryId === 'primary' ? '_1' : '_2';
-    const cloudName = process.env[`NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME${suffix}`];
+    const cloudName = libraryId === 'primary' 
+        ? process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME_1 
+        : process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME_2;
     
     if (!cloudName) {
         toast({
@@ -303,9 +305,13 @@ export default function MediaAdmin(props: MediaAdminProps) {
 
         const timestamp = Math.round((new Date()).getTime() / 1000);
         
+        const uploadPreset = libraryId === 'primary'
+            ? process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET_1
+            : process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET_2;
+
         const paramsToSign = {
             timestamp: timestamp,
-            upload_preset: process.env[`NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET${suffix}`] || '',
+            upload_preset: uploadPreset || '',
         };
         
         let signatureResponse, apiKey;
