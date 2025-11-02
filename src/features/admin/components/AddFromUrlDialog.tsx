@@ -18,6 +18,9 @@ import { Progress } from '@/components/ui/progress';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Label } from '@/components/ui/label';
+import { useFirestore, addDocumentNonBlocking } from '@/firebase';
+import { collection, type DocumentReference } from 'firebase/firestore';
+
 
 const formSchema = z.object({
   mediaUrl: z.string().url({ message: 'Please enter a valid URL.' }),
@@ -35,6 +38,7 @@ interface AddFromUrlDialogProps {
 
 export default function AddFromUrlDialog({ isOpen, onOpenChange, onUploadComplete }: AddFromUrlDialogProps) {
   const { toast } = useToast();
+  const firestore = useFirestore();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [progress, setProgress] = useState(0);
   const [isVideoUrl, setIsVideoUrl] = useState(false);
@@ -89,20 +93,41 @@ export default function AddFromUrlDialog({ isOpen, onOpenChange, onUploadComplet
   }
 
   const handleSubmit = async (values: FormValues) => {
+    if (!firestore) {
+        toast({
+            variant: "destructive",
+            title: "Error",
+            description: "Firestore is not available. Please try again later.",
+        });
+        return;
+    }
+
     setIsSubmitting(true);
     try {
       const result = await uploadMediaFromUrl(values);
-      if (result.success && result.mediaId && result.resource_type !== 'raw') {
+      if (result.success && result.resource_type !== 'raw') {
         setProgress(100);
-        toast({
-          title: 'Upload Successful',
-          description: result.message,
-        });
-        onUploadComplete(result.mediaId, result.resource_type || 'image', values.libraryId);
+
+        // Now, save the metadata to Firestore from the client
+        const { success, message, ...mediaData } = result;
+        const docRefPromise = addDocumentNonBlocking(collection(firestore, 'media'), mediaData);
+        const docRef = await docRefPromise as DocumentReference | undefined;
+
+        if (docRef) {
+            toast({
+              title: 'Upload Successful',
+              description: 'Media added to your library.',
+            });
+            onUploadComplete(docRef.id, result.resource_type as 'image' | 'video', values.libraryId);
+        } else {
+            throw new Error("Failed to save media metadata to the database.");
+        }
+        
         setTimeout(() => {
           onOpenChange(false);
           setIsSubmitting(false);
         }, 500); // Wait for progress bar to show 100%
+
       } else if (result.resource_type === 'raw') {
           toast({
             variant: 'destructive',

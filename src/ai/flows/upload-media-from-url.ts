@@ -1,12 +1,11 @@
 
 'use server';
 /**
- * @fileOverview A Genkit flow for uploading media from a URL to a specified Cloudinary library and saving to Firestore.
+ * @fileOverview A Genkit flow for uploading media from a URL to a specified Cloudinary library.
+ * This flow only handles the upload and returns the metadata; it does not write to Firestore.
  */
 import { ai } from '@/ai/genkit';
 import { z } from 'zod';
-import { getFirestore as getAdminFirestore } from 'firebase-admin/firestore';
-import { initializeServerApp } from '@/firebase/server-init';
 
 const UploadMediaFromUrlInputSchema = z.object({
   mediaUrl: z.string().url(),
@@ -18,10 +17,17 @@ export type UploadMediaFromUrlInput = z.infer<typeof UploadMediaFromUrlInputSche
 const UploadMediaFromUrlOutputSchema = z.object({
   success: z.boolean(),
   message: z.string(),
-  mediaId: z.string().optional(),
+  // Add all necessary metadata fields for Firestore
+  public_id: z.string().optional(),
+  url: z.string().optional(),
   resource_type: z.enum(['image', 'video', 'raw']).optional(),
+  created_at: z.string().optional(),
+  filename: z.string().optional(),
+  libraryId: z.enum(['primary', 'extented']).optional(),
+  videoFormat: z.enum(['mp4', 'm3u8']).optional(),
 });
 export type UploadMediaFromUrlOutput = z.infer<typeof UploadMediaFromUrlOutputSchema>;
+
 
 /**
  * A server-side function to handle the upload process.
@@ -39,7 +45,7 @@ export async function uploadMediaFromUrl(
 
 /**
  * A Genkit flow that uploads a file from a URL to a specific Cloudinary library,
- * then creates a corresponding document in Firestore.
+ * but does NOT create a Firestore document. It returns the metadata instead.
  */
 const uploadMediaFromUrlFlow = ai.defineFlow(
   {
@@ -62,8 +68,6 @@ const uploadMediaFromUrlFlow = ai.defineFlow(
         return {
           success: false,
           message: errorMessage,
-          mediaId: undefined,
-          resource_type: undefined,
         };
       }
 
@@ -99,30 +103,19 @@ const uploadMediaFromUrlFlow = ai.defineFlow(
           console.log(`Generated optimized ${uploadResult.resource_type} URL: ${finalUrl}`);
       }
 
-      // 2. Initialize Firebase Admin SDK and save metadata to Firestore
-      const serverApp = await initializeServerApp();
-      const firestore = getAdminFirestore(serverApp);
       const filename = input.mediaUrl.substring(input.mediaUrl.lastIndexOf('/') + 1);
 
-      const mediaData = {
-        public_id: uploadResult.public_id,
-        url: finalUrl,
-        resource_type: uploadResult.resource_type,
-        created_at: uploadResult.created_at,
-        filename: filename || uploadResult.public_id,
-        libraryId: libraryId, // Save the library ID
-        ...(uploadResult.resource_type === 'video' && { videoFormat: videoFormat || 'mp4' }),
-      };
-
-      const docRef = await firestore.collection('media').add(mediaData);
-
-      console.log('Firestore document written with ID:', docRef.id);
-
+      // Return all necessary metadata to the client
       return {
         success: true,
-        message: 'Media successfully added.',
-        mediaId: docRef.id,
+        message: 'Media successfully uploaded to Cloudinary.',
+        public_id: uploadResult.public_id,
+        url: finalUrl,
         resource_type: uploadResult.resource_type as 'image' | 'video' | 'raw',
+        created_at: uploadResult.created_at,
+        filename: filename || uploadResult.public_id,
+        libraryId: libraryId,
+        videoFormat: uploadResult.resource_type === 'video' ? (videoFormat || 'mp4') : undefined,
       };
     } catch (error: any) {
       console.error('Error in uploadMediaFromUrlFlow:', error);
@@ -139,8 +132,6 @@ const uploadMediaFromUrlFlow = ai.defineFlow(
       return {
         success: false,
         message: errorMessage,
-        mediaId: undefined,
-        resource_type: undefined,
       };
     }
   }
