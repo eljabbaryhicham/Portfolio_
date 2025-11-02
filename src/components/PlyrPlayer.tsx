@@ -375,7 +375,8 @@ const PlyrPlayer = forwardRef(({ source, poster, watermark, autoPlay = true, thu
             top: 9.5px;
           }
           .plyr__progress input[type="range"], .plyr__volume input[type="range"] {
-            height: 20px;
+            height: 55px;
+            top: -20px;
           }
           .plyr__progress input[type=range]::-webkit-slider-runnable-track, .plyr__volume input[type=range]::-webkit-slider-runnable-track {
             height: 1px;
