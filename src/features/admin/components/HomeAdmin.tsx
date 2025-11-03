@@ -47,6 +47,7 @@ interface HomePageSettings {
     homePageLogoUrl?: string;
     isHomePageLogoVisible?: boolean;
     themeColor?: string;
+    registrationSecretCode?: string;
 }
 
 const settingsSchema = z.object({
@@ -61,6 +62,7 @@ const settingsSchema = z.object({
   homePageLogoUrl: z.string().url().optional().or(z.literal('')),
   isHomePageLogoVisible: z.boolean().optional(),
   themeColor: z.string().optional(),
+  registrationSecretCode: z.string().optional(),
 });
 
 type SettingsFormValues = z.infer<typeof settingsSchema>;
@@ -112,6 +114,7 @@ export default function HomeAdmin() {
       homePageLogoUrl: '',
       isHomePageLogoVisible: true,
       themeColor: '#d81e38',
+      registrationSecretCode: 'BELOFTED',
     },
   });
 
@@ -132,6 +135,7 @@ export default function HomeAdmin() {
         homePageLogoUrl: homeSettings.homePageLogoUrl || '',
         isHomePageLogoVisible: homeSettings.isHomePageLogoVisible ?? true,
         themeColor: homeSettings.themeColor || '#d81e38',
+        registrationSecretCode: homeSettings.registrationSecretCode || 'BELOFTED',
       });
     }
   }, [homeSettings, form]);
@@ -426,6 +430,25 @@ export default function HomeAdmin() {
                                       )}
                                     />
                                     <Separator />
+
+                                    <FormField
+                                        control={control}
+                                        name="registrationSecretCode"
+                                        render={({ field }) => (
+                                            <FormItem>
+                                                <FormLabel>Registration Secret Code</FormLabel>
+                                                <FormControl>
+                                                    <Input type="password" placeholder="Enter secret code" {...field} />
+                                                </FormControl>
+                                                <FormDescription>
+                                                    The code users must enter to register a new admin account.
+                                                </FormDescription>
+                                                <FormMessage />
+                                            </FormItem>
+                                        )}
+                                     />
+                                    <Separator />
+
                                      <FormField
                                         control={control}
                                         name="isTestPageEnabled"
@@ -453,3 +476,5 @@ export default function HomeAdmin() {
     </div>
   );
 }
+
+    

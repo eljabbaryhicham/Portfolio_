@@ -19,24 +19,36 @@
           "type": "string",
           "description": "A brief description of the project."
         },
-        "imageUrl": {
+        "type": {
           "type": "string",
-          "description": "URL of the project's image.",
-          "format": "uri"
+          "enum": ["image", "video"]
         },
-        "videoUrl": {
+        "thumbnailUrl": {
           "type": "string",
-          "description": "URL of the project's video (if applicable).",
-          "format": "uri"
+          "format": "uri",
+          "description": "URL of the project's thumbnail image for the grid view."
         },
-        "videoPosterUrl": {
+        "thumbnailVttUrl": {
+          "type": "string",
+          "format": "uri",
+          "description": "URL of the VTT file for video timeline thumbnails."
+        },
+        "sourceUrl": {
+          "type": "string",
+          "format": "uri",
+          "description": "URL of the main media file (full-size image or video)."
+        },
+        "thumbnailHint": {
             "type": "string",
-            "description": "URL for the video's poster image.",
-            "format": "uri"
+            "description": "A 1-2 word hint for AI image generation services."
         },
-        "isFeatured": {
+        "details": {
+            "type": "string",
+            "description": "More detailed information about the project, can include Markdown."
+        },
+        "useVideoFrameAsPoster": {
           "type": "boolean",
-          "description": "Indicates whether the project is featured on the homepage."
+          "description": "If true, the player will generate a thumbnail from the video. If false, it will use the thumbnailUrl as a poster."
         },
         "order": {
           "type": "number",
@@ -50,7 +62,8 @@
       "required": [
         "id",
         "title",
-        "imageUrl",
+        "thumbnailUrl",
+        "type",
         "order"
       ]
     },
@@ -118,13 +131,23 @@
       "description": "Stores settings for the homepage, like background videos.",
       "type": "object",
       "properties": {
-        "homePageBackgroundVideoId": {
-          "type": "string",
-          "description": "The ID of the project to use for the homepage background video."
+        "homePageBackgroundType": {
+            "type": "string",
+            "enum": ["video", "image"],
+            "description": "The type of media to use for the homepage background."
         },
-        "websiteBackgroundVideoId": {
+        "homePageBackgroundMediaId": {
           "type": "string",
-          "description": "The ID of the project to use for the sitewide background video."
+          "description": "The ID of the project or media asset to use for the homepage background."
+        },
+        "websiteBackgroundType": {
+            "type": "string",
+            "enum": ["video", "image"],
+            "description": "The type of media to use for the website background."
+        },
+        "websiteBackgroundMediaId": {
+          "type": "string",
+          "description": "The ID of the project or media asset to use for the sitewide background."
         },
         "isHomePageVideoEnabled": {
           "type": "boolean",
@@ -133,6 +156,32 @@
         "isWebsiteVideoEnabled": {
           "type": "boolean",
           "description": "Controls whether the video background for other pages is enabled."
+        },
+        "workPagePlayer": {
+          "type": "string",
+          "enum": ["plyr", "clappr"],
+          "description": "The video player to use on the Work page."
+        },
+        "isTestPageEnabled": {
+          "type": "boolean",
+          "description": "Controls whether the test page link is visible in the navigation."
+        },
+        "homePageLogoUrl": {
+            "type": "string",
+            "format": "uri",
+            "description": "URL for the homepage logo."
+        },
+        "isHomePageLogoVisible": {
+            "type": "boolean",
+            "description": "Controls whether the homepage logo is visible."
+        },
+        "themeColor": {
+          "type": "string",
+          "description": "The primary theme color for the website (hex code)."
+        },
+        "registrationSecretCode": {
+          "type": "string",
+          "description": "The secret code required for user registration."
         }
       }
     },
@@ -158,6 +207,10 @@
             "type": "string",
             "format": "uri",
             "description": "URL of the logo for the about section."
+        },
+        "logoScale": {
+            "type": "number",
+            "description": "The scale of the logo on the about page."
         }
       },
       "required": [
@@ -185,13 +238,23 @@
           "enum": ["image", "video", "raw"],
           "description": "The type of the media file."
         },
+        "videoFormat": {
+            "type": "string",
+            "enum": ["mp4", "m3u8"],
+            "description": "The format for video delivery (optimized MP4 or adaptive HLS)."
+        },
         "created_at": {
           "type": "string",
           "format": "date-time",
           "description": "The timestamp when the file was uploaded."
+        },
+        "libraryId": {
+            "type": "string",
+            "enum": ["primary", "extented"],
+            "description": "The ID of the Cloudinary library the asset belongs to."
         }
       },
-      "required": ["public_id", "url", "resource_type", "created_at"]
+      "required": ["public_id", "url", "resource_type", "created_at", "libraryId"]
     },
     "User": {
       "title": "User",
@@ -406,6 +469,5 @@
     ]
   }
 }
-    
 
     

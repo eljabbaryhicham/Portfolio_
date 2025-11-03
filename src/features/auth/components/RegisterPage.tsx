@@ -14,7 +14,7 @@ import {
   FormMessage,
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
-import { useAuth, useUser, useFirestore, setDocumentNonBlocking } from '@/firebase';
+import { useAuth, useUser, useFirestore, setDocumentNonBlocking, useDoc, useMemoFirebase } from '@/firebase';
 import {
   createUserWithEmailAndPassword,
 } from 'firebase/auth';
@@ -25,13 +25,17 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import Link from 'next/link';
 import { doc } from 'firebase/firestore';
 
-const formSchema = z.object({
+interface HomePageSettings {
+    registrationSecretCode?: string;
+}
+
+const createFormSchema = (secretCode?: string) => z.object({
   username: z.string().min(3, { message: 'Username must be at least 3 characters.' }),
   password: z.string().min(6, {
     message: 'Password must be at least 6 characters.',
   }),
   secretCode: z.string().superRefine((val, ctx) => {
-    if (val !== 'BELOFTED') {
+    if (val !== (secretCode || 'BELOFTED')) {
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
         message: 'Invalid secret code.',
@@ -40,7 +44,6 @@ const formSchema = z.object({
   }),
 });
 
-type RegisterFormValues = z.infer<typeof formSchema>;
 
 export default function RegisterPage() {
   const auth = useAuth();
@@ -50,11 +53,14 @@ export default function RegisterPage() {
   const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  useEffect(() => {
-    if (!isUserLoading && user) {
-      router.push('/admin');
-    }
-  }, [isUserLoading, user, router]);
+  const settingsDocRef = useMemoFirebase(
+    () => (firestore ? doc(firestore, 'homepage', 'settings') : null),
+    [firestore]
+  );
+  const { data: homeSettings } = useDoc<HomePageSettings>(settingsDocRef);
+  
+  const formSchema = createFormSchema(homeSettings?.registrationSecretCode);
+  type RegisterFormValues = z.infer<typeof formSchema>;
 
   const form = useForm<RegisterFormValues>({
     resolver: zodResolver(formSchema),
@@ -64,6 +70,12 @@ export default function RegisterPage() {
       secretCode: '',
     },
   });
+
+  useEffect(() => {
+    if (!isUserLoading && user) {
+      router.push('/admin');
+    }
+  }, [isUserLoading, user, router]);
 
   const handleSignUp = async (values: RegisterFormValues) => {
     if (!auth || !firestore) return;
