@@ -168,7 +168,7 @@ const PlyrPlayer = forwardRef(({ source, poster, watermark, autoPlay = true, thu
             container.appendChild(element);
             
             const mobileControls = ['play-large', 'play', 'current-time', 'progress', 'settings', 'pip', 'fullscreen'];
-            const desktopControls = ['play-large', 'play', 'current-time', 'mute', 'volume', 'progress', 'settings', 'pip', 'fullscreen'];
+            const desktopControls = ['play-large', 'play', 'mute', 'volume', 'current-time', 'progress', 'settings', 'pip', 'fullscreen'];
             const controls = isMobile ? mobileControls : desktopControls;
 
             const playerConfig: any = {
