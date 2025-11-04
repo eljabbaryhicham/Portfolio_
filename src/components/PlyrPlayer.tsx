@@ -240,6 +240,12 @@ const PlyrPlayer = forwardRef(({ source, poster, watermark, autoPlay = true, thu
                 player.on('ready', () => {
                     if(isMounted) setIsLoading(false);
                 });
+                player.on('canplay', () => {
+                    if (isMounted) setIsWaitingForData(false);
+                });
+                player.on('loadstart', () => {
+                    if (isMounted) setIsLoading(true);
+                });
             }
 
         } catch (error) {
@@ -497,12 +503,12 @@ const PlyrPlayer = forwardRef(({ source, poster, watermark, autoPlay = true, thu
           }
         `}
       </style>
-      {isLoading && (
+      {(isLoading || isWaitingForData) && (
           <div className="absolute inset-0 z-20 flex items-center justify-center bg-black/20 pointer-events-none">
               <Preloader />
           </div>
       )}
-      <div ref={containerRef} className={cn("relative w-full h-full transition-opacity duration-300", (isLoading) ? 'opacity-50' : 'opacity-100')}>
+      <div ref={containerRef} className={cn("relative w-full h-full transition-opacity duration-300", (isLoading || isWaitingForData) ? 'opacity-50' : 'opacity-100')}>
          {/* Plyr will be injected here */}
         {watermark && (
             <div className="plyr__watermark">
