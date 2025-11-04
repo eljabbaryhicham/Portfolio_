@@ -320,7 +320,12 @@ const PlyrPlayer = forwardRef(({ source, poster, watermark, autoPlay = true, thu
 
 
   return (
-    <div className={cn("relative w-full h-full", "force-gpu")}>
+    <div className={cn(
+        "relative w-full h-full",
+        "force-gpu",
+        isWaitingForData && 'plyr--is-buffering'
+      )}
+    >
       <style>
         {`
           :root {
@@ -369,7 +374,20 @@ const PlyrPlayer = forwardRef(({ source, poster, watermark, autoPlay = true, thu
             color: green;
             height: 1px;
             top: 9.5px;
+            transition: width 0.2s ease;
           }
+
+          @keyframes buffer-shimmer {
+            0% { background-position: -200% 0; }
+            100% { background-position: 200% 0; }
+          }
+          
+          .plyr--is-buffering .plyr__progress__buffer {
+            background: linear-gradient(90deg, hsla(var(--primary), 0.2) 25%, hsla(var(--primary), 0.5) 50%, hsla(var(--primary), 0.2) 75%);
+            background-size: 200% 100%;
+            animation: buffer-shimmer 1.5s linear infinite;
+          }
+
           .plyr__progress input[type="range"] {
             height: 55px;
             top: -20px;
@@ -479,12 +497,12 @@ const PlyrPlayer = forwardRef(({ source, poster, watermark, autoPlay = true, thu
           }
         `}
       </style>
-      {(isLoading || isWaitingForData) && (
+      {isLoading && (
           <div className="absolute inset-0 z-20 flex items-center justify-center bg-black/20 pointer-events-none">
               <Preloader />
           </div>
       )}
-      <div ref={containerRef} className={cn("relative w-full h-full transition-opacity duration-300", (isLoading || isWaitingForData) ? 'opacity-50' : 'opacity-100')}>
+      <div ref={containerRef} className={cn("relative w-full h-full transition-opacity duration-300", (isLoading) ? 'opacity-50' : 'opacity-100')}>
          {/* Plyr will be injected here */}
         {watermark && (
             <div className="plyr__watermark">
@@ -498,5 +516,3 @@ const PlyrPlayer = forwardRef(({ source, poster, watermark, autoPlay = true, thu
 
 PlyrPlayer.displayName = 'PlyrPlayer';
 export default PlyrPlayer;
-
-    
