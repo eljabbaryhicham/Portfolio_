@@ -84,6 +84,7 @@ const PlyrPlayer = forwardRef(({ source, poster, watermark, autoPlay = true, thu
   const hlsRef = useRef<any>(null);
   const isMobile = useIsMobile();
   const [isLoading, setIsLoading] = useState(true);
+  const [isWaitingForData, setIsWaitingForData] = useState(false);
 
   // Expose the player instance via the passed ref
   useImperativeHandle(ref, () => playerRef.current, []);
@@ -91,11 +92,13 @@ const PlyrPlayer = forwardRef(({ source, poster, watermark, autoPlay = true, thu
   // Effect for setting up and tearing down the player
   useEffect(() => {
     let isMounted = true;
+    let player: any; // Declare player here to access in cleanup
     
     const initPlayer = async () => {
         const container = containerRef.current;
         if (!container) return;
         setIsLoading(true);
+        setIsWaitingForData(false);
 
         const isYoutube = source.includes('youtube.com') || source.includes('youtu.be');
         const isVimeo = source.includes('vimeo.com');
@@ -144,8 +147,6 @@ const PlyrPlayer = forwardRef(({ source, poster, watermark, autoPlay = true, thu
 
             container.appendChild(element);
             
-            let player: any;
-
             const mobileControls = ['play-large', 'play', 'current-time', 'progress', 'settings', 'pip', 'fullscreen'];
             const desktopControls = ['play-large', 'play', 'current-time', 'mute', 'volume', 'progress', 'settings', 'pip', 'fullscreen'];
             const controls = isMobile ? mobileControls : desktopControls;
@@ -172,15 +173,10 @@ const PlyrPlayer = forwardRef(({ source, poster, watermark, autoPlay = true, thu
             }
 
             if (isYoutube || isVimeo) {
-                playerConfig.previewThumbnails = {
-                    enabled: true,
-                    src: thumbnailVttUrl,
-                };
                 player = new window.Plyr(element, playerConfig);
                 player.on('ready', () => {
                     if (isMounted) setIsLoading(false);
                 });
-                if (isMounted) playerRef.current = player;
             } else if (source.includes('.m3u8')) {
                 await loadScript('https://cdn.jsdelivr.net/npm/hls.js@latest', 'hls-script');
                 await waitForGlobal('Hls');
@@ -189,15 +185,17 @@ const PlyrPlayer = forwardRef(({ source, poster, watermark, autoPlay = true, thu
 
                 if (window.Hls.isSupported()) {
                     const hls = new window.Hls({
-                      startLevel: isMobile ? 0 : -1, // Start with lower quality on mobile
+                      startLevel: isMobile ? 0 : -1,
                     });
+                    hlsRef.current = hls;
+
                     hls.loadSource(source);
+                    hls.attachMedia(element as HTMLVideoElement);
                     
                     hls.on(window.Hls.Events.MANIFEST_PARSED, (event: any, data: any) => {
                         if (!isMounted) return;
-
-                        const availableQualities = hls.levels.map((l) => l.height);
-                        availableQualities.unshift(0); // 0 will represent Auto
+                        const availableQualities = hls.levels.map((l) => l.height).filter(h => h > 0);
+                        availableQualities.unshift(0); // 0 for Auto
 
                         player = new window.Plyr(element, {
                             ...playerConfig,
@@ -211,42 +209,45 @@ const PlyrPlayer = forwardRef(({ source, poster, watermark, autoPlay = true, thu
                                     }
                                 },
                             },
-                            i18n: {
-                                qualityLabel: {
-                                    0: 'Auto',
-                                },
-                            },
+                            i18n: { qualityLabel: { 0: 'Auto' } },
                         });
-                        
-                        if(isMounted) playerRef.current = player;
+                        if (isMounted) playerRef.current = player;
                     });
-                    
-                    hls.attachMedia(element as HTMLVideoElement);
-                    hlsRef.current = hls;
-
                 } else {
-                    // Fallback for browsers that support HLS natively
                     (element as HTMLVideoElement).src = source;
                      player = new window.Plyr(element, playerConfig);
-                     if (isMounted) playerRef.current = player;
                 }
             } else {
                  player = new window.Plyr(element, playerConfig);
                 (element as HTMLVideoElement).src = source;
-                if (isMounted) playerRef.current = player;
             }
             
-            player?.on('error', () => {
-                if(isMounted) setIsLoading(false);
-            });
-            
-            player?.on('ready', () => {
-                if(isMounted) setIsLoading(false);
-            });
+            if (player) {
+                if (isMounted) playerRef.current = player;
+
+                player.on('waiting', () => {
+                    if (isMounted) setIsWaitingForData(true);
+                });
+                player.on('playing', () => {
+                    if (isMounted) setIsWaitingForData(false);
+                });
+                player.on('error', () => {
+                    if(isMounted) {
+                        setIsLoading(false);
+                        setIsWaitingForData(false);
+                    }
+                });
+                player.on('ready', () => {
+                    if(isMounted) setIsLoading(false);
+                });
+            }
 
         } catch (error) {
             console.error("Error initializing Plyr player:", error);
-            if (isMounted) setIsLoading(false);
+            if (isMounted) {
+              setIsLoading(false);
+              setIsWaitingForData(false);
+            }
         }
     };
     
@@ -260,11 +261,10 @@ const PlyrPlayer = forwardRef(({ source, poster, watermark, autoPlay = true, thu
             hlsRef.current = null;
         }
         
-        const player = playerRef.current;
-        if (player) {
+        const currentPlayer = playerRef.current;
+        if (currentPlayer) {
             try {
-                player.stop();
-                player.destroy();
+                currentPlayer.destroy();
             } catch (e) {
                 console.error("Error destroying Plyr player:", e);
             }
@@ -285,8 +285,6 @@ const PlyrPlayer = forwardRef(({ source, poster, watermark, autoPlay = true, thu
                     const playPromise = player.play();
                     if (playPromise !== undefined) {
                         playPromise.catch((e: any) => {
-                            // Autoplay was prevented. This is a common browser policy.
-                            // You might want to show a play button to the user.
                             if (isMounted) setIsLoading(false);
                         });
                     }
@@ -312,9 +310,7 @@ const PlyrPlayer = forwardRef(({ source, poster, watermark, autoPlay = true, thu
             if (player && player.playing) {
                 try {
                     player.pause();
-                } catch(e) {
-                    // It might already be destroyed
-                }
+                } catch(e) { /* It might already be destroyed */ }
             }
         };
     } else {
@@ -483,12 +479,12 @@ const PlyrPlayer = forwardRef(({ source, poster, watermark, autoPlay = true, thu
           }
         `}
       </style>
-      {isLoading && (
+      {(isLoading || isWaitingForData) && (
           <div className="absolute inset-0 z-20 flex items-center justify-center bg-black/20 pointer-events-none">
               <Preloader />
           </div>
       )}
-      <div ref={containerRef} className={cn("relative w-full h-full transition-opacity duration-300", isLoading ? 'opacity-0' : 'opacity-100')}>
+      <div ref={containerRef} className={cn("relative w-full h-full transition-opacity duration-300", (isLoading || isWaitingForData) ? 'opacity-50' : 'opacity-100')}>
          {/* Plyr will be injected here */}
         {watermark && (
             <div className="plyr__watermark">
@@ -502,3 +498,5 @@ const PlyrPlayer = forwardRef(({ source, poster, watermark, autoPlay = true, thu
 
 PlyrPlayer.displayName = 'PlyrPlayer';
 export default PlyrPlayer;
+
+    
