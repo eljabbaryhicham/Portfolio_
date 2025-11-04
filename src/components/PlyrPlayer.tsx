@@ -217,7 +217,7 @@ const PlyrPlayer = forwardRef(({ source, poster, watermark, autoPlay = true, thu
                         const availableQualities = hls.levels.map((l) => l.height).filter(h => h > 0);
                         availableQualities.unshift(0); // 0 for Auto
 
-                        player = new window.Plyr(element, {
+                        const hlsPlayerConfig = {
                             ...playerConfig,
                             quality: {
                                 default: 0,
@@ -230,7 +230,9 @@ const PlyrPlayer = forwardRef(({ source, poster, watermark, autoPlay = true, thu
                                 },
                             },
                             i18n: { qualityLabel: { 0: 'Auto' } },
-                        });
+                        };
+                        
+                        player = new window.Plyr(element, hlsPlayerConfig);
                         if (isMounted) playerRef.current = player;
                     });
                 } else {
@@ -238,7 +240,7 @@ const PlyrPlayer = forwardRef(({ source, poster, watermark, autoPlay = true, thu
                      player = new window.Plyr(element, playerConfig);
                 }
             } else {
-                 player = new window.Plyr(element, playerConfig);
+                player = new window.Plyr(element, playerConfig);
                 (element as HTMLVideoElement).src = source;
             }
             
@@ -298,7 +300,7 @@ const PlyrPlayer = forwardRef(({ source, poster, watermark, autoPlay = true, thu
         playerRef.current = null;
     };
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [source, poster, isMobile, homeSettings]); // Re-run if source, poster, isMobile or homeSettings changes
+  }, [source, poster, isMobile, homeSettings, thumbnailVttUrl]); // Re-run if source, poster, isMobile or homeSettings changes
 
   // Effect for controlling playback based on autoPlay prop
   useEffect(() => {
