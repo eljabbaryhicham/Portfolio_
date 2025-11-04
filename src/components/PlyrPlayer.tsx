@@ -2,7 +2,7 @@
 'use client';
 
 import React, { useEffect, useRef, forwardRef, useImperativeHandle, useState } from 'react';
-import { useIsMobile } from '@/hooks/use-mobile';
+import { useIsMobile } from '@/hooks/use-is-mobile';
 import Preloader from './preloader';
 import { cn } from '@/lib/utils';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
@@ -104,8 +104,8 @@ const PlyrPlayer = forwardRef(({ source, poster, watermark, autoPlay = true, thu
         const isVimeo = source.includes('vimeo.com');
 
         try {
-            await loadStylesheet('https://cdn.plyr.io/3.8.3/plyr.css', 'plyr-css');
-            await loadScript('https://cdn.plyr.io/3.8.3/plyr.js', 'plyr-script');
+            await loadStylesheet('/plyr.css', 'plyr-css');
+            await loadScript('/plyr.js', 'plyr-script');
             await waitForGlobal('Plyr');
             
             if (!isMounted) return;
