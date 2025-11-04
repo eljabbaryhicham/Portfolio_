@@ -7,6 +7,8 @@ import Preloader from './preloader';
 import { cn } from '@/lib/utils';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faEject } from '@fortawesome/free-solid-svg-icons';
+import { useDoc, useFirestore, useMemoFirebase } from '@/firebase';
+import { doc } from 'firebase/firestore';
 
 
 // Make Plyr and Hls available on the window object for type safety
@@ -23,6 +25,12 @@ interface PlyrPlayerProps {
   watermark?: string;
   autoPlay?: boolean;
   thumbnailVttUrl?: string;
+}
+
+interface HomePageSettings {
+    plyrPlayerAssetSource?: 'cdn' | 'local';
+    plyrPlayerCdnCssUrl?: string;
+    plyrPlayerCdnJsUrl?: string;
 }
 
 const loadScript = (src: string, id: string): Promise<void> => {
@@ -85,6 +93,14 @@ const PlyrPlayer = forwardRef(({ source, poster, watermark, autoPlay = true, thu
   const isMobile = useIsMobile();
   const [isLoading, setIsLoading] = useState(true);
   const [isWaitingForData, setIsWaitingForData] = useState(false);
+  
+  const firestore = useFirestore();
+  const settingsDocRef = useMemoFirebase(
+    () => (firestore ? doc(firestore, 'homepage', 'settings') : null),
+    [firestore]
+  );
+  const { data: homeSettings } = useDoc<HomePageSettings>(settingsDocRef);
+
 
   // Expose the player instance via the passed ref
   useImperativeHandle(ref, () => playerRef.current, []);
@@ -96,16 +112,20 @@ const PlyrPlayer = forwardRef(({ source, poster, watermark, autoPlay = true, thu
     
     const initPlayer = async () => {
         const container = containerRef.current;
-        if (!container) return;
+        if (!container || !homeSettings) return; // Wait for settings
         setIsLoading(true);
         setIsWaitingForData(false);
 
+        const assetSource = homeSettings.plyrPlayerAssetSource || 'local';
+        const cssUrl = assetSource === 'cdn' ? (homeSettings.plyrPlayerCdnCssUrl || '/plyr.css') : '/plyr.css';
+        const jsUrl = assetSource === 'cdn' ? (homeSettings.plyrPlayerCdnJsUrl || '/plyr.js') : '/plyr.js';
+        
         const isYoutube = source.includes('youtube.com') || source.includes('youtu.be');
         const isVimeo = source.includes('vimeo.com');
 
         try {
-            await loadStylesheet('/plyr.css', 'plyr-css');
-            await loadScript('/plyr.js', 'plyr-script');
+            await loadStylesheet(cssUrl, 'plyr-css');
+            await loadScript(jsUrl, 'plyr-script');
             await waitForGlobal('Plyr');
             
             if (!isMounted) return;
@@ -278,7 +298,7 @@ const PlyrPlayer = forwardRef(({ source, poster, watermark, autoPlay = true, thu
         playerRef.current = null;
     };
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [source, poster, isMobile]); // Re-run if source, poster, or isMobile changes
+  }, [source, poster, isMobile, homeSettings]); // Re-run if source, poster, isMobile or homeSettings changes
 
   // Effect for controlling playback based on autoPlay prop
   useEffect(() => {

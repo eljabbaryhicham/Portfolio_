@@ -48,6 +48,9 @@ interface HomePageSettings {
     isHomePageLogoVisible?: boolean;
     themeColor?: string;
     registrationSecretCode?: string;
+    plyrPlayerAssetSource?: 'cdn' | 'local';
+    plyrPlayerCdnCssUrl?: string;
+    plyrPlayerCdnJsUrl?: string;
 }
 
 const settingsSchema = z.object({
@@ -63,6 +66,9 @@ const settingsSchema = z.object({
   isHomePageLogoVisible: z.boolean().optional(),
   themeColor: z.string().optional(),
   registrationSecretCode: z.string().optional(),
+  plyrPlayerAssetSource: z.enum(['cdn', 'local']).optional(),
+  plyrPlayerCdnCssUrl: z.string().url().optional().or(z.literal('')),
+  plyrPlayerCdnJsUrl: z.string().url().optional().or(z.literal('')),
 });
 
 type SettingsFormValues = z.infer<typeof settingsSchema>;
@@ -115,6 +121,9 @@ export default function HomeAdmin() {
       isHomePageLogoVisible: true,
       themeColor: '#d81e38',
       registrationSecretCode: 'BELOFTED',
+      plyrPlayerAssetSource: 'local',
+      plyrPlayerCdnCssUrl: 'https://cdn.plyr.io/3.7.8/plyr.css',
+      plyrPlayerCdnJsUrl: 'https://cdn.plyr.io/3.7.8/plyr.js',
     },
   });
 
@@ -136,6 +145,9 @@ export default function HomeAdmin() {
         isHomePageLogoVisible: homeSettings.isHomePageLogoVisible ?? true,
         themeColor: homeSettings.themeColor || '#d81e38',
         registrationSecretCode: homeSettings.registrationSecretCode || 'BELOFTED',
+        plyrPlayerAssetSource: homeSettings.plyrPlayerAssetSource || 'local',
+        plyrPlayerCdnCssUrl: homeSettings.plyrPlayerCdnCssUrl || 'https://cdn.plyr.io/3.7.8/plyr.css',
+        plyrPlayerCdnJsUrl: homeSettings.plyrPlayerCdnJsUrl || 'https://cdn.plyr.io/3.7.8/plyr.js',
       });
     }
   }, [homeSettings, form]);
@@ -429,6 +441,68 @@ export default function HomeAdmin() {
                                         </FormItem>
                                       )}
                                     />
+                                    <Separator />
+
+                                    <FormField
+                                      control={control}
+                                      name="plyrPlayerAssetSource"
+                                      render={({ field }) => (
+                                        <FormItem className="space-y-3">
+                                          <FormLabel>Plyr Player Asset Source</FormLabel>
+                                           <FormDescription>
+                                            Choose how to load the Plyr player's files.
+                                          </FormDescription>
+                                          <FormControl>
+                                            <RadioGroup
+                                              onValueChange={field.onChange}
+                                              value={field.value}
+                                              className="flex items-center space-x-4"
+                                            >
+                                              <FormItem className="flex items-center space-x-2 space-y-0">
+                                                <FormControl><RadioGroupItem value="local" /></FormControl>
+                                                <FormLabel className="font-normal">Local</FormLabel>
+                                              </FormItem>
+                                              <FormItem className="flex items-center space-x-2 space-y-0">
+                                                <FormControl><RadioGroupItem value="cdn" /></FormControl>
+                                                <FormLabel className="font-normal">CDN</FormLabel>
+                                              </FormItem>
+                                            </RadioGroup>
+                                          </FormControl>
+                                        </FormItem>
+                                      )}
+                                    />
+
+                                    {watch('plyrPlayerAssetSource') === 'cdn' && (
+                                        <div className="space-y-4 pl-4 border-l-2 border-primary/50 ml-2">
+                                            <FormField
+                                                control={control}
+                                                name="plyrPlayerCdnCssUrl"
+                                                render={({ field }) => (
+                                                <FormItem>
+                                                    <FormLabel>Plyr CDN CSS URL</FormLabel>
+                                                    <FormControl>
+                                                    <Input placeholder="https://cdn.plyr.io/3.7.8/plyr.css" {...field} />
+                                                    </FormControl>
+                                                    <FormMessage />
+                                                </FormItem>
+                                                )}
+                                            />
+                                            <FormField
+                                                control={control}
+                                                name="plyrPlayerCdnJsUrl"
+                                                render={({ field }) => (
+                                                <FormItem>
+                                                    <FormLabel>Plyr CDN JS URL</FormLabel>
+                                                    <FormControl>
+                                                    <Input placeholder="https://cdn.plyr.io/3.7.8/plyr.js" {...field} />
+                                                    </FormControl>
+                                                    <FormMessage />
+                                                </FormItem>
+                                                )}
+                                            />
+                                        </div>
+                                    )}
+
                                     <Separator />
 
                                     <FormField
