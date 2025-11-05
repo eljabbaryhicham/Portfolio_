@@ -4,6 +4,9 @@
  * @fileOverview A Genkit flow for uploading media from a URL to a specified Cloudinary library.
  * This flow only handles the upload and returns the metadata; it does not write to Firestore.
  */
+import * as dotenv from 'dotenv';
+dotenv.config({ path: '.env.server.local' });
+
 import { ai } from '@/ai/genkit';
 import { z } from 'zod';
 

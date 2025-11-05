@@ -1,6 +1,9 @@
 
 'use server';
 
+import * as dotenv from 'dotenv';
+dotenv.config({ path: '.env.server.local' });
+
 import { v2 as cloudinary } from 'cloudinary';
 
 interface DeleteFromCloudinaryInput {
