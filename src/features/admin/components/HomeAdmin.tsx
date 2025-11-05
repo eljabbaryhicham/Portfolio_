@@ -34,6 +34,7 @@ import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { debounce } from 'lodash';
+import { Slider } from '@/components/ui/slider';
 
 interface HomePageSettings {
     homePageBackgroundType?: 'video' | 'image';
@@ -46,6 +47,7 @@ interface HomePageSettings {
     isTestPageEnabled?: boolean;
     homePageLogoUrl?: string;
     isHomePageLogoVisible?: boolean;
+    homePageLogoScale?: number;
     themeColor?: string;
     registrationSecretCode?: string;
     plyrPlayerAssetSource?: 'cdn' | 'local';
@@ -64,6 +66,7 @@ const settingsSchema = z.object({
   isTestPageEnabled: z.boolean().optional(),
   homePageLogoUrl: z.string().url().optional().or(z.literal('')),
   isHomePageLogoVisible: z.boolean().optional(),
+  homePageLogoScale: z.number().min(0.5).max(5).optional(),
   themeColor: z.string().optional(),
   registrationSecretCode: z.string().optional(),
   plyrPlayerAssetSource: z.enum(['cdn', 'local']).optional(),
@@ -119,6 +122,7 @@ export default function HomeAdmin() {
       isTestPageEnabled: false,
       homePageLogoUrl: '',
       isHomePageLogoVisible: true,
+      homePageLogoScale: 1,
       themeColor: '#d81e38',
       registrationSecretCode: 'BELOFTED',
       plyrPlayerAssetSource: 'local',
@@ -143,6 +147,7 @@ export default function HomeAdmin() {
         isTestPageEnabled: homeSettings.isTestPageEnabled ?? false,
         homePageLogoUrl: homeSettings.homePageLogoUrl || '',
         isHomePageLogoVisible: homeSettings.isHomePageLogoVisible ?? true,
+        homePageLogoScale: homeSettings.homePageLogoScale || 1,
         themeColor: homeSettings.themeColor || '#d81e38',
         registrationSecretCode: homeSettings.registrationSecretCode || 'BELOFTED',
         plyrPlayerAssetSource: homeSettings.plyrPlayerAssetSource || 'local',
@@ -220,6 +225,26 @@ export default function HomeAdmin() {
                                                 <FormMessage />
                                             </FormItem>
                                         )}
+                                    />
+                                     <FormField
+                                      control={form.control}
+                                      name="homePageLogoScale"
+                                      render={({ field }) => (
+                                        <FormItem>
+                                          <FormLabel>Homepage Logo Scale ({Math.round((field.value || 1) * 100)}%)</FormLabel>
+                                          <FormControl>
+                                            <Slider
+                                              value={[field.value || 1]}
+                                              onValueChange={(value) => field.onChange(value[0])}
+                                              min={0.5}
+                                              max={5}
+                                              step={0.05}
+                                            />
+                                          </FormControl>
+                                          <FormDescription>Adjust the size of the logo on the homepage.</FormDescription>
+                                          <FormMessage />
+                                        </FormItem>
+                                      )}
                                     />
                                     <FormField
                                         control={control}

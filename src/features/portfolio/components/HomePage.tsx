@@ -19,6 +19,7 @@ interface ContactInfo {
 interface HomePageSettings {
     homePageLogoUrl?: string;
     isHomePageLogoVisible?: boolean;
+    homePageLogoScale?: number;
 }
 
 export default function HomePageContent() {
@@ -41,7 +42,7 @@ export default function HomePageContent() {
   const siteLogoUrl = contactInfo?.logoUrl || "https://i.imgur.com/N9c8oEJ.png";
   const homeLogoUrl = homeSettings?.homePageLogoUrl || siteLogoUrl;
   const isLogoVisible = homeSettings?.isHomePageLogoVisible ?? true;
-  const logoScale = contactInfo?.logoScale || 1;
+  const logoScale = homeSettings?.homePageLogoScale || 1;
 
 
   return (

@@ -117,6 +117,10 @@
           "type": "string",
           "format": "uri",
           "description": "URL for the main site logo."
+        },
+        "logoScale": {
+            "type": "number",
+            "description": "The scale of the site logo in the navigation."
         }
       },
       "required": [
@@ -174,6 +178,10 @@
         "isHomePageLogoVisible": {
             "type": "boolean",
             "description": "Controls whether the homepage logo is visible."
+        },
+        "homePageLogoScale": {
+            "type": "number",
+            "description": "The scale of the logo on the homepage."
         },
         "themeColor": {
           "type": "string",
