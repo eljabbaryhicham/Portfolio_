@@ -644,6 +644,12 @@ export default function MediaAdmin(props: MediaAdminProps) {
     }
     return null;
   };
+  
+  const handleLibraryTabChange = (value: string) => {
+      // When a library tab is clicked, always switch to view mode
+      setViewMode('view');
+      setActiveLibrary(value as 'primary' | 'extented');
+  }
 
   const commonDialogContent = (
     <>
@@ -653,14 +659,18 @@ export default function MediaAdmin(props: MediaAdminProps) {
       </DialogHeader>
       
       <div className='flex justify-between items-center px-4 pt-4'>
-        <Tabs value={activeLibrary} onValueChange={(value) => setActiveLibrary(value as 'primary' | 'extented')}>
+        <Tabs value={viewMode === 'delete' ? '' : activeLibrary} onValueChange={handleLibraryTabChange}>
             <TabsList>
-                <TabsTrigger value="primary" className="py-2 px-4 text-base glass-effect data-[state=active]:bg-destructive" disabled={viewMode === 'delete'}>Library Primary</TabsTrigger>
-                <TabsTrigger value="extented" className="py-2 px-4 text-base glass-effect data-[state=active]:bg-destructive" disabled={viewMode === 'delete'}>Library Extented</TabsTrigger>
+                <TabsTrigger value="primary" className="py-2 px-4 text-base glass-effect data-[state=active]:bg-destructive">Library Primary</TabsTrigger>
+                <TabsTrigger value="extented" className="py-2 px-4 text-base glass-effect data-[state=active]:bg-destructive">Library Extented</TabsTrigger>
             </TabsList>
         </Tabs>
         <Tabs value={viewMode} onValueChange={(value) => setViewMode(value as 'view' | 'delete')}>
             <TabsList>
+                 <TabsTrigger value="view" className="py-2 px-4 text-base glass-effect data-[state=active]:bg-destructive">
+                    <FontAwesomeIcon icon={faFolderOpen} className="mr-2" />
+                    Browse
+                </TabsTrigger>
                  <TabsTrigger value="delete" className="py-2 px-4 text-base bg-destructive/20 text-destructive-foreground hover:bg-destructive/40 data-[state=active]:bg-destructive">
                     <FontAwesomeIcon icon={faTrash} className="mr-2" />
                     Delete Media
