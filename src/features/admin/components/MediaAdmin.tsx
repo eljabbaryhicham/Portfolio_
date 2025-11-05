@@ -9,7 +9,7 @@ import { useToast } from '@/hooks/use-toast';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import Image from 'next/image';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faCloudUploadAlt, faCopy, faTrash, faFilm, faFileImage, faImages, faXmark, faPlus, faEye, faFolderOpen, faLink, faUniversity, faStar, faPhotoFilm, faFileLines } from '@fortawesome/free-solid-svg-icons';
+import { faCloudUploadAlt, faCopy, faTrash, faFilm, faFileImage, faImages, faXmark, faPlus, faEye, faFolderOpen, faLink, faUniversity, faStar, faPhotoFilm, faFileLines, faExclamationTriangle } from '@fortawesome/free-solid-svg-icons';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogClose, DialogDescription, DialogFooter } from '@/components/ui/dialog';
 import { cn } from '@/lib/utils';
@@ -23,6 +23,7 @@ import type { AppUser } from '@/firebase/auth/use-user';
 import CdnClapprPlayer from '@/components/CdnClapprPlayer';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Label } from '@/components/ui/label';
+import { deleteFromCloudinary } from '@/api/cloudinary-delete/route';
 
 
 // Type for the media stored in Firestore
@@ -51,6 +52,7 @@ const MediaFileCard = ({
   canDelete,
   canEditContact,
   canEditHome,
+  isDeleteSection = false,
 }: {
   file: MediaAsset;
   onDelete: (publicId: string, id: string, resourceType: string, libraryId: 'primary' | 'extented') => void;
@@ -64,6 +66,7 @@ const MediaFileCard = ({
   canDelete: boolean;
   canEditContact: boolean;
   canEditHome: boolean;
+  isDeleteSection?: boolean;
 }) => {
   
   const handleDelete = () => {
@@ -81,7 +84,8 @@ const MediaFileCard = ({
       <div 
         className={cn(
           "relative group aspect-square border rounded-lg overflow-hidden glass-effect p-1",
-          isSelectionMode && "cursor-pointer"
+          isSelectionMode && "cursor-pointer",
+          isDeleteSection && "border-destructive/30"
         )}
         onClick={isSelectionMode ? handleSelect : undefined}
       >
@@ -111,6 +115,32 @@ const MediaFileCard = ({
                 <FontAwesomeIcon icon={faImages} className="h-8 w-8 mb-2" />
                 <p className="font-bold">Select</p>
               </div>
+            ) : isDeleteSection ? (
+                 <AlertDialog>
+                    <AlertDialogTrigger asChild>
+                      <Button size="lg" variant="destructive" title="Delete" className="h-16 w-16 rounded-full flex flex-col items-center justify-center">
+                        <FontAwesomeIcon icon={faTrash} className="h-6 w-6" />
+                        <span className="text-xs mt-1">Delete</span>
+                      </Button>
+                    </AlertDialogTrigger>
+                    <AlertDialogContent className="w-[80vw]">
+                      <AlertDialogHeader>
+                        <AlertDialogTitle className='flex items-center gap-2'>
+                          <FontAwesomeIcon icon={faExclamationTriangle} className="text-destructive h-6 w-6" />
+                          Are you absolutely sure?
+                        </AlertDialogTitle>
+                        <AlertDialogDescription>
+                          This will permanently delete the file from your Cloudinary storage and remove its record from your library. This action cannot be undone.
+                        </AlertDialogDescription>
+                      </AlertDialogHeader>
+                      <AlertDialogFooter>
+                        <AlertDialogCancel>Cancel</AlertDialogCancel>
+                        <AlertDialogAction onClick={handleDelete}>
+                          Delete Permanently
+                        </AlertDialogAction>
+                      </AlertDialogFooter>
+                    </AlertDialogContent>
+                  </AlertDialog>
             ) : (
               <div className="flex flex-wrap items-center justify-center gap-1 md:gap-2">
                 <Button size="icon" variant="ghost" onClick={() => onPreview(file)} title="Preview" className="h-8 w-8 md:h-10 md:w-10 text-white glass-effect">
@@ -145,7 +175,7 @@ const MediaFileCard = ({
                       <AlertDialogHeader>
                         <AlertDialogTitle>Are you sure?</AlertDialogTitle>
                         <AlertDialogDescription>
-                          This will permanently delete the file from your Cloudinary storage. This action cannot be undone.
+                          This will permanently delete the file from your Cloudinary storage and remove its record from your library. This action cannot be undone.
                         </AlertDialogDescription>
                       </AlertDialogHeader>
                       <AlertDialogFooter>
@@ -189,8 +219,8 @@ interface DialogMediaAdminProps {
   onMediaSelect: (url: string, type: 'image' | 'video' | 'raw', filename: string) => void;
   isSelectionMode: boolean;
   onSelectionComplete: () => void;
-  activeTab: 'images' | 'videos' | 'files';
-  setActiveTab: (tab: 'images' | 'videos' | 'files') => void;
+  activeTab: 'images' | 'videos' | 'files' | 'delete';
+  setActiveTab: (tab: 'images' | 'videos' | 'files' | 'delete') => void;
   activeLibrary: 'primary' | 'extented';
   setActiveLibrary: (library: 'primary' | 'extented') => void;
   newlyUploadedId: string | null;
@@ -432,10 +462,16 @@ export default function MediaAdmin(props: MediaAdminProps) {
     if (!firestore || !canDelete) return;
     
     try {
-        await deleteDocumentNonBlocking(doc(firestore, 'media', docId));
-        toast({ title: "File Removed", description: `The reference to the file has been removed from your library.`});
+        const result = await deleteFromCloudinary({ public_id: publicId, resource_type: resourceType, libraryId });
+        
+        if (result.success) {
+            await deleteDocumentNonBlocking(doc(firestore, 'media', docId));
+            toast({ title: "File Deleted", description: `The file has been permanently deleted from Cloudinary and your library.`});
+        } else {
+            toast({ variant: 'destructive', title: "Deletion Failed", description: result.message || 'Could not delete file from Cloudinary.' });
+        }
     } catch(e: any) {
-        toast({ variant: 'destructive', title: "Deletion Failed", description: `Could not remove file reference: ${e.message}`});
+        toast({ variant: 'destructive', title: "Deletion Failed", description: `An error occurred: ${e.message}`});
     }
   };
 
@@ -528,7 +564,7 @@ export default function MediaAdmin(props: MediaAdminProps) {
   };
 
 
-  const renderLibrary = (assets: MediaAsset[], type: 'image' | 'video' | 'raw') => {
+  const renderLibrary = (assets: MediaAsset[], type: 'image' | 'video' | 'raw', isDeleteSection = false) => {
     if (isLoadingMedia) {
         return (
             <div className="flex justify-center items-center h-full min-h-[200px]">
@@ -539,10 +575,12 @@ export default function MediaAdmin(props: MediaAdminProps) {
 
     if (!assets || assets.length === 0) {
         const typeName = type === 'raw' ? 'files' : `${type}s`;
+        const libraryName = activeLibrary === 'primary' ? 'Library Primary' : 'Library Extented';
+        const inLibraryText = isDeleteSection ? '' : ` in ${libraryName}`;
         return (
             <div className="text-center py-12 text-muted-foreground">
                 <FontAwesomeIcon icon={type === 'image' ? faFileImage : type === 'video' ? faFilm : faFileLines} className="h-12 w-12 mb-4" />
-                <p>No {typeName} uploaded to this library yet.</p>
+                <p>No {typeName} uploaded{inLibraryText} yet.</p>
             </div>
         );
     }
@@ -564,6 +602,7 @@ export default function MediaAdmin(props: MediaAdminProps) {
                   canDelete={canDelete}
                   canEditContact={canEditContact}
                   canEditHome={canEditHome}
+                  isDeleteSection={isDeleteSection}
                 />
             ))}
         </div>
@@ -604,13 +643,24 @@ export default function MediaAdmin(props: MediaAdminProps) {
           <DialogTitle className="font-headline">{props.isDialog && props.isSelectionMode ? "Choose Media" : "Media Library"}</DialogTitle>
            <DialogDescription>Upload and manage your images and videos.</DialogDescription>
       </DialogHeader>
-        <Tabs value={activeLibrary} onValueChange={(value) => setActiveLibrary(value as 'primary' | 'extented')} className='px-4 pt-4'>
+      <div className='flex justify-between items-center px-4 pt-4'>
+        <Tabs value={activeLibrary} onValueChange={(value) => setActiveLibrary(value as 'primary' | 'extented')}>
             <TabsList>
                 <TabsTrigger value="primary" className="py-2 px-4 text-base glass-effect data-[state=active]:bg-destructive">Library Primary</TabsTrigger>
                 <TabsTrigger value="extented" className="py-2 px-4 text-base glass-effect data-[state=active]:bg-destructive">Library Extented</TabsTrigger>
             </TabsList>
         </Tabs>
-      <Tabs value={activeTab} onValueChange={(value) => setActiveTab(value as 'images' | 'videos' | 'files')} className="flex-1 flex flex-col min-h-0">
+        <Tabs value={activeTab} onValueChange={(value) => setActiveTab(value as 'images' | 'videos' | 'files' | 'delete')} >
+            <TabsList>
+                 <TabsTrigger value="delete" className="py-2 px-4 text-base bg-destructive/20 text-destructive-foreground hover:bg-destructive/40 data-[state=active]:bg-destructive">
+                    <FontAwesomeIcon icon={faTrash} className="mr-2" />
+                    Delete Media
+                </TabsTrigger>
+            </TabsList>
+        </Tabs>
+      </div>
+
+      <Tabs value={activeTab} onValueChange={(value) => setActiveTab(value as 'images' | 'videos' | 'files' | 'delete')} className="flex-1 flex flex-col min-h-0">
           <div className='px-4 pt-4'>
             <TabsList>
                 <TabsTrigger value="images" className="py-2 px-4 text-base glass-effect data-[state=active]:bg-destructive">
@@ -637,6 +687,9 @@ export default function MediaAdmin(props: MediaAdminProps) {
               </TabsContent>
                <TabsContent value="files" className="p-4 m-0">
                   {renderLibrary(otherAssets, 'raw')}
+              </TabsContent>
+               <TabsContent value="delete" className="p-4 m-0">
+                  {renderLibrary(mediaAssets || [], 'image', true)}
               </TabsContent>
           </ScrollArea>
       </Tabs>
