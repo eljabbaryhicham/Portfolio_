@@ -1,3 +1,4 @@
+
 'use server';
 
 import admin from 'firebase-admin';
@@ -48,8 +49,12 @@ export async function initializeServerApp(): Promise<admin.app.App> {
   try {
     const serviceAccountString = await fs.readFile(serviceAccountPath, 'utf-8');
     
-    if (!serviceAccountString || serviceAccountString.includes('PASTE_YOUR_PRIVATE_KEY_HERE')) {
-        throw new Error('The service account file at "docs/service-account.json" is a placeholder or empty. Please see the instructions in README.md to add your Firebase service account key.');
+    if (!serviceAccountString || serviceAccountString.trim().length === 0) {
+        throw new Error('The service account file at "docs/service-account.json" is empty or missing. Please see the instructions in README.md to add your Firebase service account key.');
+    }
+
+    if (serviceAccountString.includes('PASTE_YOUR_PRIVATE_KEY_HERE')) {
+        throw new Error('The service account file at "docs/service-account.json" is a placeholder. Please see the instructions in README.md to add your Firebase service account key.');
     }
 
     const serviceAccount = JSON.parse(serviceAccountString);
@@ -63,8 +68,9 @@ export async function initializeServerApp(): Promise<admin.app.App> {
 
   } catch (error: any) {
     if (error.code === 'ENOENT') {
-        console.error('Firebase Admin initialization failed: The file "docs/service-account.json" was not found.');
-        throw new Error('For local development, the "docs/service-account.json" file is missing. This file is required for server-side actions like creating new admin users. Please create this file and add your Firebase service account credentials to it. See README.md for more details.');
+        const localDevError = new Error('For local development, the "docs/service-account.json" file is missing. This file is required for server-side actions like creating or deleting admin users. Please create this file and add your Firebase service account credentials to it. See README.md for more details.');
+        console.error('Firebase Admin initialization failed:', localDevError.message);
+        throw localDevError;
     }
     
     console.error("Failed to initialize Firebase Admin SDK from file.", error);

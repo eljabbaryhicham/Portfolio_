@@ -1,3 +1,4 @@
+
 'use server';
 
 import { initializeServerApp } from "@/firebase/server-init";
@@ -51,9 +52,9 @@ export async function createAdminUser(input: CreateAdminUserInput): Promise<Crea
       role: 'admin', // Default role for new admins
       createdAt: new Date().toISOString(),
       permissions: {
-        canUploadMedia: true,
+        canUploadMedia: false,
         canDeleteMedia: false,
-        canEditProjects: true,
+        canEditProjects: false,
         canEditAbout: false,
         canEditContact: false,
         canEditHome: false,
