@@ -29,15 +29,10 @@ yarn-error.log*
 .env.development.local
 .env.test.local
 .env.production.local
+.env.server.local
 
 # vercel
 .vercel
 
-# typescript
-*.tsbuildinfo
-next-env.d.ts
-
-# Firebase Studio
-.firebase/
-service-account.json
-docs/service-account.json
+# service account credentials
+/docs/service-account.json
