@@ -25,6 +25,7 @@ import type { AppUser } from '@/firebase/auth/use-user';
 import { Slider } from '@/components/ui/slider';
 
 const formSchema = z.object({
+  avatarUrl: z.string().url().optional().or(z.literal('')),
   name: z.string().min(2).optional().or(z.literal('')),
   title: z.string().min(2).optional().or(z.literal('')),
   email: z.string().email().optional().or(z.literal('')),
@@ -37,11 +38,13 @@ const formSchema = z.object({
   twitterUrl: z.string().url().optional().or(z.literal('')),
   logoUrl: z.string().url({ message: 'Please enter a valid URL for the logo.' }).optional().or(z.literal('')),
   logoScale: z.number().min(0.05).max(5).optional(),
+  avatarScale: z.number().min(0.05).max(5).optional(),
 });
 
 type ContactInfo = z.infer<typeof formSchema>;
 
 const defaultFormValues: ContactInfo = {
+    avatarUrl: '',
     name: '',
     title: '',
     email: '',
@@ -54,6 +57,7 @@ const defaultFormValues: ContactInfo = {
     twitterUrl: '',
     logoUrl: '',
     logoScale: 1,
+    avatarScale: 1,
 };
 
 export default function ContactAdmin() {
@@ -79,6 +83,7 @@ export default function ContactAdmin() {
   useEffect(() => {
     if (contactInfo) {
         const values: ContactInfo = {
+            avatarUrl: contactInfo.avatarUrl || 'https://i.imgur.com/N9c8oEJ.png',
             name: contactInfo.name || '',
             title: contactInfo.title || '',
             email: contactInfo.email || '',
@@ -91,11 +96,12 @@ export default function ContactAdmin() {
             twitterUrl: contactInfo.twitterUrl || '',
             logoUrl: contactInfo.logoUrl || 'https://i.imgur.com/N9c8oEJ.png',
             logoScale: contactInfo.logoScale || 1,
+            avatarScale: contactInfo.avatarScale || 1,
         };
       form.reset(values);
     } else if (!isLoading) {
         // Set default logo if no data is loaded
-        form.reset({ ...defaultFormValues, logoUrl: 'https://i.imgur.com/N9c8oEJ.png', logoScale: 1 });
+        form.reset({ ...defaultFormValues, logoUrl: 'https://i.imgur.com/N9c8oEJ.png', logoScale: 1, avatarUrl: 'https://i.imgur.com/N9c8oEJ.png', avatarScale: 1 });
     }
   }, [contactInfo, form, isLoading]);
   
@@ -109,7 +115,7 @@ export default function ContactAdmin() {
 
   const onSubmit = (values: ContactInfo) => {
     if (!contactDocRef || !canEditContact) return;
-    const dataToSave = { ...values, logoScale: values.logoScale || 1 };
+    const dataToSave = { ...values, logoScale: values.logoScale || 1, avatarScale: values.avatarScale || 1 };
     setDocumentNonBlocking(contactDocRef, dataToSave, { merge: true });
     toast({
       title: 'Contact Info Updated',
@@ -169,6 +175,40 @@ export default function ContactAdmin() {
                             />
                           </FormControl>
                           <FormDescription>Adjust the size of the main logo in the navigation.</FormDescription>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                        control={form.control}
+                        name="avatarUrl"
+                        render={({ field }) => (
+                        <FormItem>
+                            <FormLabel>Avatar Image URL</FormLabel>
+                            <FormControl>
+                            <Input placeholder="https://example.com/your-avatar.png" {...field} />
+                            </FormControl>
+                            <FormDescription>The circular avatar image on the contact page.</FormDescription>
+                            <FormMessage />
+                        </FormItem>
+                        )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name="avatarScale"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Avatar Scale ({Math.round((field.value || 1) * 100)}%)</FormLabel>
+                          <FormControl>
+                            <Slider
+                              value={[field.value || 1]}
+                              onValueChange={(value) => field.onChange(value[0])}
+                              min={0.05}
+                              max={2}
+                              step={0.05}
+                            />
+                          </FormControl>
+                           <FormDescription>Adjust the size of the avatar image on the contact page.</FormDescription>
                           <FormMessage />
                         </FormItem>
                       )}
@@ -315,3 +355,5 @@ export default function ContactAdmin() {
     </div>
   );
 }
+
+    

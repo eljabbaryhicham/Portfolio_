@@ -17,10 +17,11 @@ import { Button } from '@/components/ui/button';
 import ContactForm from './ContactForm';
 import { ScrollIndicator } from '@/components/ScrollIndicator';
 import { useRef } from 'react';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import Logo from '@/components/logo';
 
 interface ContactInfo {
-  logoUrl?: string;
+  avatarUrl?: string;
   name?: string;
   title?: string;
   email?: string;
@@ -31,7 +32,7 @@ interface ContactInfo {
   instagramUrl?: string;
   facebookUrl?: string;
   twitterUrl?: string;
-  logoScale?: number;
+  avatarScale?: number;
 }
 
 const containerVariants = {
@@ -77,8 +78,9 @@ export default function ContactPage() {
     { id: 'facebook', href: contactInfo.facebookUrl, icon: faFacebook, hoverColor: 'hover:text-blue-600' },
     { id: 'twitter', href: contactInfo.twitterUrl, icon: faTwitter, hoverColor: 'hover:text-sky-500' },
   ].filter(link => link.href) : [];
-  
-  const logoScale = contactInfo?.logoScale || 1;
+
+  const avatarUrl = contactInfo?.avatarUrl || "https://i.imgur.com/N9c8oEJ.png";
+  const avatarScale = contactInfo?.avatarScale || 1;
 
 
   return (
@@ -119,12 +121,16 @@ export default function ContactPage() {
                   <motion.div className="w-full md:w-1/2 flex justify-center" variants={itemVariants}>
                     <Card className="glass-effect p-6 flex flex-col h-full w-full max-w-md">
                       <CardContent className="flex flex-col items-center text-center p-0">
-                        <div 
-                          className="w-32 mb-4"
-                          style={{ transform: `scale(${logoScale})` }}
-                        >
-                          <Logo src={contactInfo.logoUrl} />
-                        </div>
+                        <Avatar className="w-32 h-32 mb-4 border-2 border-primary">
+                          <div className="w-full h-full flex items-center justify-center overflow-hidden rounded-full">
+                             <div style={{ transform: `scale(${avatarScale})` }}>
+                                <AvatarImage src={avatarUrl} alt="Avatar" />
+                              </div>
+                          </div>
+                          <AvatarFallback>
+                            <Preloader />
+                          </AvatarFallback>
+                        </Avatar>
                         <h3 className="text-lg md:text-xl font-headline">{contactInfo.name}</h3>
                         <p className="text-sm md:text-base text-foreground/70">{contactInfo.title}</p>
                         
@@ -210,3 +216,5 @@ export default function ContactPage() {
     </div>
   );
 }
+
+    

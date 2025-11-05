@@ -74,7 +74,8 @@
       "properties": {
         "avatarUrl": {
           "type": "string",
-          "format": "uri"
+          "format": "uri",
+          "description": "URL for the avatar image on the contact page."
         },
         "name": {
           "type": "string"
@@ -128,7 +129,6 @@
         }
       },
       "required": [
-        "avatarUrl",
         "name",
         "title",
         "email"
@@ -485,3 +485,5 @@
     ]
   }
 }
+
+    
