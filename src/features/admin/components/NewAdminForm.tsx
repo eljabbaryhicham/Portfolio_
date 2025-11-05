@@ -1,3 +1,4 @@
+
 'use client';
 
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -69,9 +70,9 @@ export default function NewAdminForm({ onSuccess }: NewAdminFormProps) {
         role: 'admin',
         createdAt: new Date().toISOString(),
         permissions: {
-          canUploadMedia: true,
+          canUploadMedia: false,
           canDeleteMedia: false,
-          canEditProjects: true,
+          canEditProjects: false,
           canEditAbout: false,
           canEditContact: false,
           canEditHome: false,
