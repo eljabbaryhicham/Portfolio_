@@ -17,6 +17,7 @@ import { Input } from '@/components/ui/input';
 import { useAuth, useFirestore, setDocumentNonBlocking } from '@/firebase';
 import {
   createUserWithEmailAndPassword,
+  signInWithEmailAndPassword,
 } from 'firebase/auth';
 import { useToast } from '@/hooks/use-toast';
 import { useState } from 'react';
@@ -53,9 +54,35 @@ export default function NewAdminForm({ onSuccess }: NewAdminFormProps) {
     if (!auth || !firestore) return;
     setIsSubmitting(true);
     
+    // Store current user's credentials
+    const currentSuperAdmin = auth.currentUser;
+    if (!currentSuperAdmin || !currentSuperAdmin.email) {
+        toast({
+            variant: "destructive",
+            title: "Authentication Error",
+            description: "Could not identify the current superadmin.",
+        });
+        setIsSubmitting(false);
+        return;
+    }
+    // This is a bit of a hack to re-sign in. We need a password.
+    // A better long-term solution is using a server-side function to create users.
+    // For now, we'll prompt the superadmin for their password.
+    const superAdminPassword = prompt("For security, please re-enter your password to create a new admin:");
+    if (!superAdminPassword) {
+        toast({
+            variant: "destructive",
+            title: "Action Cancelled",
+            description: "Password not provided.",
+        });
+        setIsSubmitting(false);
+        return;
+    }
+
+
     const email = `${values.username.toLowerCase()}@example.com`;
     try {
-      // We create the user but don't sign them in on this client
+      // Create the new user. This will sign them in and sign the current user out.
       const userCredential = await createUserWithEmailAndPassword(auth, email, values.password);
       
       const userDocRef = doc(firestore, 'users', userCredential.user.uid);
@@ -74,10 +101,9 @@ export default function NewAdminForm({ onSuccess }: NewAdminFormProps) {
           canEditHome: false,
         }
       }, {});
-
-      // Sign out the newly created user from the current session
-      // This is important because createUserWithEmailAndPassword automatically signs the user in
-      await auth.signOut();
+      
+      // Re-authenticate the superadmin to restore their session
+      await signInWithEmailAndPassword(auth, currentSuperAdmin.email, superAdminPassword);
 
       toast({
         title: 'Account Created',
@@ -85,6 +111,19 @@ export default function NewAdminForm({ onSuccess }: NewAdminFormProps) {
       });
       onSuccess();
     } catch (error: any) {
+        // If there was an error, try to sign the super admin back in just in case they were logged out
+        if (auth.currentUser?.email !== currentSuperAdmin.email) {
+            try {
+                await signInWithEmailAndPassword(auth, currentSuperAdmin.email, superAdminPassword);
+            } catch (reauthError) {
+                console.error("Failed to re-authenticate super admin after error:", reauthError);
+                toast({
+                    variant: "destructive",
+                    title: "Session Expired",
+                    description: "Your session expired during the operation. Please sign in again.",
+                });
+            }
+        }
       toast({
         variant: 'destructive',
         title: 'Uh oh! Something went wrong.',
