@@ -18,11 +18,12 @@ import { Input } from '@/components/ui/input';
 import { useToast } from '@/hooks/use-toast';
 import { useDoc, useFirestore, useMemoFirebase, setDocumentNonBlocking, useUser } from '@/firebase';
 import { doc } from 'firebase/firestore';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import Preloader from '@/components/preloader';
 import type { AppUser } from '@/firebase/auth/use-user';
 import { Slider } from '@/components/ui/slider';
+import { debounce } from 'lodash';
 
 const formSchema = z.object({
   avatarUrl: z.string().url().optional().or(z.literal('')),
@@ -64,6 +65,7 @@ export default function ContactAdmin() {
   const { toast } = useToast();
   const firestore = useFirestore();
   const { user } = useUser();
+  const [isMounted, setIsMounted] = useState(false);
 
   const typedUser = user as AppUser | null;
   const isSuperAdmin = typedUser?.email === 'eljabbaryhicham@example.com';
@@ -79,8 +81,11 @@ export default function ContactAdmin() {
     resolver: zodResolver(formSchema),
     defaultValues: defaultFormValues,
   });
+  
+  const { watch } = form;
 
   useEffect(() => {
+    setIsMounted(true);
     if (contactInfo) {
         const values: ContactInfo = {
             avatarUrl: contactInfo.avatarUrl || 'https://i.imgur.com/N9c8oEJ.png',
@@ -112,18 +117,36 @@ export default function ContactAdmin() {
       });
     }
   }, [canEditContact, form]);
+  
+  useEffect(() => {
+    if (!canEditContact || !isMounted || isLoading) return;
 
-  const onSubmit = (values: ContactInfo) => {
-    if (!contactDocRef || !canEditContact) return;
-    const dataToSave = { ...values, logoScale: values.logoScale || 1, avatarScale: values.avatarScale || 1 };
-    setDocumentNonBlocking(contactDocRef, dataToSave, { merge: true });
-    toast({
-      title: 'Contact Info Updated',
-      description: 'Your contact page has been successfully updated.',
+    const debouncedSave = debounce((fieldName: keyof ContactInfo, value: any) => {
+        if (contactDocRef && form.formState.isDirty) {
+            const dataToSave = { [fieldName]: value };
+            setDocumentNonBlocking(contactDocRef, dataToSave, { merge: true });
+            toast({
+                title: 'Setting Saved',
+                description: 'Your change has been saved automatically.',
+            });
+        }
+    }, 1000);
+
+    const subscription = watch((value, { name, type }) => {
+      if (type === 'change' && name) {
+        const fieldName = name as keyof ContactInfo;
+        debouncedSave(fieldName, value[fieldName]);
+      }
     });
-  };
 
-  if (isLoading) {
+    return () => {
+        subscription.unsubscribe();
+        debouncedSave.cancel();
+    };
+  }, [watch, contactDocRef, canEditContact, toast, isMounted, isLoading, form.formState.isDirty]);
+
+
+  if (isLoading && !isMounted) {
     return (
         <div className="flex justify-center items-center h-full">
             <Preloader />
@@ -143,7 +166,7 @@ export default function ContactAdmin() {
           <ScrollArea className="h-full">
               <div className="p-6">
                 <Form {...form}>
-                    <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+                    <div className="space-y-8">
                     <fieldset disabled={!canEditContact} className="group">
                     <FormField
                         control={form.control}
@@ -343,11 +366,8 @@ export default function ContactAdmin() {
                         </FormItem>
                         )}
                     />
-                    <div className="flex justify-end pt-4">
-                        <Button type="submit" disabled={!canEditContact}>Save Changes</Button>
-                    </div>
                     </fieldset>
-                    </form>
+                    </div>
                 </Form>
               </div>
           </ScrollArea>
@@ -355,5 +375,7 @@ export default function ContactAdmin() {
     </div>
   );
 }
+
+    
 
     
