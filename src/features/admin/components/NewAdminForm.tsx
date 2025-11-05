@@ -15,7 +15,10 @@ import {
 import { Input } from '@/components/ui/input';
 import { useToast } from '@/hooks/use-toast';
 import { useState } from 'react';
-import { createAdminUser } from '@/app/actions/create-admin';
+import { useAuth, useFirestore, setDocumentNonBlocking, initiateEmailSignIn } from '@/firebase';
+import { createUserWithEmailAndPassword, signInWithEmailAndPassword } from 'firebase/auth';
+import { doc } from 'firebase/firestore';
+
 
 const formSchema = z.object({
   username: z.string().min(3, { message: 'Username must be at least 3 characters.' }).regex(/^[a-zA-Z0-9]+$/, 'Username can only contain letters and numbers.'),
@@ -31,6 +34,8 @@ interface NewAdminFormProps {
 }
 
 export default function NewAdminForm({ onSuccess }: NewAdminFormProps) {
+  const auth = useAuth();
+  const firestore = useFirestore();
   const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -43,26 +48,87 @@ export default function NewAdminForm({ onSuccess }: NewAdminFormProps) {
   });
 
   const handleSignUp = async (values: RegisterFormValues) => {
+    if (!auth || !firestore) return;
     setIsSubmitting(true);
     
-    try {
-      const result = await createAdminUser(values);
-
-      if (result.success) {
+    // 1. Get the current superadmin's credentials (assuming they are still logged in)
+    const currentSuperAdmin = auth.currentUser;
+    if (!currentSuperAdmin || !currentSuperAdmin.email) {
         toast({
-          title: 'Account Created',
-          description: `Admin user '${values.username}' has been successfully created.`,
+            variant: "destructive",
+            title: "Authentication Error",
+            description: "Could not identify the current admin. Please sign in again.",
         });
-        onSuccess();
-      } else {
-        throw new Error(result.error);
-      }
+        setIsSubmitting(false);
+        return;
+    }
+    const superAdminEmail = currentSuperAdmin.email;
+    const superAdminPassword = prompt("For security, please re-enter your password to create a new admin:");
+
+    if (!superAdminPassword) {
+        toast({
+            variant: "destructive",
+            title: "Action Cancelled",
+            description: "Password not provided.",
+        });
+        setIsSubmitting(false);
+        return;
+    }
+
+    const newAdminEmail = `${values.username.toLowerCase()}@example.com`;
+    try {
+      // 2. Create the new admin user. This will automatically sign them in.
+      const newUserCredential = await createUserWithEmailAndPassword(auth, newAdminEmail, values.password);
+      
+      // 3. Create the user's document in Firestore
+      const userDocRef = doc(firestore, 'users', newUserCredential.user.uid);
+      await setDocumentNonBlocking(userDocRef, {
+        uid: newUserCredential.user.uid,
+        username: values.username,
+        email: newUserCredential.user.email,
+        role: 'admin',
+        createdAt: new Date().toISOString(),
+        permissions: {
+            canUploadMedia: true,
+            canDeleteMedia: false,
+            canEditProjects: true,
+            canEditAbout: false,
+            canEditContact: false,
+            canEditHome: false,
+        }
+      }, {});
+
+      toast({
+        title: 'Account Created',
+        description: `Admin user '${values.username}' has been successfully created.`,
+      });
+      
+      // 4. IMPORTANT: Sign the superadmin back in to restore their session
+      await signInWithEmailAndPassword(auth, superAdminEmail, superAdminPassword);
+
+      onSuccess();
+
     } catch (error: any) {
       toast({
         variant: 'destructive',
         title: 'Uh oh! Something went wrong.',
-        description: error.message || 'An unexpected error occurred.',
+        description: error.code === 'auth/email-already-in-use' ? 'This username is already taken.' : error.message,
       });
+
+      // Attempt to sign back in the superadmin even if creation fails
+      try {
+        await signInWithEmailAndPassword(auth, superAdminEmail, superAdminPassword);
+      } catch (reauthError) {
+        console.error("Failed to re-authenticate superadmin:", reauthError);
+        toast({
+            variant: 'destructive',
+            title: 'Session Warning',
+            description: 'Failed to restore your session. You may need to sign in again.',
+        });
+        // Optionally redirect to login if re-auth fails
+        // router.push('/login');
+      }
+
     } finally {
         setIsSubmitting(false);
     }
