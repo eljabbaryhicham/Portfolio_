@@ -121,6 +121,10 @@
         "logoScale": {
             "type": "number",
             "description": "The scale of the site logo in the navigation."
+        },
+        "avatarScale": {
+            "type": "number",
+            "description": "The scale of the avatar image on the contact page."
         }
       },
       "required": [

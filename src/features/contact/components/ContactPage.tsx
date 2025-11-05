@@ -31,6 +31,7 @@ interface ContactInfo {
   instagramUrl?: string;
   facebookUrl?: string;
   twitterUrl?: string;
+  avatarScale?: number;
 }
 
 const containerVariants = {
@@ -76,6 +77,8 @@ export default function ContactPage() {
     { id: 'facebook', href: contactInfo.facebookUrl, icon: faFacebook, hoverColor: 'hover:text-blue-600' },
     { id: 'twitter', href: contactInfo.twitterUrl, icon: faTwitter, hoverColor: 'hover:text-sky-500' },
   ].filter(link => link.href) : [];
+  
+  const avatarScale = contactInfo?.avatarScale || 1;
 
 
   return (
@@ -116,7 +119,7 @@ export default function ContactPage() {
                   <motion.div className="w-full md:w-1/2 flex justify-center" variants={itemVariants}>
                     <Card className="glass-effect p-6 flex flex-col h-full w-full max-w-md">
                       <CardContent className="flex flex-col items-center text-center p-0">
-                        <Avatar className="border-2 border-white mb-4 w-16 h-16 md:w-20 md:h-20">
+                        <Avatar className="border-2 border-white mb-4 w-16 h-16 md:w-20 md:h-20" style={{ transform: `scale(${avatarScale})` }}>
                           <AvatarImage src={contactInfo.avatarUrl} alt={contactInfo.name} />
                           <AvatarFallback>{contactInfo.name?.substring(0, 2)}</AvatarFallback>
                         </Avatar>
