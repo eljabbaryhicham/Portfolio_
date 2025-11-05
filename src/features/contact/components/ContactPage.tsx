@@ -122,11 +122,14 @@ export default function ContactPage() {
                     <Card className="glass-effect p-6 flex flex-col h-full w-full max-w-md">
                       <CardContent className="flex flex-col items-center text-center p-0">
                         <Avatar className="w-32 h-32 mb-4 border-2 border-primary">
-                          <div className="w-full h-full flex items-center justify-center overflow-hidden rounded-full">
-                             <div style={{ transform: `scale(${avatarScale})` }}>
-                                <AvatarImage src={avatarUrl} alt="Avatar" />
-                              </div>
-                          </div>
+                           <AvatarImage 
+                              src={avatarUrl} 
+                              alt="Avatar" 
+                              style={{ 
+                                transform: `scale(${avatarScale})`, 
+                                objectFit: 'contain' 
+                              }} 
+                            />
                           <AvatarFallback>
                             <Preloader />
                           </AvatarFallback>
@@ -216,5 +219,3 @@ export default function ContactPage() {
     </div>
   );
 }
-
-    
