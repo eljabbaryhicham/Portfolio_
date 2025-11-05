@@ -15,7 +15,11 @@ import {
 import { Input } from '@/components/ui/input';
 import { useToast } from '@/hooks/use-toast';
 import { useState } from 'react';
-import { createAdminUser } from '@/app/actions/create-admin';
+import { useFirestore, setDocumentNonBlocking } from '@/firebase';
+import { doc } from 'firebase/firestore';
+import { initializeApp, deleteApp } from 'firebase/app';
+import { getAuth, createUserWithEmailAndPassword } from 'firebase/auth';
+import { firebaseConfig } from '@/firebase/config';
 
 const formSchema = z.object({
   username: z.string().min(3, { message: 'Username must be at least 3 characters.' }).regex(/^[a-zA-Z0-9]+$/, 'Username can only contain letters and numbers.'),
@@ -32,6 +36,7 @@ interface NewAdminFormProps {
 
 export default function NewAdminForm({ onSuccess }: NewAdminFormProps) {
   const { toast } = useToast();
+  const firestore = useFirestore();
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const form = useForm<RegisterFormValues>({
@@ -43,25 +48,52 @@ export default function NewAdminForm({ onSuccess }: NewAdminFormProps) {
   });
 
   const handleSignUp = async (values: RegisterFormValues) => {
+    if (!firestore) return;
     setIsSubmitting(true);
-    
-    const result = await createAdminUser(values);
 
-    if (result.success) {
-        toast({
-            title: 'Account Created',
-            description: `Admin user '${values.username}' has been successfully created.`,
-        });
-        onSuccess();
-    } else {
-        toast({
-            variant: 'destructive',
-            title: 'Uh oh! Something went wrong.',
-            description: result.error,
-        });
+    const tempAppName = `temp-user-creation-${Date.now()}`;
+    const tempApp = initializeApp(firebaseConfig, tempAppName);
+    const tempAuth = getAuth(tempApp);
+
+    const email = `${values.username.toLowerCase()}@example.com`;
+    try {
+      // 1. Create user in the temporary app instance. This won't affect the main app's auth state.
+      const userCredential = await createUserWithEmailAndPassword(tempAuth, email, values.password);
+      
+      // 2. The user now exists in the backend. Now, create their Firestore document using the main app's Firestore instance.
+      const userDocRef = doc(firestore, 'users', userCredential.user.uid);
+      await setDocumentNonBlocking(userDocRef, {
+        uid: userCredential.user.uid,
+        username: values.username,
+        email: userCredential.user.email,
+        role: 'admin',
+        createdAt: new Date().toISOString(),
+        permissions: {
+          canUploadMedia: true,
+          canDeleteMedia: false,
+          canEditProjects: true,
+          canEditAbout: false,
+          canEditContact: false,
+          canEditHome: false,
+        }
+      }, {});
+
+      toast({
+          title: 'Account Created',
+          description: `Admin user '${values.username}' has been successfully created.`,
+      });
+      onSuccess(); // Close the dialog
+    } catch (error: any) {
+      toast({
+        variant: 'destructive',
+        title: 'Uh oh! Something went wrong.',
+        description: error.code === 'auth/email-already-in-use' ? 'This username is already taken.' : error.message,
+      });
+    } finally {
+      // 3. Clean up the temporary app instance.
+      await deleteApp(tempApp);
+      setIsSubmitting(false);
     }
-
-    setIsSubmitting(false);
   };
 
   return (
