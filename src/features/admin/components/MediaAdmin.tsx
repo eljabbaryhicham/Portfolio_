@@ -273,20 +273,23 @@ export default function MediaAdmin(props: MediaAdminProps) {
     const images: MediaAsset[] = [];
     const videos: MediaAsset[] = [];
     const others: MediaAsset[] = [];
-    mediaAssets?.forEach(asset => {
-        const libraryMatch = asset.libraryId === activeLibrary || (activeLibrary === 'primary' && !asset.libraryId);
-        if (libraryMatch) {
-            if (asset.resource_type === 'image') {
-                images.push(asset);
-            } else if (asset.resource_type === 'video') {
-                videos.push(asset);
-            } else {
-                others.push(asset);
-            }
+    
+    const sourceAssets = activeTab === 'delete' ? (mediaAssets || []) : (mediaAssets?.filter(asset => {
+        return asset.libraryId === activeLibrary || (activeLibrary === 'primary' && !asset.libraryId);
+    }) || []);
+    
+    sourceAssets.forEach(asset => {
+        if (asset.resource_type === 'image') {
+            images.push(asset);
+        } else if (asset.resource_type === 'video') {
+            videos.push(asset);
+        } else {
+            others.push(asset);
         }
     });
+
     return { imageAssets: images, videoAssets: videos, otherAssets: others };
-  }, [mediaAssets, activeLibrary]);
+  }, [mediaAssets, activeLibrary, activeTab]);
 
   const onDrop = useCallback((acceptedFiles: File[]) => {
     if (!canUpload) {
@@ -563,8 +566,42 @@ export default function MediaAdmin(props: MediaAdminProps) {
     setIsSetBackgroundOpen(false);
   };
 
+  const getAssetsForCurrentTab = () => {
+    switch (activeTab) {
+        case 'images':
+            return imageAssets;
+        case 'videos':
+            return videoAssets;
+        case 'files':
+            return otherAssets;
+        case 'delete':
+            // In delete tab, we still filter by type based on the active "viewing" tab
+            const viewingTab = (props.isDialog && ['images', 'videos', 'files'].includes(props.activeTab)) ? props.activeTab : 'images';
+            if (viewingTab === 'images') return imageAssets;
+            if (viewingTab === 'videos') return videoAssets;
+            if (viewingTab === 'files') return otherAssets;
+            return [];
+        default:
+            return [];
+    }
+  }
+  
+  const getAssetTypeForCurrentTab = (): 'image' | 'video' | 'raw' => {
+      switch (activeTab) {
+          case 'images': return 'image';
+          case 'videos': return 'video';
+          case 'files': return 'raw';
+          case 'delete':
+              const viewingTab = (props.isDialog && ['images', 'videos', 'files'].includes(props.activeTab)) ? props.activeTab : 'images';
+              if (viewingTab === 'videos') return 'video';
+              if (viewingTab === 'files') return 'raw';
+              return 'image';
+          default: return 'image';
+      }
+  }
 
-  const renderLibrary = (assets: MediaAsset[], type: 'image' | 'video' | 'raw', isDeleteSection = false) => {
+
+  const renderLibrary = (assets: MediaAsset[], type: 'image' | 'video' | 'raw') => {
     if (isLoadingMedia) {
         return (
             <div className="flex justify-center items-center h-full min-h-[200px]">
@@ -575,16 +612,16 @@ export default function MediaAdmin(props: MediaAdminProps) {
 
     if (!assets || assets.length === 0) {
         const typeName = type === 'raw' ? 'files' : `${type}s`;
-        const libraryName = activeLibrary === 'primary' ? 'Library Primary' : 'Library Extented';
-        const inLibraryText = isDeleteSection ? '' : ` in ${libraryName}`;
         return (
             <div className="text-center py-12 text-muted-foreground">
                 <FontAwesomeIcon icon={type === 'image' ? faFileImage : type === 'video' ? faFilm : faFileLines} className="h-12 w-12 mb-4" />
-                <p>No {typeName} uploaded{inLibraryText} yet.</p>
+                <p>No {typeName} found.</p>
             </div>
         );
     }
     
+    const isDeleteMode = activeTab === 'delete';
+
     return (
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4">
             {assets.map(file => (
@@ -602,7 +639,7 @@ export default function MediaAdmin(props: MediaAdminProps) {
                   canDelete={canDelete}
                   canEditContact={canEditContact}
                   canEditHome={canEditHome}
-                  isDeleteSection={isDeleteSection}
+                  isDeleteSection={isDeleteMode}
                 />
             ))}
         </div>
@@ -689,7 +726,7 @@ export default function MediaAdmin(props: MediaAdminProps) {
                   {renderLibrary(otherAssets, 'raw')}
               </TabsContent>
                <TabsContent value="delete" className="p-4 m-0">
-                  {renderLibrary(mediaAssets || [], 'image', true)}
+                  {renderLibrary(getAssetsForCurrentTab(), getAssetTypeForCurrentTab())}
               </TabsContent>
           </ScrollArea>
       </Tabs>
