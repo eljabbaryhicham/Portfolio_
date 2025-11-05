@@ -206,7 +206,7 @@ export default function AboutPage() {
 
                 <motion.div variants={itemVariants}>
                   <div className="text-center mb-8">
-                    <h2 className="text-2xl font-headline tracking-tight">Our Clients</h2>
+                    <h2 className="text-2xl md:text-3xl font-headline tracking-tight">Our Clients</h2>
                     <Separator className="bg-white/10 max-w-xs mx-auto mt-2" />
                   </div>
                   
