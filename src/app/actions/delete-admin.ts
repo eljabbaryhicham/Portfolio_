@@ -13,7 +13,13 @@ export async function deleteAdminUser(uid: string): Promise<DeleteAdminUserResul
   try {
     const adminApp = await initializeServerApp();
     if (!adminApp) {
-        return { success: false, error: 'Firebase Admin SDK not initialized. "Fully Revoke Access" requires the "docs/service-account.json" file for local development. See README.md.' };
+        let errorMessage = 'Firebase Admin SDK not initialized. ';
+        if (process.env.VERCEL_ENV) {
+            errorMessage += 'On Vercel, ensure FIREBASE_PROJECT_ID, FIREBASE_CLIENT_EMAIL, and FIREBASE_PRIVATE_KEY environment variables are set correctly.';
+        } else {
+            errorMessage += '"Fully Revoke Access" requires the "docs/service-account.json" file for local development. See README.md.';
+        }
+        return { success: false, error: errorMessage };
     }
     const auth = admin.auth(adminApp);
     const firestore = admin.firestore(adminApp);

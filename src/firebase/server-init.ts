@@ -1,3 +1,4 @@
+
 'use server';
 
 import admin from 'firebase-admin';
@@ -20,8 +21,8 @@ export async function initializeServerApp(): Promise<admin.app.App | null> {
   // --- PRODUCTION: Vercel Environment ---
   // When deployed on Vercel, the app will use secure environment variables.
   // The `service-account.json` file is NOT used in production.
-  if (process.env.VERCEL_ENV && process.env.FIREBASE_PRIVATE_KEY) {
-    console.log("Initializing Firebase Admin SDK using Vercel environment variables...");
+  if (process.env.VERCEL_ENV && process.env.FIREBASE_PROJECT_ID && process.env.FIREBASE_CLIENT_EMAIL && process.env.FIREBASE_PRIVATE_KEY) {
+    console.log("Attempting to initialize Firebase Admin SDK from Vercel environment variables...");
     try {
       // Vercel escapes newlines in multiline environment variables. We need to un-escape them.
       const privateKey = process.env.FIREBASE_PRIVATE_KEY.replace(/\\n/g, '\n');
@@ -49,7 +50,7 @@ export async function initializeServerApp(): Promise<admin.app.App | null> {
   // --- LOCAL DEVELOPMENT: service-account.json file ---
   // For local development, the app looks for a `docs/service-account.json` file.
   // This file is listed in `.gitignore` and MUST NOT be committed to your repository.
-  console.log("Attempting to initialize Firebase Admin SDK using local 'docs/service-account.json'...");
+  console.log("Vercel environment variables not found. Attempting to initialize Firebase Admin SDK using local 'docs/service-account.json'...");
   const serviceAccountPath = path.resolve(process.cwd(), 'docs', 'service-account.json');
   
   try {
