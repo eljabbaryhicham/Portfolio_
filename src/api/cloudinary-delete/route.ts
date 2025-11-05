@@ -2,7 +2,6 @@
 'use server';
 
 import { v2 as cloudinary } from 'cloudinary';
-import { initializeServerApp } from '@/firebase/server-init';
 
 interface DeleteFromCloudinaryInput {
   public_id: string;
@@ -20,8 +19,6 @@ export async function deleteFromCloudinary(
   input: DeleteFromCloudinaryInput
 ): Promise<DeleteFromCloudinaryOutput> {
     try {
-        await initializeServerApp();
-
         const { public_id, resource_type, libraryId } = input;
         
         const isPrimary = libraryId === 'primary';
