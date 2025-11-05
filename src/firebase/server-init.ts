@@ -64,7 +64,7 @@ export async function initializeServerApp(): Promise<admin.app.App> {
   } catch (error: any) {
     if (error.code === 'ENOENT') {
         console.error('Firebase Admin initialization failed: The file "docs/service-account.json" was not found.');
-        throw new Error('For local development, the "docs/service-account.json" file is missing. Please create this file and add your Firebase service account credentials to it. See README.md for more details.');
+        throw new Error('For local development, the "docs/service-account.json" file is missing. This file is required for server-side actions like creating new admin users. Please create this file and add your Firebase service account credentials to it. See README.md for more details.');
     }
     
     console.error("Failed to initialize Firebase Admin SDK from file.", error);
