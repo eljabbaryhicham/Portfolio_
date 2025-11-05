@@ -167,7 +167,7 @@ export default function AboutPage() {
                                     Contact Us
                                 </Link>
                             </Button>
-                            <Button asChild variant="success">
+                            <Button asChild variant="destructive">
                                  <Link href="/work">
                                     Explore Our Works
                                     <FontAwesomeIcon icon={faArrowRight} className="ml-2" />
@@ -240,7 +240,7 @@ export default function AboutPage() {
                             Contact Us
                         </Link>
                     </Button>
-                    <Button asChild variant="success">
+                    <Button asChild variant="destructive">
                             <Link href="/work">
                             Explore Our Works
                             <FontAwesomeIcon icon={faArrowRight} className="ml-2" />
@@ -255,5 +255,3 @@ export default function AboutPage() {
     </div>
   );
 }
-
-    
