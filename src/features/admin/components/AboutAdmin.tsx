@@ -43,7 +43,7 @@ const formSchema = z.object({
   content: z.string().min(10, { message: 'Content must be at least 10 characters.' }),
   imageUrl: z.string().url({ message: 'Please enter a valid URL.' }),
   logoUrl: z.string().url({ message: 'Please enter a valid URL.' }).optional().or(z.literal('')),
-  logoScale: z.number().min(0.5).max(5).optional(),
+  logoScale: z.number().min(0.05).max(5).optional(),
 });
 
 type AboutFormValues = z.infer<typeof formSchema>;
@@ -200,7 +200,7 @@ export default function AboutAdmin() {
                                     <Slider
                                       value={[field.value || 1]}
                                       onValueChange={(value) => field.onChange(value[0])}
-                                      min={0.5}
+                                      min={0.05}
                                       max={5}
                                       step={0.05}
                                     />

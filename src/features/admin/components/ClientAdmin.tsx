@@ -59,7 +59,7 @@ const defaultClients: Omit<Client, 'id'>[] = [
 const formSchema = z.object({
   name: z.string().min(2, { message: 'Name must be at least 2 characters.' }),
   logoUrl: z.string().url({ message: 'Please enter a valid URL.' }),
-  logoScale: z.number().min(0.5).max(2).optional(),
+  logoScale: z.number().min(0.05).max(2).optional(),
 });
 
 type ClientFormValues = z.infer<typeof formSchema>;
@@ -144,7 +144,7 @@ function ClientForm({ client, onSubmit, onCancel, onChooseFromLibrary, canEdit }
                     <Slider
                       value={[field.value || 1]}
                       onValueChange={(value) => field.onChange(value[0])}
-                      min={0.5}
+                      min={0.05}
                       max={2}
                       step={0.05}
                     />
@@ -541,5 +541,3 @@ export default function ClientAdmin() {
     </>
   );
 }
-
-    

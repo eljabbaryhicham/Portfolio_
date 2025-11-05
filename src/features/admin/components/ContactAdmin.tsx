@@ -37,8 +37,8 @@ const formSchema = z.object({
   facebookUrl: z.string().url().optional().or(z.literal('')),
   twitterUrl: z.string().url().optional().or(z.literal('')),
   logoUrl: z.string().url({ message: 'Please enter a valid URL for the logo.' }).optional().or(z.literal('')),
-  logoScale: z.number().min(0.5).max(5).optional(),
-  avatarScale: z.number().min(0.5).max(2).optional(),
+  logoScale: z.number().min(0.05).max(5).optional(),
+  avatarScale: z.number().min(0.05).max(2).optional(),
 });
 
 type ContactInfo = z.infer<typeof formSchema>;
@@ -169,7 +169,7 @@ export default function ContactAdmin() {
                             <Slider
                               value={[field.value || 1]}
                               onValueChange={(value) => field.onChange(value[0])}
-                              min={0.5}
+                              min={0.05}
                               max={5}
                               step={0.05}
                             />
@@ -229,7 +229,7 @@ export default function ContactAdmin() {
                             <Slider
                               value={[field.value || 1]}
                               onValueChange={(value) => field.onChange(value[0])}
-                              min={0.5}
+                              min={0.05}
                               max={2}
                               step={0.05}
                             />

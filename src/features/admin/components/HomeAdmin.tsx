@@ -66,7 +66,7 @@ const settingsSchema = z.object({
   isTestPageEnabled: z.boolean().optional(),
   homePageLogoUrl: z.string().url().optional().or(z.literal('')),
   isHomePageLogoVisible: z.boolean().optional(),
-  homePageLogoScale: z.number().min(0.5).max(5).optional(),
+  homePageLogoScale: z.number().min(0.05).max(5).optional(),
   themeColor: z.string().optional(),
   registrationSecretCode: z.string().optional(),
   plyrPlayerAssetSource: z.enum(['cdn', 'local']).optional(),
@@ -236,7 +236,7 @@ export default function HomeAdmin() {
                                             <Slider
                                               value={[field.value || 1]}
                                               onValueChange={(value) => field.onChange(value[0])}
-                                              min={0.5}
+                                              min={0.05}
                                               max={5}
                                               step={0.05}
                                             />
@@ -575,5 +575,3 @@ export default function HomeAdmin() {
     </div>
   );
 }
-
-    

@@ -353,7 +353,7 @@
         },
         "logoScale": {
           "type": "number",
-          "description": "The scale of the client logo, from 0.5 to 2."
+          "description": "The scale of the client logo, from 0.05 to 2."
         }
       },
       "required": [
@@ -485,4 +485,3 @@
     ]
   }
 }
-    
