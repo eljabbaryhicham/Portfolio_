@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useCollection, useFirestore, useMemoFirebase, updateDocumentNonBlocking, useUser } from '@/firebase';
@@ -16,16 +15,19 @@ import Preloader from '@/components/preloader';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faTrash, faShieldHalved, faPlusCircle } from '@fortawesome/free-solid-svg-icons';
+import { faTrash, faShieldHalved, faPlusCircle, faExclamationTriangle } from '@fortawesome/free-solid-svg-icons';
 import { useToast } from '@/hooks/use-toast';
 import { useMemo, useState } from 'react';
 import { deleteDocumentNonBlocking } from '@/firebase/non-blocking-updates';
 import { Separator } from '@/components/ui/separator';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog"
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 import type { AppUser } from '@/firebase/auth/use-user';
 import NewAdminForm from './NewAdminForm';
+import { deleteAdminUser } from '@/app/actions/delete-admin';
+
 
 interface AdminUser {
     id: string;
@@ -110,7 +112,7 @@ export default function AdminManagement() {
   const typedUser = currentUser as AppUser | null;
   const isSuperAdmin = typedUser?.email === 'eljabbaryhicham@example.com';
   
-  const [selectedUser, setSelectedUser] = useState<AdminUser | null>(null);
+  const [selectedUserForPermissions, setSelectedUserForPermissions] = useState<AdminUser | null>(null);
   const [isPermissionsDialogOpen, setIsPermissionsDialogOpen] = useState(false);
   const [isAddAdminDialogOpen, setIsAddAdminDialogOpen] = useState(false);
 
@@ -119,30 +121,46 @@ export default function AdminManagement() {
     return users || [];
   }, [users]);
 
-  const handleDeleteUser = (userId: string, username: string) => {
+  const handleRemoveFromList = (userId: string, username: string) => {
     if (!firestore || !isSuperAdmin) return;
     
     deleteDocumentNonBlocking(doc(firestore, 'users', userId));
 
     toast({
         title: `Admin '${username}' Removed`,
-        description: 'The user has been removed from the list. To fully revoke their access, delete them from Firebase Authentication as well.',
-        duration: 8000,
+        description: 'The user has been removed from the list. Their authentication record still exists.',
     });
+  }
+
+  const handleFullDelete = async (userId: string, username: string) => {
+    if (!isSuperAdmin) return;
+    const result = await deleteAdminUser(userId);
+    if (result.success) {
+      toast({
+        title: `Admin '${username}' Fully Deleted`,
+        description: 'The user has been deleted from Authentication and Firestore.',
+      });
+    } else {
+      toast({
+        variant: 'destructive',
+        title: 'Deletion Failed',
+        description: result.error,
+      });
+    }
   }
   
   const handleOpenPermissions = (user: AdminUser) => {
-    setSelectedUser(user);
+    setSelectedUserForPermissions(user);
     setIsPermissionsDialogOpen(true);
   };
 
   const handleSavePermissions = (permissions: Permissions) => {
-    if (!firestore || !isSuperAdmin || !selectedUser) return;
-    const userDocRef = doc(firestore, 'users', selectedUser.id);
+    if (!firestore || !isSuperAdmin || !selectedUserForPermissions) return;
+    const userDocRef = doc(firestore, 'users', selectedUserForPermissions.id);
     updateDocumentNonBlocking(userDocRef, { permissions });
     toast({
         title: 'Permissions Updated',
-        description: `Permissions for ${selectedUser.username} have been saved.`,
+        description: `Permissions for ${selectedUserForPermissions.username} have been saved.`,
     });
   };
 
@@ -194,9 +212,28 @@ export default function AdminManagement() {
                                       </Button>
                                   ) : <div />}
                                   {user.email !== 'eljabbaryhicham@example.com' && (
-                                      <Button variant="ghost" size="icon" onClick={() => handleDeleteUser(user.id, user.username)} disabled={!isSuperAdmin}>
-                                          <FontAwesomeIcon icon={faTrash} className="h-4 w-4 text-destructive" />
-                                      </Button>
+                                    <AlertDialog>
+                                        <AlertDialogTrigger asChild>
+                                            <Button variant="ghost" size="icon" disabled={!isSuperAdmin}>
+                                                <FontAwesomeIcon icon={faTrash} className="h-4 w-4 text-destructive" />
+                                            </Button>
+                                        </AlertDialogTrigger>
+                                        <AlertDialogContent>
+                                            <AlertDialogHeader>
+                                                <AlertDialogTitle>Delete {user.username}?</AlertDialogTitle>
+                                                <AlertDialogDescription>
+                                                    Choose how you want to remove this admin user. This action cannot be undone.
+                                                </AlertDialogDescription>
+                                            </AlertDialogHeader>
+                                            <AlertDialogFooter className="sm:justify-between gap-2">
+                                                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                                <div className="flex flex-col sm:flex-row gap-2">
+                                                  <AlertDialogAction onClick={() => handleRemoveFromList(user.id, user.username)} className="bg-yellow-600 hover:bg-yellow-700">Remove from List Only</AlertDialogAction>
+                                                  <AlertDialogAction onClick={() => handleFullDelete(user.uid, user.username)} className="bg-destructive hover:bg-destructive/90">Fully Revoke Access</AlertDialogAction>
+                                                </div>
+                                            </AlertDialogFooter>
+                                        </AlertDialogContent>
+                                    </AlertDialog>
                                   )}
                               </div>
                           </div>
@@ -240,9 +277,28 @@ export default function AdminManagement() {
                           </TableCell>
                           <TableCell className="text-right">
                               {user.email !== 'eljabbaryhicham@example.com' && (
-                              <Button variant="ghost" size="icon" onClick={() => handleDeleteUser(user.id, user.username)} disabled={!isSuperAdmin}>
-                                      <FontAwesomeIcon icon={faTrash} className="h-4 w-4 text-destructive" />
-                              </Button>
+                                <AlertDialog>
+                                    <AlertDialogTrigger asChild>
+                                        <Button variant="ghost" size="icon" disabled={!isSuperAdmin}>
+                                            <FontAwesomeIcon icon={faTrash} className="h-4 w-4 text-destructive" />
+                                        </Button>
+                                    </AlertDialogTrigger>
+                                    <AlertDialogContent>
+                                        <AlertDialogHeader>
+                                            <AlertDialogTitle>Delete {user.username}?</AlertDialogTitle>
+                                            <AlertDialogDescription>
+                                                Choose how you want to remove this admin user. "Fully Revoke Access" is permanent.
+                                            </AlertDialogDescription>
+                                        </AlertDialogHeader>
+                                        <AlertDialogFooter className="sm:justify-between gap-2">
+                                            <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                            <div className="flex flex-col sm:flex-row gap-2">
+                                                <AlertDialogAction onClick={() => handleRemoveFromList(user.id, user.username)} className="bg-yellow-600 hover:bg-yellow-700 text-white">Remove from List</AlertDialogAction>
+                                                <AlertDialogAction onClick={() => handleFullDelete(user.uid, user.username)} className="bg-destructive hover:bg-destructive/90 text-white">Fully Revoke Access</AlertDialogAction>
+                                            </div>
+                                        </AlertDialogFooter>
+                                    </AlertDialogContent>
+                                </AlertDialog>
                               )}
                           </TableCell>
                           </TableRow>
@@ -261,9 +317,9 @@ export default function AdminManagement() {
         )}
       </div>
       
-      {selectedUser && (
+      {selectedUserForPermissions && (
         <PermissionsDialog 
-          user={selectedUser} 
+          user={selectedUserForPermissions} 
           isOpen={isPermissionsDialogOpen} 
           onOpenChange={setIsPermissionsDialogOpen}
           onSave={handleSavePermissions} 
