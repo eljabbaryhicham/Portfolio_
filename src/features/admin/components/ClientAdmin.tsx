@@ -35,6 +35,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import MediaAdmin from './MediaAdmin';
 import type { AppUser } from '@/firebase/auth/use-user';
+import { Slider } from '@/components/ui/slider';
 
 interface Client {
   id: string;
@@ -42,21 +43,23 @@ interface Client {
   logoUrl: string;
   order: number;
   isVisible?: boolean;
+  logoScale?: number;
 }
 
 const defaultClients: Omit<Client, 'id'>[] = [
-    { name: 'QuantumLeap', logoUrl: 'https://res.cloudinary.com/da1srnoer/image/upload/v1760834216/nqnqvmroqxngfamrcpuf.png', order: 0, isVisible: true },
-    { name: 'StellarForge', logoUrl: 'https://res.cloudinary.com/da1srnoer/image/upload/v1760834216/nqnqvmroqxngfamrcpuf.png', order: 1, isVisible: true },
-    { name: 'ApexInnovate', logoUrl: 'https://res.cloudinary.com/da1srnoer/image/upload/v1760834216/nqnqvmroqxngfamrcpuf.png', order: 2, isVisible: true },
-    { name: 'NexusCore', logoUrl: 'https://res.cloudinary.com/da1srnoer/image/upload/v1760834216/nqnqvmroqxngfamrcpuf.png', order: 3, isVisible: true },
-    { name: 'VertexDynamics', logoUrl: 'https://res.cloudinary.com/da1srnoer/image/upload/v1760834216/nqnqvmroqxngfamrcpuf.png', order: 4, isVisible: true },
-    { name: 'MomentumSuite', logoUrl: 'https://res.cloudinary.com/da1srnoer/image/upload/v1760834216/nqnqvmroqxngfamrcpuf.png', order: 5, isVisible: true },
+    { name: 'QuantumLeap', logoUrl: 'https://res.cloudinary.com/da1srnoer/image/upload/v1760834216/nqnqvmroqxngfamrcpuf.png', order: 0, isVisible: true, logoScale: 1 },
+    { name: 'StellarForge', logoUrl: 'https://res.cloudinary.com/da1srnoer/image/upload/v1760834216/nqnqvmroqxngfamrcpuf.png', order: 1, isVisible: true, logoScale: 1 },
+    { name: 'ApexInnovate', logoUrl: 'https://res.cloudinary.com/da1srnoer/image/upload/v1760834216/nqnqvmroqxngfamrcpuf.png', order: 2, isVisible: true, logoScale: 1 },
+    { name: 'NexusCore', logoUrl: 'https://res.cloudinary.com/da1srnoer/image/upload/v1760834216/nqnqvmroqxngfamrcpuf.png', order: 3, isVisible: true, logoScale: 1 },
+    { name: 'VertexDynamics', logoUrl: 'https://res.cloudinary.com/da1srnoer/image/upload/v1760834216/nqnqvmroqxngfamrcpuf.png', order: 4, isVisible: true, logoScale: 1 },
+    { name: 'MomentumSuite', logoUrl: 'https://res.cloudinary.com/da1srnoer/image/upload/v1760834216/nqnqvmroqxngfamrcpuf.png', order: 5, isVisible: true, logoScale: 1 },
 ];
 
 
 const formSchema = z.object({
   name: z.string().min(2, { message: 'Name must be at least 2 characters.' }),
   logoUrl: z.string().url({ message: 'Please enter a valid URL.' }),
+  logoScale: z.number().min(0.5).max(2).optional(),
 });
 
 type ClientFormValues = z.infer<typeof formSchema>;
@@ -67,6 +70,7 @@ function ClientForm({ client, onSubmit, onCancel, onChooseFromLibrary, canEdit }
     defaultValues: {
       name: client?.name || '',
       logoUrl: client?.logoUrl || '',
+      logoScale: client?.logoScale || 1,
     },
   });
 
@@ -74,6 +78,7 @@ function ClientForm({ client, onSubmit, onCancel, onChooseFromLibrary, canEdit }
     form.reset({
       name: client?.name || '',
       logoUrl: client?.logoUrl || '',
+      logoScale: client?.logoScale || 1,
     });
   }, [client, form]);
 
@@ -128,6 +133,25 @@ function ClientForm({ client, onSubmit, onCancel, onChooseFromLibrary, canEdit }
                 <FormMessage />
                 </FormItem>
             )}
+            />
+            <FormField
+              control={form.control}
+              name="logoScale"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Logo Scale ({Math.round((field.value || 1) * 100)}%)</FormLabel>
+                  <FormControl>
+                    <Slider
+                      value={[field.value || 1]}
+                      onValueChange={(value) => field.onChange(value[0])}
+                      min={0.5}
+                      max={2}
+                      step={0.05}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
             />
             <div className="flex justify-end space-x-4">
                 <Button type="button" variant="outline" onClick={onCancel}>Cancel</Button>
@@ -224,15 +248,20 @@ export default function ClientAdmin() {
   const handleFormSubmit = (values: ClientFormValues) => {
     if (!firestore || !canEdit) return;
 
+    const dataToSave = {
+        ...values,
+        logoScale: values.logoScale || 1,
+    };
+
     if (selectedClient && selectedClient.id) {
         // Editing existing client
         const clientRef = doc(firestore, 'clients', selectedClient.id);
-        setDocumentNonBlocking(clientRef, { ...values, order: selectedClient.order ?? 0, isVisible: selectedClient.isVisible ?? true }, { merge: true });
+        setDocumentNonBlocking(clientRef, { ...dataToSave, order: selectedClient.order ?? 0, isVisible: selectedClient.isVisible ?? true }, { merge: true });
         toast({ title: 'Client Updated', description: 'The client has been updated.'});
     } else {
         // Adding new client
-        const maxOrder = clients ? Math.max(-1, ...clients.map(c => c.order)) : -1;
-        const newClient = { ...values, order: maxOrder + 1, isVisible: true };
+        const maxOrder = clients ? Math.max(-1, ...clients.map(c => c.order ?? 0)) : -1;
+        const newClient = { ...dataToSave, order: maxOrder + 1, isVisible: true };
         addDocumentNonBlocking(collection(firestore, 'clients'), newClient);
         toast({ title: 'Client Added', description: 'A new client has been added.'});
     }

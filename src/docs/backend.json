@@ -353,6 +353,10 @@
         "isVisible": {
           "type": "boolean",
           "description": "Controls the visibility of the client on the public about page."
+        },
+        "logoScale": {
+          "type": "number",
+          "description": "The scale of the client logo, from 0.5 to 2."
         }
       },
       "required": [

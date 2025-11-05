@@ -27,6 +27,7 @@ interface Client {
   logoUrl: string;
   order: number;
   isVisible?: boolean;
+  logoScale?: number;
 }
 
 interface AboutPageContent {
@@ -51,6 +52,7 @@ const MemoizedImage = memo(Image);
 const ClientLogo = ({ client }: { client: Client }) => (
     <div 
       className="relative mx-8 flex-shrink-0 basis-1/5 group"
+      style={{ transform: `scale(${client.logoScale || 1})` }}
     >
         <MemoizedImage
             src={client.logoUrl}
