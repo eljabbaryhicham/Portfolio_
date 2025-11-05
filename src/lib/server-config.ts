@@ -1,13 +1,9 @@
 // IMPORTANT: This file is for SERVER-SIDE use only.
 // It loads sensitive environment variables and should not be imported into client-side code.
 
-import * as dotenv from 'dotenv';
-
-// Load server-specific environment variables from .env.server.local
-// This is necessary because Next.js only automatically loads .env.local for server components,
-// but our API routes and Genkit flows run in a separate Node.js context.
-dotenv.config({ path: '.env.server.local' });
-
+// This file centralizes the access to server-side environment variables.
+// In local development, Next.js will automatically load variables from `.env.local`.
+// On Vercel, these variables must be set in the project's environment variable settings.
 
 // Cloudinary credentials (both libraries)
 export const cloudinaryConfig = {
