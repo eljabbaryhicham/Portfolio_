@@ -182,21 +182,6 @@
         "registrationSecretCode": {
           "type": "string",
           "description": "The secret code required for user registration."
-        },
-        "plyrPlayerAssetSource": {
-          "type": "string",
-          "enum": ["cdn", "local"],
-          "description": "The source for the Plyr player assets (CSS and JS)."
-        },
-        "plyrPlayerCdnCssUrl": {
-          "type": "string",
-          "format": "uri",
-          "description": "The CDN URL for the Plyr player CSS file."
-        },
-        "plyrPlayerCdnJsUrl": {
-          "type": "string",
-          "format": "uri",
-          "description": "The CDN URL for the Plyr player JS file."
         }
       }
     },

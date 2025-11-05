@@ -22,6 +22,7 @@ import { useEffect } from 'react';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import Preloader from '@/components/preloader';
 import type { AppUser } from '@/firebase/auth/use-user';
+import { Slider } from '@/components/ui/slider';
 
 const formSchema = z.object({
   avatarUrl: z.string().url().optional().or(z.literal('')),
@@ -36,6 +37,7 @@ const formSchema = z.object({
   facebookUrl: z.string().url().optional().or(z.literal('')),
   twitterUrl: z.string().url().optional().or(z.literal('')),
   logoUrl: z.string().url({ message: 'Please enter a valid URL for the logo.' }).optional().or(z.literal('')),
+  logoScale: z.number().min(0.5).max(5).optional(),
 });
 
 type ContactInfo = z.infer<typeof formSchema>;
@@ -53,6 +55,7 @@ const defaultFormValues: ContactInfo = {
     facebookUrl: '',
     twitterUrl: '',
     logoUrl: '',
+    logoScale: 1,
 };
 
 export default function ContactAdmin() {
@@ -90,11 +93,12 @@ export default function ContactAdmin() {
             facebookUrl: contactInfo.facebookUrl || '',
             twitterUrl: contactInfo.twitterUrl || '',
             logoUrl: contactInfo.logoUrl || 'https://i.imgur.com/N9c8oEJ.png',
+            logoScale: contactInfo.logoScale || 1,
         };
       form.reset(values);
     } else if (!isLoading) {
         // Set default logo if no data is loaded
-        form.reset({ ...defaultFormValues, logoUrl: 'https://i.imgur.com/N9c8oEJ.png' });
+        form.reset({ ...defaultFormValues, logoUrl: 'https://i.imgur.com/N9c8oEJ.png', logoScale: 1 });
     }
   }, [contactInfo, form, isLoading]);
   
@@ -108,7 +112,8 @@ export default function ContactAdmin() {
 
   const onSubmit = (values: ContactInfo) => {
     if (!contactDocRef || !canEditContact) return;
-    setDocumentNonBlocking(contactDocRef, values, { merge: true });
+    const dataToSave = { ...values, logoScale: values.logoScale || 1 };
+    setDocumentNonBlocking(contactDocRef, dataToSave, { merge: true });
     toast({
       title: 'Contact Info Updated',
       description: 'Your contact page has been successfully updated.',
@@ -150,6 +155,26 @@ export default function ContactAdmin() {
                             <FormMessage />
                         </FormItem>
                         )}
+                    />
+                     <FormField
+                      control={form.control}
+                      name="logoScale"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Site Logo Scale ({Math.round((field.value || 1) * 100)}%)</FormLabel>
+                          <FormControl>
+                            <Slider
+                              value={[field.value || 1]}
+                              onValueChange={(value) => field.onChange(value[0])}
+                              min={0.5}
+                              max={5}
+                              step={0.05}
+                            />
+                          </FormControl>
+                          <FormDescription>Adjust the size of the main logo in the navigation.</FormDescription>
+                          <FormMessage />
+                        </FormItem>
+                      )}
                     />
                     <FormField
                         control={form.control}

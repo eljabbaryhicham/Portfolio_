@@ -13,6 +13,7 @@ import { doc } from "firebase/firestore";
 
 interface ContactInfo {
     logoUrl?: string;
+    logoScale?: number;
 }
 
 interface HomePageSettings {
@@ -40,6 +41,7 @@ export default function HomePageContent() {
   const siteLogoUrl = contactInfo?.logoUrl || "https://i.imgur.com/N9c8oEJ.png";
   const homeLogoUrl = homeSettings?.homePageLogoUrl || siteLogoUrl;
   const isLogoVisible = homeSettings?.isHomePageLogoVisible ?? true;
+  const logoScale = contactInfo?.logoScale || 1;
 
 
   return (
@@ -52,7 +54,7 @@ export default function HomePageContent() {
 
       <div className={cn("relative z-10 flex flex-col items-center justify-center gap-8 transition-opacity duration-1000", isLoading && "opacity-0")}>
         {isLogoVisible && (
-            <div className="w-full max-w-sm">
+            <div className="w-full max-w-sm" style={{ transform: `scale(${logoScale})`}}>
                 <Logo src={homeLogoUrl} />
             </div>
         )}

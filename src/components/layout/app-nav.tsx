@@ -28,6 +28,11 @@ interface HomePageSettings {
     isTestPageEnabled?: boolean;
 }
 
+interface ContactInfo {
+    logoUrl?: string;
+    logoScale?: number;
+}
+
 export function AppNav() {
   const pathname = usePathname();
   const { user } = useUser();
@@ -38,7 +43,7 @@ export function AppNav() {
     () => (firestore ? doc(firestore, 'contact', 'details') : null),
     [firestore]
   );
-  const { data: contactInfo } = useDoc(contactDocRef);
+  const { data: contactInfo } = useDoc<ContactInfo>(contactDocRef);
 
   const settingsDocRef = useMemoFirebase(
     () => (firestore ? doc(firestore, 'homepage', 'settings') : null),
@@ -48,6 +53,7 @@ export function AppNav() {
 
 
   const logoUrl = contactInfo?.logoUrl || "https://i.imgur.com/N9c8oEJ.png";
+  const logoScale = contactInfo?.logoScale || 1;
 
   const accessibleNavItems = navItems.filter(item => {
     if (item.href === '/test') {
@@ -160,7 +166,7 @@ export function AppNav() {
         <Link href="/" className="hidden md:block relative group mt-4">
             <div className="relative w-12 h-12 flex items-center justify-center">
                 <div className="absolute inset-0 rounded-full animate-spinning-circle-border bg-gradient-to-r from-primary via-transparent to-transparent"></div>
-                <div className="relative bg-transparent rounded-full p-1 w-10 h-10 flex items-center justify-center">
+                <div className="relative bg-transparent rounded-full p-1 w-10 h-10 flex items-center justify-center" style={{ transform: `scale(${logoScale})`}}>
                     <Logo src={logoUrl} />
                 </div>
             </div>
