@@ -2,7 +2,6 @@
 'use client';
 
 import Link from 'next/link';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { useDoc, useFirestore, useMemoFirebase } from '@/firebase';
 import { doc } from 'firebase/firestore';
 import { Separator } from '@/components/ui/separator';
@@ -18,9 +17,10 @@ import { Button } from '@/components/ui/button';
 import ContactForm from './ContactForm';
 import { ScrollIndicator } from '@/components/ScrollIndicator';
 import { useRef } from 'react';
+import Logo from '@/components/logo';
 
 interface ContactInfo {
-  avatarUrl?: string;
+  logoUrl?: string;
   name?: string;
   title?: string;
   email?: string;
@@ -31,7 +31,7 @@ interface ContactInfo {
   instagramUrl?: string;
   facebookUrl?: string;
   twitterUrl?: string;
-  avatarScale?: number;
+  logoScale?: number;
 }
 
 const containerVariants = {
@@ -78,7 +78,7 @@ export default function ContactPage() {
     { id: 'twitter', href: contactInfo.twitterUrl, icon: faTwitter, hoverColor: 'hover:text-sky-500' },
   ].filter(link => link.href) : [];
   
-  const avatarScale = contactInfo?.avatarScale || 1;
+  const logoScale = contactInfo?.logoScale || 1;
 
 
   return (
@@ -119,15 +119,12 @@ export default function ContactPage() {
                   <motion.div className="w-full md:w-1/2 flex justify-center" variants={itemVariants}>
                     <Card className="glass-effect p-6 flex flex-col h-full w-full max-w-md">
                       <CardContent className="flex flex-col items-center text-center p-0">
-                        <Avatar className="border-2 border-white mb-4 w-16 h-16 md:w-20 md:h-20">
-                            <AvatarImage 
-                                src={contactInfo.avatarUrl} 
-                                alt={contactInfo.name} 
-                                style={{ transform: `scale(${avatarScale})` }}
-                                className="transition-transform duration-300"
-                            />
-                          <AvatarFallback>{contactInfo.name?.substring(0, 2)}</AvatarFallback>
-                        </Avatar>
+                        <div 
+                          className="w-32 mb-4"
+                          style={{ transform: `scale(${logoScale})` }}
+                        >
+                          <Logo src={contactInfo.logoUrl} />
+                        </div>
                         <h3 className="text-lg md:text-xl font-headline">{contactInfo.name}</h3>
                         <p className="text-sm md:text-base text-foreground/70">{contactInfo.title}</p>
                         

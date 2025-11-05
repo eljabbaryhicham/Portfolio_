@@ -72,10 +72,6 @@
       "description": "Stores contact information for the portfolio owner.",
       "type": "object",
       "properties": {
-        "avatarUrl": {
-          "type": "string",
-          "format": "uri"
-        },
         "name": {
           "type": "string"
         },
@@ -117,10 +113,13 @@
           "type": "string",
           "format": "uri",
           "description": "URL for the main site logo."
+        },
+        "logoScale": {
+            "type": "number",
+            "description": "The scale of the site logo in the navigation."
         }
       },
       "required": [
-        "avatarUrl",
         "name",
         "title",
         "email"
@@ -174,6 +173,10 @@
         "isHomePageLogoVisible": {
             "type": "boolean",
             "description": "Controls whether the homepage logo is visible."
+        },
+        "homePageLogoScale": {
+            "type": "number",
+            "description": "The scale of the logo on the homepage."
         },
         "themeColor": {
           "type": "string",
@@ -338,6 +341,10 @@
         "isVisible": {
           "type": "boolean",
           "description": "Controls the visibility of the client on the public about page."
+        },
+        "logoScale": {
+          "type": "number",
+          "description": "The scale of the client logo, from 0.05 to 2."
         }
       },
       "required": [
@@ -469,5 +476,3 @@
     ]
   }
 }
-
-    
