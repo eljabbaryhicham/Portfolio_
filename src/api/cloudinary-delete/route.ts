@@ -1,10 +1,8 @@
 
 'use server';
 
-import * as dotenv from 'dotenv';
-dotenv.config({ path: '.env.server.local' });
-
 import { v2 as cloudinary } from 'cloudinary';
+import { cloudinaryConfig } from '@/lib/server-config';
 
 interface DeleteFromCloudinaryInput {
   public_id: string;
@@ -25,20 +23,18 @@ export async function deleteFromCloudinary(
         const { public_id, resource_type, libraryId } = input;
         
         const isPrimary = libraryId === 'primary';
-        const cloudName = isPrimary ? process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME_1 : process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME_2;
-        const apiKey = isPrimary ? process.env.CLOUDINARY_API_KEY_1 : process.env.CLOUDINARY_API_KEY_2;
-        const apiSecret = isPrimary ? process.env.CLOUDINARY_API_SECRET_1 : process.env.CLOUDINARY_API_SECRET_2;
+        const config = isPrimary ? cloudinaryConfig.library1 : cloudinaryConfig.library2;
 
-        if (!cloudName || !apiKey || !apiSecret) {
+        if (!config.cloudName || !config.apiKey || !config.apiSecret) {
             const errorMessage = `Cloudinary credentials for ${libraryId} library are missing.`;
             console.error(errorMessage);
             return { success: false, message: errorMessage };
         }
 
         cloudinary.config({
-            cloud_name: cloudName, 
-            api_key: apiKey, 
-            api_secret: apiSecret,
+            cloud_name: config.cloudName, 
+            api_key: config.apiKey, 
+            api_secret: config.apiSecret,
             secure: true
         });
 

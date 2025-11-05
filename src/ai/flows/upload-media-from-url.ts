@@ -4,11 +4,9 @@
  * @fileOverview A Genkit flow for uploading media from a URL to a specified Cloudinary library.
  * This flow only handles the upload and returns the metadata; it does not write to Firestore.
  */
-import * as dotenv from 'dotenv';
-dotenv.config({ path: '.env.server.local' });
-
 import { ai } from '@/ai/genkit';
 import { z } from 'zod';
+import { cloudinaryConfig } from '@/lib/server-config';
 
 const UploadMediaFromUrlInputSchema = z.object({
   mediaUrl: z.string().url(),
@@ -61,11 +59,9 @@ const uploadMediaFromUrlFlow = ai.defineFlow(
       const { libraryId, videoFormat } = input;
       
       const isPrimary = libraryId === 'primary';
-      const cloudName = isPrimary ? process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME_1 : process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME_2;
-      const apiKey = isPrimary ? process.env.CLOUDINARY_API_KEY_1 : process.env.CLOUDINARY_API_KEY_2;
-      const apiSecret = isPrimary ? process.env.CLOUDINARY_API_SECRET_1 : process.env.CLOUDINARY_API_SECRET_2;
+      const config = isPrimary ? cloudinaryConfig.library1 : cloudinaryConfig.library2;
 
-      if (!cloudName || !apiKey || !apiSecret) {
+      if (!config.cloudName || !config.apiKey || !config.apiSecret) {
         const errorMessage = `Cloudinary credentials for ${libraryId} library are missing. Please check your environment variables.`;
         console.error('Error in uploadMediaFromUrlFlow:', errorMessage);
         return {
@@ -76,9 +72,9 @@ const uploadMediaFromUrlFlow = ai.defineFlow(
 
       const cloudinary = (await import('cloudinary')).v2;
       cloudinary.config({
-        cloud_name: cloudName, 
-        api_key: apiKey, 
-        api_secret: apiSecret,
+        cloud_name: config.cloudName, 
+        api_key: config.apiKey, 
+        api_secret: config.apiSecret,
         secure: true
       });
       
@@ -94,7 +90,7 @@ const uploadMediaFromUrlFlow = ai.defineFlow(
       let finalUrl = uploadResult.secure_url;
       
       if (uploadResult.resource_type === 'video' && videoFormat === 'm3u8') {
-          finalUrl = `https://res.cloudinary.com/${cloudName}/video/upload/sp_auto/v${uploadResult.version}/${uploadResult.public_id}.m3u8`;
+          finalUrl = `https://res.cloudinary.com/${config.cloudName}/video/upload/sp_auto/v${uploadResult.version}/${uploadResult.public_id}.m3u8`;
           console.log(`Generated adaptive streaming (HLS) URL: ${finalUrl}`);
       } else if (uploadResult.resource_type === 'image' || uploadResult.resource_type === 'video') {
           finalUrl = cloudinary.url(uploadResult.public_id, {
