@@ -12,6 +12,9 @@ interface DeleteAdminUserResult {
 export async function deleteAdminUser(uid: string): Promise<DeleteAdminUserResult> {
   try {
     const adminApp = await initializeServerApp();
+    if (!adminApp) {
+        return { success: false, error: 'Firebase Admin SDK not initialized. "Fully Revoke Access" requires the "docs/service-account.json" file for local development. See README.md.' };
+    }
     const auth = admin.auth(adminApp);
     const firestore = admin.firestore(adminApp);
     

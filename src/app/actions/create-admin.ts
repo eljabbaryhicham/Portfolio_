@@ -20,6 +20,9 @@ export async function createAdminUser(input: CreateAdminUserInput): Promise<Crea
   try {
     // 1. Initialize the Firebase Admin App
     const adminApp = await initializeServerApp();
+    if (!adminApp) {
+        return { success: false, error: 'Firebase Admin SDK not initialized. Creating new admins requires the "docs/service-account.json" file for local development. See README.md.' };
+    }
     const auth = admin.auth(adminApp);
     const firestore = admin.firestore(adminApp);
     

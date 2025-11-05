@@ -7,13 +7,12 @@ import * as path from 'path';
 
 /**
  * Initializes the Firebase Admin SDK for server-side operations if not already initialized.
- * This function is now environment-aware.
- * - In a production/Vercel environment, it uses environment variables.
- * - In a local environment, it falls back to reading the service-account.json file.
+ * This function is now environment-aware and will not throw an error if credentials are not found,
+ * allowing the application to run but disabling features that require the Admin SDK.
  *
- * @returns {Promise<admin.app.App>} A promise that resolves to the initialized Firebase Admin App instance.
+ * @returns {Promise<admin.app.App | null>} A promise that resolves to the initialized Firebase Admin App instance, or null if initialization fails.
  */
-export async function initializeServerApp(): Promise<admin.app.App> {
+export async function initializeServerApp(): Promise<admin.app.App | null> {
   // Use the SDK's built-in check to prevent re-initialization.
   if (admin.apps.length > 0) {
     return admin.app();
@@ -38,23 +37,20 @@ export async function initializeServerApp(): Promise<admin.app.App> {
       return app;
     } catch (error) {
       console.error("Error initializing Firebase Admin SDK from environment variables:", error);
-      throw new Error('Failed to initialize Firebase Admin SDK from environment variables. Please check your Vercel project settings.');
+      return null;
     }
   }
 
   // Local development fallback using service-account.json
-  console.log("Initializing Firebase Admin SDK using local service-account.json...");
+  console.log("Attempting to initialize Firebase Admin SDK using local service-account.json...");
   const serviceAccountPath = path.resolve(process.cwd(), 'docs', 'service-account.json');
   
   try {
     const serviceAccountString = await fs.readFile(serviceAccountPath, 'utf-8');
     
-    if (!serviceAccountString || serviceAccountString.trim().length === 0) {
-        throw new Error('The service account file at "docs/service-account.json" is empty or missing. Please see the instructions in README.md to add your Firebase service account key.');
-    }
-
-    if (serviceAccountString.includes('PASTE_YOUR_PRIVATE_KEY_HERE')) {
-        throw new Error('The service account file at "docs/service-account.json" is a placeholder. Please see the instructions in README.md to add your Firebase service account key.');
+    if (!serviceAccountString || serviceAccountString.trim().length === 0 || serviceAccountString.includes('PASTE_YOUR_PRIVATE_KEY_HERE')) {
+        console.warn('Local development: "docs/service-account.json" is missing or is a placeholder. Server-side admin features will be disabled. See README.md for setup instructions.');
+        return null;
     }
 
     const serviceAccount = JSON.parse(serviceAccountString);
@@ -68,15 +64,10 @@ export async function initializeServerApp(): Promise<admin.app.App> {
 
   } catch (error: any) {
     if (error.code === 'ENOENT') {
-        const localDevError = new Error('For local development, the "docs/service-account.json" file is missing. This file is required for server-side actions like creating or deleting admin users. Please create this file and add your Firebase service account credentials to it. See README.md for more details.');
-        console.error('Firebase Admin initialization failed:', localDevError.message);
-        throw localDevError;
+        console.warn('Local development: "docs/service-account.json" not found. Server-side admin features will be disabled. See README.md for setup instructions.');
+    } else {
+      console.error("Failed to initialize Firebase Admin SDK from file.", error);
     }
-    
-    console.error("Failed to initialize Firebase Admin SDK from file.", error);
-    if (error instanceof SyntaxError) {
-        throw new Error('Failed to parse "docs/service-account.json". Please ensure it contains valid JSON.');
-    }
-    throw error;
+    return null;
   }
 }
