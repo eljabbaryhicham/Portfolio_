@@ -120,9 +120,12 @@ export default function ContactPage() {
                     <Card className="glass-effect p-6 flex flex-col h-full w-full max-w-md">
                       <CardContent className="flex flex-col items-center text-center p-0">
                         <Avatar className="border-2 border-white mb-4 w-16 h-16 md:w-20 md:h-20">
-                            <div className='w-full h-full' style={{ transform: `scale(${avatarScale})` }}>
-                                <AvatarImage src={contactInfo.avatarUrl} alt={contactInfo.name} />
-                            </div>
+                            <AvatarImage 
+                                src={contactInfo.avatarUrl} 
+                                alt={contactInfo.name} 
+                                style={{ transform: `scale(${avatarScale})` }}
+                                className="transition-transform duration-300"
+                            />
                           <AvatarFallback>{contactInfo.name?.substring(0, 2)}</AvatarFallback>
                         </Avatar>
                         <h3 className="text-lg md:text-xl font-headline">{contactInfo.name}</h3>
