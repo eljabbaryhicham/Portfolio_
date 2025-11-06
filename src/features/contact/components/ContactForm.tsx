@@ -96,7 +96,6 @@ export default function ContactForm({ onSuccess, defaultMessage = '' }: ContactF
           description: result.message || "An unexpected error occurred. Please try again.",
           duration: 8000,
         });
-        setIsSubmitting(false);
       }
     } catch (error) {
        toast({
@@ -104,7 +103,9 @@ export default function ContactForm({ onSuccess, defaultMessage = '' }: ContactF
           title: "An Error Occurred",
           description: "A network error occurred. Please check your connection and try again.",
         });
-       setIsSubmitting(false);
+    } finally {
+        // This will run regardless of success or failure, ensuring the button is re-enabled.
+        setIsSubmitting(false);
     }
   };
 
@@ -129,7 +130,7 @@ export default function ContactForm({ onSuccess, defaultMessage = '' }: ContactF
           )}
           {!onSuccess && contactInfo?.whatsApp && (
             <Button asChild className="bg-gradient-to-r from-green-500 to-emerald-600 mt-4">
-                <Link href={`https://wa.me/${contactInfo.whatsApp.replace(/\D/g, '')}`} target="_blank" rel="noopener noreferrer">
+                <Link href={`https://wa.me/${contactInfo.whatsApp.replace(/\\D/g, '')}`} target="_blank" rel="noopener noreferrer">
                     <FontAwesomeIcon icon={faWhatsapp} className="mr-2 h-5 w-5" />
                     Chat on WhatsApp
                 </Link>
