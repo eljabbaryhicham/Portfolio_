@@ -105,7 +105,7 @@ const defaultEmailTemplate = `<!DOCTYPE html>
         <div style="text-align: center; margin-bottom: 24px;">
             <img src="{{emailLogoUrl}}" alt="Logo" style="max-width: 150px; height: auto; transform: scale({{emailLogoScale}});">
         </div>
-        <h1 style="font-size: 24px; font-weight: bold; color: #ffffff; margin: 0 0 24px; text-align: center;">Message From BELOFTED</h1>
+        <h1 style="font-size: 24px; font-weight: bold; color: #ffffff; margin: 0 0 24px; text-align: center;">Message From {{name}}</h1>
         <p style="margin: 0 0 16px; text-align: center;">You have received a new message from your portfolio website.</p>
         
         <div style="background-color: #0d1a2e; padding: 20px; border-radius: 8px;">
@@ -513,7 +513,7 @@ export default function HomeAdmin() {
                                                     />
                                                 </FormControl>
                                                 <FormDescription>
-                                                    The full HTML of the notification email. Use placeholders: {"{{name}}"}, {"{{email}}"}, {"{{message}}"}, {"{{emailLogoUrl}}"}, and {"{{emailLogoScale}}"}.
+                                                    The full HTML of the notification email. Use placeholders: {`"{{name}}"`}, {`"{{email}}"`}, {`"{{message}}"`}, {`"{{emailLogoUrl}}"`}, and {`"{{emailLogoScale}}"`}.
                                                 </FormDescription>
                                                 <FormMessage />
                                             </FormItem>
