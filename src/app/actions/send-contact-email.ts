@@ -1,3 +1,4 @@
+
 'use server';
 
 import { z } from 'zod';
@@ -42,7 +43,7 @@ async function getLatestEmailSettings(): Promise<HomePageSettings> {
         
         if (settingsDoc.exists) {
             const settings = settingsDoc.data() as HomePageSettings;
-            console.log("Successfully fetched dynamic settings:", { hasTemplate: !!settings.emailHtmlTemplate });
+            console.log("Successfully fetched dynamic settings:", { hasTemplate: !!settings.emailHtmlTemplate, logoUrl: settings.emailLogoUrl, logoScale: settings.emailLogoScale });
             return settings;
         } else {
             console.warn("Could not find 'homepage/settings' document. Will use fallback.");
@@ -95,6 +96,7 @@ export async function sendContactEmail(
         console.log(`Using logo URL: ${logoUrl}`);
         console.log(`Using logo scale: ${logoScale}`);
 
+        // Correctly replace all placeholders
         const finalHtml = htmlTemplate
           .replace(/{{name}}/g, name)
           .replace(/{{email}}/g, email)
