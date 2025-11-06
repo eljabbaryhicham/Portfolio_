@@ -8,9 +8,6 @@ import admin from 'firebase-admin';
 import { ContactFormInputSchema } from '@/features/contact/data/contact-form-types';
 import { unstable_noStore as noStore } from 'next/cache';
 
-// This is the crucial line to prevent caching of the entire action.
-export const dynamic = 'force-dynamic';
-
 interface HomePageSettings {
     emailLogoUrl?: string;
     emailLogoScale?: number;
