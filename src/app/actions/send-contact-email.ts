@@ -7,8 +7,8 @@ import { initializeServerApp } from '@/firebase/server-init';
 import admin from 'firebase-admin';
 import { ContactFormInputSchema } from '@/features/contact/data/contact-form-types';
 
-// NOTE: The 'export const dynamic = 'force-dynamic'' line was removed as it is not valid in server action files.
-// Server actions are inherently dynamic.
+// This is the crucial line that prevents caching and ensures fresh data on every run.
+export const revalidate = 0;
 
 interface HomePageSettings {
     emailLogoUrl?: string;
@@ -35,7 +35,7 @@ export async function sendContactEmail(
     prevState: ActionState,
     formData: FormData
 ): Promise<ActionState> {
-    console.log("sendContactEmail action started.");
+    console.log("sendContactEmail action started. This action is set to be fully dynamic (no caching).");
     const apiKey = process.env.RESEND_API_KEY;
 
     if (!apiKey) {
@@ -70,7 +70,11 @@ export async function sendContactEmail(
             const settingsDoc = await firestore.collection('homepage').doc('settings').get();
             if (settingsDoc.exists) {
                 settings = settingsDoc.data() as HomePageSettings;
-                console.log("Successfully fetched email settings from Firestore:", settings);
+                console.log("Successfully fetched email settings from Firestore:", {
+                    hasTemplate: !!settings.emailHtmlTemplate,
+                    logoUrl: settings.emailLogoUrl,
+                    logoScale: settings.emailLogoScale
+                });
             } else {
                 console.warn("Could not find 'homepage/settings' document in Firestore. Using fallback template.");
             }
@@ -84,7 +88,7 @@ export async function sendContactEmail(
         const logoUrl = settings.emailLogoUrl || 'https://i.imgur.com/N9c8oEJ.png'; // Default logo if not set
         const logoScale = settings.emailLogoScale || 1;
 
-        console.log(`Using template: ${settings.emailHtmlTemplate ? 'Custom Template' : 'Fallback Template'}`);
+        console.log(`Using template: ${settings.emailHtmlTemplate ? 'Custom Template from DB' : 'Fallback Template'}`);
         console.log(`Using logo URL: ${logoUrl}`);
         console.log(`Using logo scale: ${logoScale}`);
 
