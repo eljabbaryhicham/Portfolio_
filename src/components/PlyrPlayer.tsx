@@ -372,9 +372,6 @@ const PlyrPlayer = forwardRef(({ source, poster, watermark, autoPlay = true, thu
             background: rgba(0,0,0,0.6);
             border-radius: 50%;
           }
-          .plyr__control:hover {
-            background: hsl(var(--destructive));
-          }
           .plyr--full-ui.plyr--video .plyr__control--overlaid {
             display: none !important;
           }
