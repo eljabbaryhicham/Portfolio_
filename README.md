@@ -21,15 +21,39 @@ For the application to run correctly, you will need to create a `.env.local` fil
 
 When deploying to Vercel, you must set all the environment variables listed in `.env.example` in your Vercel project's **Settings > Environment Variables** section. This includes both the `NEXT_PUBLIC_` variables and all the server-side secret keys (Firebase Admin, Cloudinary, Resend, etc.).
 
-**VERY IMPORTANT: Handling `FIREBASE_PRIVATE_KEY`**
+**VERY IMPORTANT: Fixing `Invalid JWT Signature` Error**
 
-The `FIREBASE_PRIVATE_KEY` is a multi-line value that starts with `-----BEGIN PRIVATE KEY-----` and ends with `-----END PRIVATE KEY-----`. When you copy this from your service account file, you must ensure it is pasted into the Vercel environment variable field correctly.
+If your Vercel deployment fails with an error like `Invalid JWT Signature` or `invalid_grant`, it means your `FIREBASE_PRIVATE_KEY` is corrupted or incorrectly formatted in Vercel's environment variable settings. This is a very common issue with multi-line keys.
 
-- **Copy the entire key**, including the `-----BEGIN...` and `-----END...` lines.
-- **Paste it directly** into the Vercel value field. Vercel is designed to handle multi-line keys correctly. Do not try to convert it to a single line or remove the newline characters yourself.
-- If you continue to see authentication errors after setting the variable, the most common cause is an error in the copy-paste process. The best solution is to **generate a new private key** in your Google Cloud or Firebase project settings and carefully repeat the copy-paste process into Vercel.
+The only way to fix this is to **generate a new private key** and paste it correctly.
 
-**Important**: Do not commit your `.env.local` file to Git. It contains sensitive credentials and is already included in the `.gitignore` file.
+**Step-by-Step Instructions:**
+
+1.  **Go to your Firebase Project Settings**:
+    *   Navigate to: `https://console.firebase.google.com/project/_/settings/serviceaccounts/adminsdk`
+    *   Select your project from the dropdown if prompted.
+
+2.  **Generate a New Private Key**:
+    *   Click the **"Generate new private key"** button.
+    *   A `.json` file will be downloaded. This file contains your new, uncorrupted private key.
+
+3.  **Copy the Key from the Downloaded File**:
+    *   Open the downloaded `.json` file in a text editor.
+    *   The `private_key` value will look like this: `-----BEGIN PRIVATE KEY-----\n...some content...\n...more content...\n-----END PRIVATE KEY-----\n`
+    *   **Select and copy the entire value**, starting from `-----BEGIN PRIVATE KEY-----` and ending with `-----END PRIVATE KEY-----\n`. Make sure you get everything inside the quotes.
+
+4.  **Update the Key in Vercel**:
+    *   Go to your Vercel project's **Settings > Environment Variables**.
+    *   Find the `FIREBASE_PRIVATE_KEY` variable and click to edit it.
+    *   **Delete the old value completely.**
+    *   **Paste the new key** you just copied. Vercel is designed to handle multi-line keys correctly. Do not try to convert it to a single line or remove the newline characters yourself.
+    *   Save the environment variable.
+
+5.  **Redeploy**:
+    *   Go to the "Deployments" tab in your Vercel project.
+    *   Find the most recent deployment, click the "..." menu, and select **"Redeploy"** to apply the new environment variable.
+
+This process will guarantee that Vercel has a fresh, correctly formatted key, which should resolve the authentication error.
 
 ---
 
