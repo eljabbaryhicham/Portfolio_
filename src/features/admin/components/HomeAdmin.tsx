@@ -1,4 +1,3 @@
-
 'use client';
 
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -148,6 +147,8 @@ export default function HomeAdmin() {
 
   const videoItems = portfolioItems?.filter(item => item.type === 'video') || [];
   const imageAssets = mediaAssets?.filter(asset => asset.resource_type === 'image') || [];
+  
+  const isLoading = isLoadingSettings || isLoadingProjects || isLoadingMedia;
 
   const form = useForm<SettingsFormValues>({
     resolver: zodResolver(settingsSchema),
@@ -229,8 +230,6 @@ export default function HomeAdmin() {
         debouncedSave.cancel();
     };
   }, [watch, settingsDocRef, canEditHome, toast, isMounted, isLoading]);
-
-  const isLoading = isLoadingSettings || isLoadingProjects || isLoadingMedia;
 
   if (isLoading && !isMounted) {
     return (
