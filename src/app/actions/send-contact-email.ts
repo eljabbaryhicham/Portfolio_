@@ -138,5 +138,3 @@ export async function sendContactEmail(
         return { success: false, message: `An unexpected server error occurred: ${e.message}` };
     }
 }
-
-    
