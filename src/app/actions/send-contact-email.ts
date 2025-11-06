@@ -31,7 +31,7 @@ const basicFallbackTemplate = `
  * This is the key to ensuring admin panel changes are reflected immediately.
  */
 async function getLatestEmailSettings(): Promise<HomePageSettings> {
-    noStore(); // Explicitly tell Next.js not to cache this function's result.
+    noStore(); // THIS IS THE CRUCIAL LINE to prevent caching.
     console.log("Fetching latest email settings from Firestore...");
     try {
         const adminApp = await initializeServerApp();
@@ -81,7 +81,7 @@ export async function sendContactEmail(
     const { name, email, message } = validatedFields.data;
     
     try {
-        // Fetch the most recent settings directly from the database
+        // Fetch the most recent settings directly from the database on every call
         const settings = await getLatestEmailSettings();
         
         const resend = new Resend(apiKey);
