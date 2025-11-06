@@ -46,8 +46,7 @@ async function getLatestEmailSettings(): Promise<HomePageSettings> {
         const settingsDoc = await firestore.collection('homepage').doc('settings').get();
         
         const settingsData = settingsDoc.data();
-        // **CRITICAL FIX**: Ensure that emailHtmlTemplate is a non-empty string.
-        if (settingsDoc.exists && settingsData && typeof settingsData.emailHtmlTemplate === 'string' && settingsData.emailHtmlTemplate) {
+        if (settingsDoc.exists && settingsData) {
             console.log("Successfully fetched dynamic settings from database.");
             return {
                 emailHtmlTemplate: settingsData.emailHtmlTemplate,
@@ -55,7 +54,7 @@ async function getLatestEmailSettings(): Promise<HomePageSettings> {
                 emailLogoScale: settingsData.emailLogoScale || 1,
             };
         } else {
-            console.warn("Could not find 'homepage/settings' document in Firestore or `emailHtmlTemplate` is missing/invalid. Using default template.");
+            console.warn("Could not find 'homepage/settings' document in Firestore. Using default template.");
             return {
                 emailHtmlTemplate: defaultEmailTemplate,
                 emailLogoUrl: settingsData?.emailLogoUrl || 'https://i.imgur.com/N9c8oEJ.png',
