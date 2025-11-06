@@ -36,7 +36,3 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
-
-# Firebase Studio specific
-/docs/service-account.json
-.env.server.local
