@@ -26,6 +26,7 @@ interface ContactInfo {
 interface ContactFormProps {
     onSuccess?: () => void;
     defaultMessage?: string;
+    emailFromName: string;
     emailHtmlTemplate: string;
     emailLogoUrl: string;
     emailLogoScale: number;
@@ -44,6 +45,7 @@ function SubmitButton() {
 export default function ContactForm({ 
     onSuccess, 
     defaultMessage = '',
+    emailFromName,
     emailHtmlTemplate,
     emailLogoUrl,
     emailLogoScale 
@@ -137,6 +139,7 @@ export default function ContactForm({
             </svg>
         </div>
         <form ref={formRef} action={formAction} className="space-y-8 w-full">
+            <input type="hidden" name="emailFromName" value={emailFromName} />
             <input type="hidden" name="emailHtmlTemplate" value={emailHtmlTemplate} />
             <input type="hidden" name="emailLogoUrl" value={emailLogoUrl} />
             <input type="hidden" name="emailLogoScale" value={emailLogoScale} />

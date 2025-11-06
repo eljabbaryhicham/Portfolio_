@@ -186,6 +186,10 @@
           "type": "string",
           "description": "The secret code required for user registration."
         },
+        "emailFromName": {
+            "type": "string",
+            "description": "The 'From' name used in notification emails."
+        },
         "emailLogoUrl": {
           "type": "string",
           "format": "uri",
@@ -489,5 +493,3 @@
     ]
   }
 }
-
-    

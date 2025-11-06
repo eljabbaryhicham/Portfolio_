@@ -54,6 +54,7 @@ interface HomePageSettings {
     plyrPlayerAssetSource?: 'cdn' | 'local';
     plyrPlayerCdnCssUrl?: string;
     plyrPlayerCdnJsUrl?: string;
+    emailFromName?: string;
     emailLogoUrl?: string;
     emailLogoScale?: number;
     emailHtmlTemplate?: string;
@@ -76,6 +77,7 @@ const settingsSchema = z.object({
   plyrPlayerAssetSource: z.enum(['cdn', 'local']).optional(),
   plyrPlayerCdnCssUrl: z.string().url().optional().or(z.literal('')),
   plyrPlayerCdnJsUrl: z.string().url().optional().or(z.literal('')),
+  emailFromName: z.string().optional(),
   emailLogoUrl: z.string().url({ message: 'Please enter a valid URL.' }).optional().or(z.literal('')),
   emailLogoScale: z.number().min(0.05).max(5).optional(),
   emailHtmlTemplate: z.string().optional(),
@@ -146,11 +148,11 @@ export default function HomeAdmin() {
   const mediaCollection = useMemoFirebase(() => firestore ? collection(firestore, 'media') : null, [firestore]);
   const { data: mediaAssets, isLoading: isLoadingMedia } = useCollection<MediaAsset>(mediaCollection);
 
+  const isLoading = isLoadingSettings || isLoadingProjects || isLoadingMedia;
+
   const videoItems = portfolioItems?.filter(item => item.type === 'video') || [];
   const imageAssets = mediaAssets?.filter(asset => asset.resource_type === 'image') || [];
   
-  const isLoading = isLoadingSettings || isLoadingProjects || isLoadingMedia;
-
   const form = useForm<SettingsFormValues>({
     resolver: zodResolver(settingsSchema),
     defaultValues: {
@@ -170,6 +172,7 @@ export default function HomeAdmin() {
       plyrPlayerAssetSource: 'local',
       plyrPlayerCdnCssUrl: 'https://cdn.plyr.io/3.7.8/plyr.css',
       plyrPlayerCdnJsUrl: 'https://cdn.plyr.io/3.7.8/plyr.js',
+      emailFromName: 'BELOFTED',
       emailLogoUrl: 'https://i.imgur.com/N9c8oEJ.png',
       emailLogoScale: 1,
       emailHtmlTemplate: defaultEmailTemplate,
@@ -198,6 +201,7 @@ export default function HomeAdmin() {
         plyrPlayerAssetSource: homeSettings.plyrPlayerAssetSource || 'local',
         plyrPlayerCdnCssUrl: homeSettings.plyrPlayerCdnCssUrl || 'https://cdn.plyr.io/3.7.8/plyr.css',
         plyrPlayerCdnJsUrl: homeSettings.plyrPlayerCdnJsUrl || 'https://cdn.plyr.io/3.7.8/plyr.js',
+        emailFromName: homeSettings.emailFromName || 'BELOFTED',
         emailLogoUrl: homeSettings.emailLogoUrl || 'https://i.imgur.com/N9c8oEJ.png',
         emailLogoScale: homeSettings.emailLogoScale || 1,
         emailHtmlTemplate: homeSettings.emailHtmlTemplate || defaultEmailTemplate,
@@ -463,6 +467,22 @@ export default function HomeAdmin() {
                                      <h3 className="font-headline text-lg">Email Settings</h3>
                                      <FormField
                                         control={control}
+                                        name="emailFromName"
+                                        render={({ field }) => (
+                                            <FormItem>
+                                                <FormLabel>Email "From" Name</FormLabel>
+                                                <FormControl>
+                                                    <Input placeholder="Your Company Name" {...field} />
+                                                </FormControl>
+                                                <FormDescription>
+                                                    The name that appears as the sender in contact form notifications.
+                                                </FormDescription>
+                                                <FormMessage />
+                                            </FormItem>
+                                        )}
+                                     />
+                                     <FormField
+                                        control={control}
                                         name="emailLogoUrl"
                                         render={({ field }) => (
                                             <FormItem>
@@ -685,5 +705,3 @@ export default function HomeAdmin() {
     </div>
   );
 }
-
-    

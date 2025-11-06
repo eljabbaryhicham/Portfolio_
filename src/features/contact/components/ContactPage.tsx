@@ -37,6 +37,7 @@ interface ContactInfo {
 }
 
 interface HomePageSettings {
+    emailFromName?: string;
     emailLogoUrl?: string;
     emailLogoScale?: number;
     emailHtmlTemplate?: string;
@@ -98,6 +99,7 @@ export default function ContactPage() {
   const avatarUrl = contactInfo?.avatarUrl || "https://i.imgur.com/N9c8oEJ.png";
   const avatarScale = contactInfo?.avatarScale || 1;
 
+  const emailFromName = homeSettings?.emailFromName || 'BELOFTED';
   const emailTemplate = homeSettings?.emailHtmlTemplate || defaultEmailTemplate;
   const emailLogoUrl = homeSettings?.emailLogoUrl || 'https://i.imgur.com/N9c8oEJ.png';
   const emailLogoScale = homeSettings?.emailLogoScale || 1;
@@ -134,6 +136,7 @@ export default function ContactPage() {
                     <Card className="glass-effect p-6 sm:p-8 h-full flex flex-col justify-center w-full max-w-md">
                       <CardContent className="p-0 flex flex-col items-center">
                           <ContactForm 
+                            emailFromName={emailFromName}
                             emailHtmlTemplate={emailTemplate}
                             emailLogoUrl={emailLogoUrl}
                             emailLogoScale={emailLogoScale}

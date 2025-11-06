@@ -9,6 +9,7 @@ const ContactFormSchemaWithTemplate = z.object({
   name: z.string(),
   email: z.string().email(),
   message: z.string(),
+  emailFromName: z.string(),
   emailHtmlTemplate: z.string(),
   emailLogoUrl: z.string().url(),
   emailLogoScale: z.coerce.number(),
@@ -36,6 +37,7 @@ export async function sendContactEmail(
         name: formData.get('name'),
         email: formData.get('email'),
         message: formData.get('message'),
+        emailFromName: formData.get('emailFromName'),
         emailHtmlTemplate: formData.get('emailHtmlTemplate'),
         emailLogoUrl: formData.get('emailLogoUrl'),
         emailLogoScale: formData.get('emailLogoScale'),
@@ -50,6 +52,7 @@ export async function sendContactEmail(
         name, 
         email, 
         message, 
+        emailFromName,
         emailHtmlTemplate,
         emailLogoUrl,
         emailLogoScale 
@@ -68,8 +71,10 @@ export async function sendContactEmail(
           .replace(/{{emailLogoUrl}}/g, emailLogoUrl)
           .replace(/{{emailLogoScale}}/g, emailLogoScale.toString());
 
+        const fromName = emailFromName || 'BELOFTED';
+
         const { data, error } = await resend.emails.send({
-          from: `BELOFTED <${FROM_EMAIL}>`,
+          from: `${fromName} <${FROM_EMAIL}>`,
           to: TO_EMAIL,
           subject: `New Message from ${name}`,
           reply_to: email,
