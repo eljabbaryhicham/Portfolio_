@@ -185,6 +185,15 @@
         "registrationSecretCode": {
           "type": "string",
           "description": "The secret code required for user registration."
+        },
+        "emailLogoUrl": {
+          "type": "string",
+          "format": "uri",
+          "description": "URL for the logo in notification emails."
+        },
+        "emailLogoScale": {
+          "type": "number",
+          "description": "The scale of the logo in emails."
         }
       }
     },
