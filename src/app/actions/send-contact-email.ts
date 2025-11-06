@@ -19,7 +19,8 @@ interface ActionState {
     message: string;
 }
 
-const basicFallbackTemplate = `
+// This is the correct default template, which will be used as a fallback.
+const correctDefaultTemplate = `
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -51,6 +52,7 @@ const basicFallbackTemplate = `
     </table>
 </body>
 </html>`;
+
 
 /**
  * Fetches the latest email settings from Firestore dynamically, bypassing any cache.
@@ -111,7 +113,7 @@ export async function sendContactEmail(
         const TO_EMAIL = 'eljabbaryhicham@gmail.com';
         const FROM_EMAIL = 'onboarding@resend.dev';
 
-        let htmlTemplate = settings.emailHtmlTemplate || basicFallbackTemplate;
+        let htmlTemplate = settings.emailHtmlTemplate || correctDefaultTemplate;
         const logoUrl = settings.emailLogoUrl || 'https://i.imgur.com/N9c8oEJ.png';
         const logoScale = settings.emailLogoScale || 1;
 
