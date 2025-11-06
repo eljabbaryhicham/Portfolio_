@@ -18,7 +18,9 @@ For the application to run correctly, you will need to create a `.env.local` fil
 
 ### Production Deployment (Vercel)
 
-When deploying to Vercel, you must set all the environment variables listed in `.env.example` in your Vercel project's **Settings > Environment Variables** section. This includes both the `NEXT_PUBLIC_` variables and all the secret keys (Firebase Admin, Cloudinary, Resend, etc.).
+When deploying to Vercel, you must set all the environment variables listed in `.env.example` in your Vercel project's **Settings > Environment Variables** section. This includes both the `NEXT_PUBLIC_` variables and all the server-side secret keys (Firebase Admin, Cloudinary, Resend, etc.).
+
+**Important**: Do not commit your `.env.local` file to Git. It contains sensitive credentials and is already included in the `.gitignore` file.
 
 ---
 
