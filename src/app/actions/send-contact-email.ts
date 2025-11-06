@@ -7,9 +7,7 @@ import { initializeServerApp } from '@/firebase/server-init';
 import admin from 'firebase-admin';
 import { ContactFormInputSchema } from '@/features/contact/data/contact-form-types';
 
-// This is the crucial line that prevents caching and ensures fresh data on every run.
-// NOTE: export const revalidate = 0; IS NOT VALID IN SERVER ACTIONS.
-// The dynamic nature is ensured by re-initializing the admin app on each call.
+// NOTE: Using a dynamic function by re-initializing the admin app on each call ensures fresh data.
 
 interface HomePageSettings {
     emailLogoUrl?: string;
@@ -64,7 +62,7 @@ export async function sendContactEmail(
 
     try {
         let settings: HomePageSettings = {};
-        // Initialize the admin app on every call to ensure fresh data
+        // Re-initialize the admin app on every call to ensure fresh data
         const adminApp = await initializeServerApp();
         
         if (adminApp) {
