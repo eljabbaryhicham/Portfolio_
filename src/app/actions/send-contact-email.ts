@@ -7,6 +7,9 @@ import { initializeServerApp } from '@/firebase/server-init';
 import admin from 'firebase-admin';
 import { ContactFormInputSchema } from '@/features/contact/data/contact-form-types';
 
+// This is the crucial line that prevents caching and ensures fresh data on every run.
+export const dynamic = 'force-dynamic';
+
 interface HomePageSettings {
     emailLogoUrl?: string;
     emailLogoScale?: number;
@@ -32,6 +35,7 @@ export async function sendContactEmail(
     prevState: ActionState,
     formData: FormData
 ): Promise<ActionState> {
+    console.log("sendContactEmail action started.");
     const apiKey = process.env.RESEND_API_KEY;
 
     if (!apiKey) {
@@ -66,7 +70,7 @@ export async function sendContactEmail(
             const settingsDoc = await firestore.collection('homepage').doc('settings').get();
             if (settingsDoc.exists) {
                 settings = settingsDoc.data() as HomePageSettings;
-                console.log("Successfully fetched email settings from Firestore.");
+                console.log("Successfully fetched email settings from Firestore:", settings);
             } else {
                 console.warn("Could not find 'homepage/settings' document in Firestore. Using fallback template.");
             }
@@ -79,6 +83,10 @@ export async function sendContactEmail(
         let htmlTemplate = settings.emailHtmlTemplate || basicFallbackTemplate;
         const logoUrl = settings.emailLogoUrl || 'https://i.imgur.com/N9c8oEJ.png'; // Default logo if not set
         const logoScale = settings.emailLogoScale || 1;
+
+        console.log(`Using template: ${htmlTemplate ? 'Custom Template' : 'Fallback Template'}`);
+        console.log(`Using logo URL: ${logoUrl}`);
+        console.log(`Using logo scale: ${logoScale}`);
 
         // Perform the placeholder replacements
         const finalHtml = htmlTemplate
@@ -101,6 +109,7 @@ export async function sendContactEmail(
             return { success: false, message: `Failed to send email: ${error.message}` };
         }
         
+        console.log("Email sent successfully via Resend.");
         return { success: true, message: 'Message Sent Successfully!' };
 
     } catch (e: any) {
