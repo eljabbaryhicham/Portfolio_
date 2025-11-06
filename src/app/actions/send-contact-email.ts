@@ -33,12 +33,9 @@ async function getLatestEmailSettings(): Promise<HomePageSettings> {
 
     const adminApp = await initializeServerApp();
     if (!adminApp) {
-        console.error("sendContactEmail Error: Failed to initialize Firebase Admin SDK. Cannot fetch email settings. Using default template.");
-        return {
-            emailHtmlTemplate: defaultEmailTemplate,
-            emailLogoUrl: 'https://i.imgur.com/N9c8oEJ.png',
-            emailLogoScale: 1,
-        };
+        console.error("sendContactEmail Error: Failed to initialize Firebase Admin SDK. Cannot fetch email settings.");
+        // Return an empty object on failure to allow fallback logic to handle it
+        return {};
     }
 
     try {
@@ -55,19 +52,11 @@ async function getLatestEmailSettings(): Promise<HomePageSettings> {
             };
         } else {
             console.warn("Could not find 'homepage/settings' document in Firestore. Using default template.");
-            return {
-                emailHtmlTemplate: defaultEmailTemplate,
-                emailLogoUrl: 'https://i.imgur.com/N9c8oEJ.png',
-                emailLogoScale: 1,
-            };
+            return {};
         }
     } catch (error) {
         console.error("Error fetching dynamic settings from Firestore. Using default template:", error);
-        return {
-            emailHtmlTemplate: defaultEmailTemplate,
-            emailLogoUrl: 'https://i.imgur.com/N9c8oEJ.png',
-            emailLogoScale: 1,
-        };
+        return {};
     }
 }
 
@@ -101,6 +90,7 @@ export async function sendContactEmail(
         const settings = await getLatestEmailSettings();
 
         // **DEFINITIVE FIX**: Guarantee `template` is a string before using .replace().
+        // If the template from settings is a valid string, use it. Otherwise, use the default.
         const template = (typeof settings.emailHtmlTemplate === 'string' && settings.emailHtmlTemplate)
             ? settings.emailHtmlTemplate
             : defaultEmailTemplate;
@@ -109,7 +99,7 @@ export async function sendContactEmail(
         const TO_EMAIL = 'eljabbaryhicham@gmail.com';
         const FROM_EMAIL = 'onboarding@resend.dev';
 
-        // Ensure all placeholders are replaced using the fresh settings
+        // Ensure all placeholders are replaced using the guaranteed 'template' variable.
         const finalHtml = template
           .replace(/{{name}}/g, name)
           .replace(/{{email}}/g, email)
