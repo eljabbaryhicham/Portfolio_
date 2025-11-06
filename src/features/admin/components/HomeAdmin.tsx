@@ -234,9 +234,9 @@ export default function HomeAdmin() {
 
   if (isLoading && !isMounted) {
     return (
-      <div className="flex justify-center items-center h-full">
-        <Preloader />
-      </div>
+        <div className="flex justify-center items-center h-full">
+            <Preloader />
+        </div>
     );
   }
 
@@ -513,7 +513,7 @@ export default function HomeAdmin() {
                                                     />
                                                 </FormControl>
                                                 <FormDescription>
-                                                    The full HTML of the notification email. Use placeholders: `{{name}}`, `{{email}}`, `{{message}}`, `{{emailLogoUrl}}`, and `{{emailLogoScale}}`.
+                                                    The full HTML of the notification email. Use placeholders: {"{{name}}"}, {"{{email}}"}, {"{{message}}"}, {"{{emailLogoUrl}}"}, and {"{{emailLogoScale}}"}.
                                                 </FormDescription>
                                                 <FormMessage />
                                             </FormItem>
@@ -685,5 +685,3 @@ export default function HomeAdmin() {
     </div>
   );
 }
-
-    
