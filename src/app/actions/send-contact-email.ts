@@ -3,68 +3,27 @@
 
 import { z } from 'zod';
 import { Resend } from 'resend';
-import { initializeServerApp } from '@/firebase/server-init';
-import admin from 'firebase-admin';
-import { ContactFormInputSchema } from '@/features/contact/data/contact-form-types';
-import { unstable_noStore as noStore } from 'next/cache';
-import { defaultEmailTemplate } from '@/features/admin/components/HomeAdmin';
 
-
-interface HomePageSettings {
-    emailLogoUrl?: string;
-    emailLogoScale?: number;
-    emailHtmlTemplate?: string;
-}
+// This is the new schema for the form data, including the template info
+const ContactFormSchemaWithTemplate = z.object({
+  name: z.string(),
+  email: z.string().email(),
+  message: z.string(),
+  emailHtmlTemplate: z.string(),
+  emailLogoUrl: z.string().url(),
+  emailLogoScale: z.coerce.number(),
+});
 
 interface ActionState {
     success: boolean;
     message: string;
 }
 
-/**
- * Fetches the latest email settings from Firestore dynamically.
- * noStore() ensures this function's result is never cached.
- */
-async function getLatestEmailSettings(): Promise<HomePageSettings> {
-    // This is the crucial line to prevent caching of the data fetch.
-    noStore();
-    
-    console.log("Attempting to get latest email settings from Firestore...");
-
-    const adminApp = await initializeServerApp();
-    if (!adminApp) {
-        console.error("sendContactEmail Error: Failed to initialize Firebase Admin SDK. Cannot fetch email settings.");
-        // Return an empty object on failure to allow fallback logic to handle it
-        return {};
-    }
-
-    try {
-        const firestore = admin.firestore(adminApp);
-        const settingsDoc = await firestore.collection('homepage').doc('settings').get();
-        
-        const settingsData = settingsDoc.data();
-        if (settingsDoc.exists && settingsData) {
-            console.log("Successfully fetched dynamic settings from database.");
-            return {
-                emailHtmlTemplate: settingsData.emailHtmlTemplate,
-                emailLogoUrl: settingsData.emailLogoUrl || 'https://i.imgur.com/N9c8oEJ.png',
-                emailLogoScale: settingsData.emailLogoScale || 1,
-            };
-        } else {
-            console.warn("Could not find 'homepage/settings' document in Firestore. Using default template.");
-            return {};
-        }
-    } catch (error) {
-        console.error("Error fetching dynamic settings from Firestore. Using default template:", error);
-        return {};
-    }
-}
-
 export async function sendContactEmail(
     prevState: ActionState,
     formData: FormData
 ): Promise<ActionState> {
-    console.log("`sendContactEmail` server action invoked.");
+    console.log("`sendContactEmail` server action invoked (v-client-driven).");
     
     const apiKey = process.env.RESEND_API_KEY;
     if (!apiKey) {
@@ -73,39 +32,41 @@ export async function sendContactEmail(
         return { success: false, message: errorMsg };
     }
 
-    const validatedFields = ContactFormInputSchema.safeParse({
+    const validatedFields = ContactFormSchemaWithTemplate.safeParse({
         name: formData.get('name'),
         email: formData.get('email'),
         message: formData.get('message'),
+        emailHtmlTemplate: formData.get('emailHtmlTemplate'),
+        emailLogoUrl: formData.get('emailLogoUrl'),
+        emailLogoScale: formData.get('emailLogoScale'),
     });
 
     if (!validatedFields.success) {
+        console.error("Form validation failed:", validatedFields.error.flatten().fieldErrors);
         return { success: false, message: 'Invalid form data.' };
     }
 
-    const { name, email, message } = validatedFields.data;
+    const { 
+        name, 
+        email, 
+        message, 
+        emailHtmlTemplate,
+        emailLogoUrl,
+        emailLogoScale 
+    } = validatedFields.data;
     
     try {
-        // ALWAYS fetch the latest settings. This function is NOT cached.
-        const settings = await getLatestEmailSettings();
-
-        // **DEFINITIVE FIX**: Guarantee `template` is a string before using .replace().
-        // If the template from settings is a valid string, use it. Otherwise, use the default.
-        const template = (typeof settings.emailHtmlTemplate === 'string' && settings.emailHtmlTemplate)
-            ? settings.emailHtmlTemplate
-            : defaultEmailTemplate;
-        
         const resend = new Resend(apiKey);
         const TO_EMAIL = 'eljabbaryhicham@gmail.com';
         const FROM_EMAIL = 'onboarding@resend.dev';
 
-        // Ensure all placeholders are replaced using the guaranteed 'template' variable.
-        const finalHtml = template
+        // The template is now guaranteed to be a string because it comes directly from the validated form data.
+        const finalHtml = emailHtmlTemplate
           .replace(/{{name}}/g, name)
           .replace(/{{email}}/g, email)
           .replace(/{{message}}/g, message)
-          .replace(/{{emailLogoUrl}}/g, settings.emailLogoUrl || 'https://i.imgur.com/N9c8oEJ.png')
-          .replace(/{{emailLogoScale}}/g, (settings.emailLogoScale || 1).toString());
+          .replace(/{{emailLogoUrl}}/g, emailLogoUrl)
+          .replace(/{{emailLogoScale}}/g, emailLogoScale.toString());
 
         const { data, error } = await resend.emails.send({
           from: `BELOFTED <${FROM_EMAIL}>`,
@@ -120,7 +81,7 @@ export async function sendContactEmail(
             return { success: false, message: `Failed to send email: ${error.message}` };
         }
         
-        console.log("Email sent successfully using live settings:", data);
+        console.log("Email sent successfully using client-provided settings:", data);
         return { success: true, message: 'Message Sent Successfully!' };
 
     } catch (e: any) {

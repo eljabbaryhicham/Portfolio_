@@ -18,7 +18,8 @@ import ContactForm from './ContactForm';
 import { ScrollIndicator } from '@/components/ScrollIndicator';
 import { useRef } from 'react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import Logo from '@/components/logo';
+import { defaultEmailTemplate } from '@/features/admin/components/HomeAdmin';
+
 
 interface ContactInfo {
   avatarUrl?: string;
@@ -33,6 +34,12 @@ interface ContactInfo {
   facebookUrl?: string;
   twitterUrl?: string;
   avatarScale?: number;
+}
+
+interface HomePageSettings {
+    emailLogoUrl?: string;
+    emailLogoScale?: number;
+    emailHtmlTemplate?: string;
 }
 
 const containerVariants = {
@@ -65,7 +72,16 @@ export default function ContactPage() {
     () => firestore ? doc(firestore, 'contact', 'details') : null,
     [firestore]
   );
-  const { data: contactInfo, isLoading } = useDoc<ContactInfo>(contactDocRef);
+  const { data: contactInfo, isLoading: isContactLoading } = useDoc<ContactInfo>(contactDocRef);
+
+  const settingsDocRef = useMemoFirebase(
+    () => (firestore ? doc(firestore, 'homepage', 'settings') : null),
+    [firestore]
+  );
+  const { data: homeSettings, isLoading: isSettingsLoading } = useDoc<HomePageSettings>(settingsDocRef);
+
+
+  const isLoading = isContactLoading || isSettingsLoading;
 
   const contactLinks = contactInfo ? [
     { icon: faEnvelope, label: 'Email', value: contactInfo.email, href: `mailto:${contactInfo.email}`, color: 'hover:text-blue-300' },
@@ -82,6 +98,9 @@ export default function ContactPage() {
   const avatarUrl = contactInfo?.avatarUrl || "https://i.imgur.com/N9c8oEJ.png";
   const avatarScale = contactInfo?.avatarScale || 1;
 
+  const emailTemplate = homeSettings?.emailHtmlTemplate || defaultEmailTemplate;
+  const emailLogoUrl = homeSettings?.emailLogoUrl || 'https://i.imgur.com/N9c8oEJ.png';
+  const emailLogoScale = homeSettings?.emailLogoScale || 1;
 
   return (
     <div className="h-full w-full flex flex-col">
@@ -104,7 +123,7 @@ export default function ContactPage() {
                 <div className="flex justify-center items-center h-64">
                   <Preloader />
                 </div>
-              ) : contactInfo ? (
+              ) : (
                 <motion.div
                   className="flex flex-col md:flex-row gap-8 items-center md:items-start justify-center text-center"
                   variants={containerVariants}
@@ -114,7 +133,11 @@ export default function ContactPage() {
                   <motion.div className="w-full md:w-1/2 flex justify-center" variants={itemVariants}>
                     <Card className="glass-effect p-6 sm:p-8 h-full flex flex-col justify-center w-full max-w-md">
                       <CardContent className="p-0 flex flex-col items-center">
-                          <ContactForm />
+                          <ContactForm 
+                            emailHtmlTemplate={emailTemplate}
+                            emailLogoUrl={emailLogoUrl}
+                            emailLogoScale={emailLogoScale}
+                          />
                       </CardContent>
                     </Card>
                   </motion.div>
@@ -134,8 +157,8 @@ export default function ContactPage() {
                             <Preloader />
                           </AvatarFallback>
                         </Avatar>
-                        <h3 className="text-lg md:text-xl font-headline">{contactInfo.name}</h3>
-                        <p className="text-sm md:text-base text-foreground/70">{contactInfo.title}</p>
+                        <h3 className="text-lg md:text-xl font-headline">{contactInfo?.name}</h3>
+                        <p className="text-sm md:text-base text-foreground/70">{contactInfo?.title}</p>
                         
                         <Separator className="my-4 bg-white/20" />
                         
@@ -163,7 +186,7 @@ export default function ContactPage() {
                           </div>
                         </div>
                         
-                        {contactInfo.whatsApp && (
+                        {contactInfo?.whatsApp && (
                           <>
                             <Separator className="my-4 bg-white/20" />
                             <div className="flex justify-center">
@@ -183,10 +206,6 @@ export default function ContactPage() {
                     </Card>
                   </motion.div>
                 </motion.div>
-              ) : (
-                  <div className="text-center py-12 text-muted-foreground">
-                      <p>Contact information is not available at the moment.</p>
-                  </div>
               )}
               {contactInfo && (
                 <motion.div 

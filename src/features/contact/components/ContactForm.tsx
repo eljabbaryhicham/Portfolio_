@@ -26,6 +26,9 @@ interface ContactInfo {
 interface ContactFormProps {
     onSuccess?: () => void;
     defaultMessage?: string;
+    emailHtmlTemplate: string;
+    emailLogoUrl: string;
+    emailLogoScale: number;
 }
 
 function SubmitButton() {
@@ -38,7 +41,13 @@ function SubmitButton() {
     );
 }
 
-export default function ContactForm({ onSuccess, defaultMessage = '' }: ContactFormProps) {
+export default function ContactForm({ 
+    onSuccess, 
+    defaultMessage = '',
+    emailHtmlTemplate,
+    emailLogoUrl,
+    emailLogoScale 
+}: ContactFormProps) {
   const [state, formAction] = useActionState(sendContactEmail, { success: false, message: '' });
   const [isSent, setIsSent] = useState(false);
   const firestore = useFirestore();
@@ -128,6 +137,10 @@ export default function ContactForm({ onSuccess, defaultMessage = '' }: ContactF
             </svg>
         </div>
         <form ref={formRef} action={formAction} className="space-y-8 w-full">
+            <input type="hidden" name="emailHtmlTemplate" value={emailHtmlTemplate} />
+            <input type="hidden" name="emailLogoUrl" value={emailLogoUrl} />
+            <input type="hidden" name="emailLogoScale" value={emailLogoScale} />
+
             <Input 
                 name="name"
                 placeholder="Name" 
