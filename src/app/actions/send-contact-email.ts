@@ -18,6 +18,8 @@ interface ActionState {
     message: string;
 }
 
+// This is a basic fallback template used ONLY if the database connection fails
+// or if the template field in Firestore is empty.
 const basicFallbackTemplate = `
     <p><strong>Name:</strong> {{name}}</p>
     <p><strong>Email:</strong> {{email}}</p>
@@ -73,7 +75,7 @@ export async function sendContactEmail(
         }
         
         let htmlTemplate = settings.emailHtmlTemplate || basicFallbackTemplate;
-        const logoUrl = settings.emailLogoUrl || 'https://i.imgur.com/N9c8oEJ.png';
+        const logoUrl = settings.emailLogoUrl || 'https://i.imgur.com/N9c8oEJ.png'; // Default logo if not set
         const logoScale = settings.emailLogoScale || 1;
 
         // Perform the placeholder replacements
