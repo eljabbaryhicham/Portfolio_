@@ -45,20 +45,20 @@ async function getLatestEmailSettings(): Promise<HomePageSettings> {
         const firestore = admin.firestore(adminApp);
         const settingsDoc = await firestore.collection('homepage').doc('settings').get();
         
-        if (settingsDoc.exists && settingsDoc.data()?.emailHtmlTemplate) {
-            const settings = settingsDoc.data() as HomePageSettings;
+        const settingsData = settingsDoc.data();
+        if (settingsDoc.exists && settingsData && typeof settingsData.emailHtmlTemplate === 'string' && settingsData.emailHtmlTemplate) {
             console.log("Successfully fetched dynamic settings from database.");
             return {
-                emailHtmlTemplate: settings.emailHtmlTemplate,
-                emailLogoUrl: settings.emailLogoUrl || 'https://i.imgur.com/N9c8oEJ.png',
-                emailLogoScale: settings.emailLogoScale || 1,
+                emailHtmlTemplate: settingsData.emailHtmlTemplate,
+                emailLogoUrl: settingsData.emailLogoUrl || 'https://i.imgur.com/N9c8oEJ.png',
+                emailLogoScale: settingsData.emailLogoScale || 1,
             };
         } else {
-            console.warn("Could not find 'homepage/settings' document in Firestore or `emailHtmlTemplate` is missing. Using default template.");
+            console.warn("Could not find 'homepage/settings' document in Firestore or `emailHtmlTemplate` is missing/invalid. Using default template.");
             return {
                 emailHtmlTemplate: defaultEmailTemplate,
-                emailLogoUrl: settingsDoc.data()?.emailLogoUrl || 'https://i.imgur.com/N9c8oEJ.png',
-                emailLogoScale: settingsDoc.data()?.emailLogoScale || 1,
+                emailLogoUrl: settingsData?.emailLogoUrl || 'https://i.imgur.com/N9c8oEJ.png',
+                emailLogoScale: settingsData?.emailLogoScale || 1,
             };
         }
     } catch (error) {
@@ -100,18 +100,14 @@ export async function sendContactEmail(
         // ALWAYS fetch the latest settings. This function is NOT cached.
         const settings = await getLatestEmailSettings();
 
-        if (!settings || !settings.emailHtmlTemplate) {
-             const errorMsg = 'Email template is not configured. Cannot send email.';
-             console.error(errorMsg);
-             return { success: false, message: errorMsg };
-        }
+        const template = settings.emailHtmlTemplate || defaultEmailTemplate;
         
         const resend = new Resend(apiKey);
         const TO_EMAIL = 'eljabbaryhicham@gmail.com';
         const FROM_EMAIL = 'onboarding@resend.dev';
 
         // Ensure all placeholders are replaced using the fresh settings
-        const finalHtml = settings.emailHtmlTemplate
+        const finalHtml = template
           .replace(/{{name}}/g, name)
           .replace(/{{email}}/g, email)
           .replace(/{{message}}/g, message)
