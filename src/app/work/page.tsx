@@ -33,6 +33,7 @@ import type { AppUser } from '@/firebase/auth/use-user';
 import PlyrPlayer from '@/components/PlyrPlayer';
 import CdnClapprPlayer from '@/components/CdnClapprPlayer';
 import { debounce } from 'lodash';
+import { defaultEmailTemplate } from '@/features/admin/components/HomeAdmin';
 
 const MemoizedImage = memo(Image);
 const MemoizedPlyrPlayer = memo(PlyrPlayer);
@@ -226,6 +227,10 @@ const PortfolioGridItem = ({ item, onClick, onEditClick, isAdmin, isSuperAdmin, 
 
 interface HomePageSettings {
     workPagePlayer?: 'plyr' | 'clappr';
+    emailFromName?: string;
+    emailLogoUrl?: string;
+    emailLogoScale?: number;
+    emailHtmlTemplate?: string;
 }
 
 const slugify = (text: string) => text.toLowerCase().replace(/\s+/g, '-').replace(/[^\w-]+/g, '');
@@ -573,6 +578,11 @@ export default function WorkPage() {
   const logoUrl = contactInfo?.logoUrl;
   const workPagePlayer = homeSettings?.workPagePlayer || 'clappr';
 
+  const emailFromName = homeSettings?.emailFromName || 'BELOFTED';
+  const emailTemplate = homeSettings?.emailHtmlTemplate || defaultEmailTemplate;
+  const emailLogoUrl = homeSettings?.emailLogoUrl || 'https://i.imgur.com/N9c8oEJ.png';
+  const emailLogoScale = homeSettings?.emailLogoScale || 1;
+
   return (
     <>
       <div className="h-full w-full flex flex-col">
@@ -825,6 +835,10 @@ export default function WorkPage() {
             <ContactForm
                 onSuccess={() => setIsContactFormOpen(false)}
                 defaultMessage={selectedItem ? `I'm contacting you about discuss a similar project of "${selectedItem.title}"` : ''}
+                emailFromName={emailFromName}
+                emailHtmlTemplate={emailTemplate}
+                emailLogoUrl={emailLogoUrl}
+                emailLogoScale={emailLogoScale}
             />
             <DialogClose className={cn(
                 "absolute right-4 top-4 h-8 w-8",
