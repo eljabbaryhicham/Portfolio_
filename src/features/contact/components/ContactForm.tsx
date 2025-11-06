@@ -1,8 +1,7 @@
-
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
-import { useFormState, useFormStatus } from 'react-dom';
+import { useEffect, useRef, useState, useActionState } from 'react';
+import { useFormStatus } from 'react-dom';
 import { motion } from 'framer-motion';
 import Link from 'next/link';
 import { useDoc, useFirestore, useMemoFirebase } from '@/firebase';
@@ -38,7 +37,7 @@ function SubmitButton() {
 }
 
 export default function ContactForm({ onSuccess, defaultMessage = '' }: ContactFormProps) {
-  const [state, formAction] = useFormState(sendContactEmail, { success: false, message: '' });
+  const [state, formAction] = useActionState(sendContactEmail, { success: false, message: '' });
   const [isSent, setIsSent] = useState(false);
   const firestore = useFirestore();
   const { toast } = useToast();
