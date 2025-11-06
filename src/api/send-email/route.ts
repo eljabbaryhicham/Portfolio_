@@ -47,29 +47,6 @@ export async function POST(req: NextRequest) {
   const TO_EMAIL = 'eljabbaryhicham@gmail.com';
   const FROM_EMAIL = 'onboarding@resend.dev'; // Resend requires this for free tier
 
-  let emailLogoUrl = 'https://i.imgur.com/N9c8oEJ.png'; // Default logo
-  let emailLogoScale = 1; // Default scale
-  
-  try {
-      const adminApp = await initializeServerApp();
-      if (adminApp) {
-          const firestore = admin.firestore(adminApp);
-          const settingsDoc = await firestore.collection('homepage').doc('settings').get();
-          if (settingsDoc.exists) {
-              const settings = settingsDoc.data() as HomePageSettings;
-              emailLogoUrl = settings.emailLogoUrl || emailLogoUrl;
-              emailLogoScale = settings.emailLogoScale || emailLogoScale;
-          }
-      } else {
-          console.warn('Could not connect to settings database. Falling back to default email styles.');
-      }
-  } catch (error) {
-      console.error('Error fetching email settings:', error);
-      console.warn('Falling back to default email styles.');
-  }
-
-  const logoWidth = 150 * emailLogoScale;
-
   try {
     // Read the HTML template from the file system
     const templatePath = path.join(process.cwd(), 'src', 'lib', 'email-templates', 'contact-form.html');
@@ -79,9 +56,7 @@ export async function POST(req: NextRequest) {
     htmlTemplate = htmlTemplate
       .replace('{{name}}', name)
       .replace('{{email}}', email)
-      .replace('{{message}}', message)
-      .replace('{{emailLogoUrl}}', emailLogoUrl)
-      .replace('{{logoWidth}}', String(logoWidth));
+      .replace('{{message}}', message);
 
     const { data, error } = await resend.emails.send({
       from: `BELOFTED <${FROM_EMAIL}>`,
