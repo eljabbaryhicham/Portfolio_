@@ -2,7 +2,7 @@
 'use client';
 
 import React, { useEffect, useRef, forwardRef, useImperativeHandle, useState } from 'react';
-import { useIsMobile } from '@/hooks/use-mobile';
+import { useIsMobile } from '@/hooks/use-is-mobile';
 import Preloader from './preloader';
 import { cn } from '@/lib/utils';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
@@ -360,6 +360,9 @@ const PlyrPlayer = forwardRef(({ source, poster, watermark, autoPlay = true, thu
             --plyr-color-main: hsl(var(--destructive));
             --plyr-control-radius: 8px;
             --plyr-font-family: 'Quicksand', sans-serif;
+          }
+          .plyr--video .plyr__control:hover {
+            background: transparent !important;
           }
           .plyr {
             width: 100%;
