@@ -7,8 +7,8 @@ import { initializeServerApp } from '@/firebase/server-init';
 import admin from 'firebase-admin';
 import { ContactFormInputSchema } from '@/features/contact/data/contact-form-types';
 
-// This is the crucial line that prevents caching and ensures fresh data on every run.
-export const dynamic = 'force-dynamic';
+// NOTE: The 'export const dynamic = 'force-dynamic'' line was removed as it is not valid in server action files.
+// Server actions are inherently dynamic.
 
 interface HomePageSettings {
     emailLogoUrl?: string;
@@ -84,7 +84,7 @@ export async function sendContactEmail(
         const logoUrl = settings.emailLogoUrl || 'https://i.imgur.com/N9c8oEJ.png'; // Default logo if not set
         const logoScale = settings.emailLogoScale || 1;
 
-        console.log(`Using template: ${htmlTemplate ? 'Custom Template' : 'Fallback Template'}`);
+        console.log(`Using template: ${settings.emailHtmlTemplate ? 'Custom Template' : 'Fallback Template'}`);
         console.log(`Using logo URL: ${logoUrl}`);
         console.log(`Using logo scale: ${logoScale}`);
 
