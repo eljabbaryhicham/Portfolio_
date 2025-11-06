@@ -1,3 +1,4 @@
+
 'use server';
 
 import { z } from 'zod';
@@ -75,7 +76,8 @@ export async function sendContactEmail(
         const logoUrl = settings.emailLogoUrl || 'https://i.imgur.com/N9c8oEJ.png';
         const logoScale = settings.emailLogoScale || 1;
 
-        htmlTemplate = htmlTemplate
+        // Perform the placeholder replacements
+        const finalHtml = htmlTemplate
           .replace(/{{name}}/g, name)
           .replace(/{{email}}/g, email)
           .replace(/{{message}}/g, message)
@@ -87,7 +89,7 @@ export async function sendContactEmail(
           to: TO_EMAIL,
           subject: `New Message from ${name}`,
           reply_to: email,
-          html: htmlTemplate,
+          html: finalHtml, // Use the processed HTML
         });
 
         if (error) {
