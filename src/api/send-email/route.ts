@@ -2,7 +2,6 @@
 import { type NextRequest, NextResponse } from 'next/server';
 import { Resend } from 'resend';
 import { z } from 'zod';
-import { resendApiKey } from '@/lib/server-config';
 
 const formSchema = z.object({
   name: z.string(),
@@ -11,7 +10,7 @@ const formSchema = z.object({
 });
 
 export async function POST(req: NextRequest) {
-  const apiKey = resendApiKey;
+  const apiKey = process.env.RESEND_API_KEY;
 
   if (!apiKey) {
     console.error('RESEND_API_KEY is not configured on the server.');

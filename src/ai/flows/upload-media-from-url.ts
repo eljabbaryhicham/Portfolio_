@@ -6,7 +6,6 @@
  */
 import { ai } from '@/ai/genkit';
 import { z } from 'zod';
-import { cloudinaryConfig } from '@/lib/server-config';
 
 const UploadMediaFromUrlInputSchema = z.object({
   mediaUrl: z.string().url(),
@@ -59,9 +58,12 @@ const uploadMediaFromUrlFlow = ai.defineFlow(
       const { libraryId, videoFormat } = input;
       
       const isPrimary = libraryId === 'primary';
-      const config = isPrimary ? cloudinaryConfig.library1 : cloudinaryConfig.library2;
+      const suffix = isPrimary ? '_1' : '_2';
+      const cloudName = process.env[`NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME${suffix}`];
+      const apiKey = process.env[`CLOUDINARY_API_KEY${suffix}`];
+      const apiSecret = process.env[`CLOUDINARY_API_SECRET${suffix}`];
 
-      if (!config.cloudName || !config.apiKey || !config.apiSecret) {
+      if (!cloudName || !apiKey || !apiSecret) {
         const errorMessage = `Cloudinary credentials for ${libraryId} library are missing. Please check your environment variables.`;
         console.error('Error in uploadMediaFromUrlFlow:', errorMessage);
         return {
@@ -72,9 +74,9 @@ const uploadMediaFromUrlFlow = ai.defineFlow(
 
       const cloudinary = (await import('cloudinary')).v2;
       cloudinary.config({
-        cloud_name: config.cloudName, 
-        api_key: config.apiKey, 
-        api_secret: config.apiSecret,
+        cloud_name: cloudName, 
+        api_key: apiKey, 
+        api_secret: apiSecret,
         secure: true
       });
       
@@ -90,7 +92,7 @@ const uploadMediaFromUrlFlow = ai.defineFlow(
       let finalUrl = uploadResult.secure_url;
       
       if (uploadResult.resource_type === 'video' && videoFormat === 'm3u8') {
-          finalUrl = `https://res.cloudinary.com/${config.cloudName}/video/upload/sp_auto/v${uploadResult.version}/${uploadResult.public_id}.m3u8`;
+          finalUrl = `https://res.cloudinary.com/${cloudName}/video/upload/sp_auto/v${uploadResult.version}/${uploadResult.public_id}.m3u8`;
           console.log(`Generated adaptive streaming (HLS) URL: ${finalUrl}`);
       } else if (uploadResult.resource_type === 'image' || uploadResult.resource_type === 'video') {
           finalUrl = cloudinary.url(uploadResult.public_id, {

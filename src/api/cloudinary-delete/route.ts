@@ -2,7 +2,6 @@
 'use server';
 
 import { v2 as cloudinary } from 'cloudinary';
-import { cloudinaryConfig } from '@/lib/server-config';
 
 interface DeleteFromCloudinaryInput {
   public_id: string;
@@ -22,19 +21,21 @@ export async function deleteFromCloudinary(
     try {
         const { public_id, resource_type, libraryId } = input;
         
-        const isPrimary = libraryId === 'primary';
-        const config = isPrimary ? cloudinaryConfig.library1 : cloudinaryConfig.library2;
+        const suffix = libraryId === 'primary' ? '_1' : '_2';
+        const cloudName = process.env[`NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME${suffix}`];
+        const apiKey = process.env[`CLOUDINARY_API_KEY${suffix}`];
+        const apiSecret = process.env[`CLOUDINARY_API_SECRET${suffix}`];
 
-        if (!config.cloudName || !config.apiKey || !config.apiSecret) {
-            const errorMessage = `Cloudinary credentials for ${libraryId} library are missing.`;
+        if (!cloudName || !apiKey || !apiSecret) {
+            const errorMessage = `Cloudinary credentials for ${libraryId} library are missing. Please check your environment variables.`;
             console.error(errorMessage);
             return { success: false, message: errorMessage };
         }
 
         cloudinary.config({
-            cloud_name: config.cloudName, 
-            api_key: config.apiKey, 
-            api_secret: config.apiSecret,
+            cloud_name: cloudName, 
+            api_key: apiKey, 
+            api_secret: apiSecret,
             secure: true
         });
 
