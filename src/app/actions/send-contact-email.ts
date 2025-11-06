@@ -46,6 +46,7 @@ async function getLatestEmailSettings(): Promise<HomePageSettings> {
         const settingsDoc = await firestore.collection('homepage').doc('settings').get();
         
         const settingsData = settingsDoc.data();
+        // **CRITICAL FIX**: Ensure that emailHtmlTemplate is a non-empty string.
         if (settingsDoc.exists && settingsData && typeof settingsData.emailHtmlTemplate === 'string' && settingsData.emailHtmlTemplate) {
             console.log("Successfully fetched dynamic settings from database.");
             return {
@@ -100,7 +101,8 @@ export async function sendContactEmail(
         // ALWAYS fetch the latest settings. This function is NOT cached.
         const settings = await getLatestEmailSettings();
 
-        const template = settings.emailHtmlTemplate || defaultEmailTemplate;
+        // **CRITICAL FIX**: Ensure template is a string before calling .replace()
+        const template = (settings.emailHtmlTemplate && typeof settings.emailHtmlTemplate === 'string') ? settings.emailHtmlTemplate : defaultEmailTemplate;
         
         const resend = new Resend(apiKey);
         const TO_EMAIL = 'eljabbaryhicham@gmail.com';
