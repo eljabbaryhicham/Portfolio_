@@ -1,7 +1,7 @@
+
 'use client';
 
-import { useFormState, useFormStatus } from 'react-dom';
-import { useEffect, useRef, useState } from 'react';
+import { useActionState, useEffect, useRef, useState } from 'react';
 import { motion } from 'framer-motion';
 import Link from 'next/link';
 import { useDoc, useFirestore, useMemoFirebase } from '@/firebase';
@@ -10,6 +10,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faCheckCircle, faSpinner } from '@fortawesome/free-solid-svg-icons';
 import { faWhatsapp } from '@fortawesome/free-brands-svg-icons';
 import { useToast } from '@/hooks/use-toast';
+import { useFormStatus } from 'react-dom';
 
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -37,7 +38,7 @@ function SubmitButton() {
 }
 
 export default function ContactForm({ onSuccess, defaultMessage = '' }: ContactFormProps) {
-  const [state, formAction] = useFormState(sendContactEmail, { success: false, message: '' });
+  const [state, formAction] = useActionState(sendContactEmail, { success: false, message: '' });
   const [isSent, setIsSent] = useState(false);
   const firestore = useFirestore();
   const { toast } = useToast();
