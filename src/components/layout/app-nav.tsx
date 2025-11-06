@@ -74,7 +74,13 @@ export function AppNav() {
     const navButtonContent = (
       <motion.div 
         className="relative"
-        whileHover={{ scale: 1.1, rotate: [0, 10, -5, 0] }}
+        initial="rest"
+        whileHover="hover"
+        animate="rest"
+        variants={{
+          rest: { scale: 1, rotate: 0 },
+          hover: { scale: 1.1, rotate: [0, 10, -5, 0] },
+        }}
         transition={{ duration: 0.3 }}
       >
         <Link
