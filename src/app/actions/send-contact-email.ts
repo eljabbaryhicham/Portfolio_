@@ -54,16 +54,16 @@ const defaultTemplate = `
 
 
 /**
- * Fetches the latest email settings from Firestore dynamically, bypassing any cache.
+ * Fetches the latest email settings from Firestore dynamically.
+ * noStore() ensures this function's result is never cached.
  */
 async function getLatestEmailSettings(): Promise<HomePageSettings> {
-    noStore(); // This is the crucial line that prevents caching of this function's result.
+    noStore(); // Force dynamic execution.
     console.log("Attempting to get latest email settings from Firestore...");
 
     const adminApp = await initializeServerApp();
     if (!adminApp) {
         console.error("sendContactEmail Error: Failed to initialize Firebase Admin SDK. Cannot fetch email settings.");
-        // Return default values if Firebase isn't available.
         return {
             emailHtmlTemplate: defaultTemplate,
             emailLogoUrl: 'https://i.imgur.com/N9c8oEJ.png',
@@ -77,15 +77,14 @@ async function getLatestEmailSettings(): Promise<HomePageSettings> {
         
         if (settingsDoc.exists) {
             const settings = settingsDoc.data() as HomePageSettings;
-            console.log("Successfully fetched dynamic settings:", { hasTemplate: !!settings.emailHtmlTemplate });
-            // Return the fetched settings, ensuring no property is undefined
+            console.log("Successfully fetched dynamic settings from database.");
             return {
                 emailHtmlTemplate: settings.emailHtmlTemplate || defaultTemplate,
                 emailLogoUrl: settings.emailLogoUrl || 'https://i.imgur.com/N9c8oEJ.png',
                 emailLogoScale: settings.emailLogoScale || 1,
             };
         } else {
-            console.warn("Could not find 'homepage/settings' document. Will use fallback.");
+            console.warn("Could not find 'homepage/settings' document. Using default values.");
             return {
                  emailHtmlTemplate: defaultTemplate,
                  emailLogoUrl: 'https://i.imgur.com/N9c8oEJ.png',
@@ -106,7 +105,7 @@ export async function sendContactEmail(
     prevState: ActionState,
     formData: FormData
 ): Promise<ActionState> {
-    console.log("`sendContactEmail` server action invoked dynamically.");
+    console.log("`sendContactEmail` server action invoked.");
     
     const apiKey = process.env.RESEND_API_KEY;
     if (!apiKey) {
@@ -128,29 +127,18 @@ export async function sendContactEmail(
     const { name, email, message } = validatedFields.data;
     
     try {
-        // Always fetch the latest settings
         const settings = await getLatestEmailSettings();
         
         const resend = new Resend(apiKey);
         const TO_EMAIL = 'eljabbaryhicham@gmail.com';
         const FROM_EMAIL = 'onboarding@resend.dev';
 
-        const htmlTemplate = settings.emailHtmlTemplate;
-        const logoUrl = settings.emailLogoUrl;
-        const logoScale = settings.emailLogoScale;
-
-        console.log(`Using template: ${settings.emailHtmlTemplate === defaultTemplate ? 'Fallback Template' : 'Custom DB Template (Live)'}`);
-        console.log(`Using logo URL: ${logoUrl}`);
-        console.log(`Using logo scale: ${logoScale}`);
-        console.log(`Sending email to: ${TO_EMAIL}`);
-
-
-        const finalHtml = htmlTemplate
+        const finalHtml = (settings.emailHtmlTemplate || defaultTemplate)
           .replace(/{{name}}/g, name)
           .replace(/{{email}}/g, email)
           .replace(/{{message}}/g, message)
-          .replace(/{{emailLogoUrl}}/g, logoUrl || 'https://i.imgur.com/N9c8oEJ.png')
-          .replace(/{{emailLogoScale}}/g, (logoScale || 1).toString());
+          .replace(/{{emailLogoUrl}}/g, settings.emailLogoUrl || 'https://i.imgur.com/N9c8oEJ.png')
+          .replace(/{{emailLogoScale}}/g, (settings.emailLogoScale || 1).toString());
 
         const { data, error } = await resend.emails.send({
           from: `BELOFTED <${FROM_EMAIL}>`,
@@ -173,6 +161,3 @@ export async function sendContactEmail(
         return { success: false, message: `An unexpected server error occurred: ${e.message}` };
     }
 }
-    
-
-    
