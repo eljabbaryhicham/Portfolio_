@@ -7,6 +7,8 @@ import { initializeServerApp } from '@/firebase/server-init';
 import admin from 'firebase-admin';
 import { ContactFormInputSchema } from '@/features/contact/data/contact-form-types';
 import { unstable_noStore as noStore } from 'next/cache';
+import { defaultEmailTemplate } from '@/features/admin/components/HomeAdmin';
+
 
 interface HomePageSettings {
     emailLogoUrl?: string;
@@ -23,7 +25,7 @@ interface ActionState {
  * Fetches the latest email settings from Firestore dynamically.
  * noStore() ensures this function's result is never cached.
  */
-async function getLatestEmailSettings(): Promise<HomePageSettings | null> {
+async function getLatestEmailSettings(): Promise<HomePageSettings> {
     // This is the crucial line to prevent caching of the data fetch.
     noStore();
     
@@ -31,8 +33,12 @@ async function getLatestEmailSettings(): Promise<HomePageSettings | null> {
 
     const adminApp = await initializeServerApp();
     if (!adminApp) {
-        console.error("sendContactEmail Error: Failed to initialize Firebase Admin SDK. Cannot fetch email settings.");
-        return null;
+        console.error("sendContactEmail Error: Failed to initialize Firebase Admin SDK. Cannot fetch email settings. Using default template.");
+        return {
+            emailHtmlTemplate: defaultEmailTemplate,
+            emailLogoUrl: 'https://i.imgur.com/N9c8oEJ.png',
+            emailLogoScale: 1,
+        };
     }
 
     try {
@@ -48,12 +54,20 @@ async function getLatestEmailSettings(): Promise<HomePageSettings | null> {
                 emailLogoScale: settings.emailLogoScale || 1,
             };
         } else {
-            console.warn("Could not find 'homepage/settings' document in Firestore or `emailHtmlTemplate` is missing.");
-            return null;
+            console.warn("Could not find 'homepage/settings' document in Firestore or `emailHtmlTemplate` is missing. Using default template.");
+            return {
+                emailHtmlTemplate: defaultEmailTemplate,
+                emailLogoUrl: settingsDoc.data()?.emailLogoUrl || 'https://i.imgur.com/N9c8oEJ.png',
+                emailLogoScale: settingsDoc.data()?.emailLogoScale || 1,
+            };
         }
     } catch (error) {
-        console.error("Error fetching dynamic settings from Firestore:", error);
-        return null;
+        console.error("Error fetching dynamic settings from Firestore. Using default template:", error);
+        return {
+            emailHtmlTemplate: defaultEmailTemplate,
+            emailLogoUrl: 'https://i.imgur.com/N9c8oEJ.png',
+            emailLogoScale: 1,
+        };
     }
 }
 
@@ -87,7 +101,7 @@ export async function sendContactEmail(
         const settings = await getLatestEmailSettings();
 
         if (!settings || !settings.emailHtmlTemplate) {
-             const errorMsg = 'Email template is not configured in the admin panel. Cannot send email.';
+             const errorMsg = 'Email template is not configured. Cannot send email.';
              console.error(errorMsg);
              return { success: false, message: errorMsg };
         }
