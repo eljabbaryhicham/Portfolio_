@@ -204,7 +204,7 @@ export default function HomeAdmin() {
   }, [homeSettings, form]);
 
   useEffect(() => {
-    if (!canEditHome || !isMounted) return;
+    if (!canEditHome || !isMounted || isLoading) return;
 
     const debouncedSave = debounce((fieldName, value) => {
         if (settingsDocRef) {
@@ -228,7 +228,7 @@ export default function HomeAdmin() {
         subscription.unsubscribe();
         debouncedSave.cancel();
     };
-  }, [watch, settingsDocRef, canEditHome, toast, isMounted]);
+  }, [watch, settingsDocRef, canEditHome, toast, isMounted, isLoading]);
 
   const isLoading = isLoadingSettings || isLoadingProjects || isLoadingMedia;
 
