@@ -1,32 +1,21 @@
-
 'use client';
 
-import { zodResolver } from '@hookform/resolvers/zod';
-import { useForm } from 'react-hook-form';
-import * as z from 'zod';
-import { Button } from '@/components/ui/button';
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormMessage,
-} from '@/components/ui/form';
-import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
-import { useState, useEffect } from 'react';
-import { ContactFormInputSchema, type ContactFormInput } from '@/features/contact/data/contact-form-types';
+import { useFormState, useFormStatus } from 'react-dom';
+import { useEffect, useRef, useState } from 'react';
 import { motion } from 'framer-motion';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faCheckCircle } from '@fortawesome/free-solid-svg-icons';
-import { faWhatsapp } from '@fortawesome/free-brands-svg-icons';
+import Link from 'next/link';
 import { useDoc, useFirestore, useMemoFirebase } from '@/firebase';
 import { doc } from 'firebase/firestore';
-import Link from 'next/link';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faCheckCircle, faSpinner } from '@fortawesome/free-solid-svg-icons';
+import { faWhatsapp } from '@fortawesome/free-brands-svg-icons';
 import { useToast } from '@/hooks/use-toast';
 
-const formSchema = ContactFormInputSchema;
-type ContactFormValues = z.infer<typeof formSchema>;
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
+import { sendContactEmail } from '@/app/actions/send-contact-email';
+
 
 interface ContactInfo {
     whatsApp?: string;
@@ -37,11 +26,22 @@ interface ContactFormProps {
     defaultMessage?: string;
 }
 
+function SubmitButton() {
+    const { pending } = useFormStatus();
+    return (
+        <Button type="submit" size="lg" className="w-full glass-effect" disabled={pending}>
+            {pending && <FontAwesomeIcon icon={faSpinner} className="mr-2 h-4 w-4 animate-spin" />}
+            {pending ? 'Sending...' : 'Send Message'}
+        </Button>
+    );
+}
+
 export default function ContactForm({ onSuccess, defaultMessage = '' }: ContactFormProps) {
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [state, formAction] = useFormState(sendContactEmail, { success: false, message: '' });
   const [isSent, setIsSent] = useState(false);
   const firestore = useFirestore();
   const { toast } = useToast();
+  const formRef = useRef<HTMLFormElement>(null);
 
   const contactDocRef = useMemoFirebase(
     () => (firestore ? doc(firestore, 'contact', 'details') : null),
@@ -49,43 +49,16 @@ export default function ContactForm({ onSuccess, defaultMessage = '' }: ContactF
   );
   const { data: contactInfo } = useDoc<ContactInfo>(contactDocRef);
 
-  const form = useForm<ContactFormValues>({
-    resolver: zodResolver(formSchema),
-    defaultValues: {
-      name: '',
-      email: '',
-      message: defaultMessage,
-    },
-  });
-
   useEffect(() => {
-    form.setValue('message', defaultMessage);
-  }, [defaultMessage, form]);
-
-
-  const handleSubmit = async (values: ContactFormValues) => {
-    setIsSubmitting(true);
-    
-    try {
-      const response = await fetch('/api/send-email', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(values),
-      });
-
-      const result = await response.json();
-
-      if (response.ok && result.success) {
+    if (state.message) {
+      if (state.success) {
         setIsSent(true);
         if (onSuccess) {
             setTimeout(() => {
                 onSuccess();
-                // Reset form state after dialog closes
                 setTimeout(() => {
                     setIsSent(false);
-                    form.reset({ name: '', email: '', message: defaultMessage });
+                    formRef.current?.reset();
                 }, 500);
             }, 2000);
         }
@@ -93,21 +66,24 @@ export default function ContactForm({ onSuccess, defaultMessage = '' }: ContactF
         toast({
           variant: "destructive",
           title: "Message Failed to Send",
-          description: result.message || "An unexpected error occurred. Please try again.",
+          description: state.message,
           duration: 8000,
         });
       }
-    } catch (error) {
-       toast({
-          variant: "destructive",
-          title: "An Error Occurred",
-          description: "A network error occurred. Please check your connection and try again.",
-        });
-    } finally {
-        // This will run regardless of success or failure, ensuring the button is re-enabled.
-        setIsSubmitting(false);
     }
-  };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [state]);
+
+  // Effect to update the message field when defaultMessage prop changes
+  useEffect(() => {
+    if (formRef.current) {
+        const messageTextarea = formRef.current.elements.namedItem('message') as HTMLTextAreaElement | null;
+        if (messageTextarea) {
+            messageTextarea.value = defaultMessage;
+        }
+    }
+  }, [defaultMessage]);
+
 
   if (isSent) {
     return (
@@ -123,8 +99,8 @@ export default function ContactForm({ onSuccess, defaultMessage = '' }: ContactF
           <p className="text-foreground/80 mt-2 max-w-sm">
             Thank you for reaching out. We will get back to you shortly.
           </p>
-          {!onSuccess && ( // Only show "Send Another" if it's not in a dialog that will close
-            <Button onClick={() => setIsSent(false)} className="mt-6">
+          {!onSuccess && ( 
+            <Button onClick={() => { setIsSent(false); formRef.current?.reset(); }} className="mt-6">
               Send Another Message
             </Button>
           )}
@@ -149,53 +125,29 @@ export default function ContactForm({ onSuccess, defaultMessage = '' }: ContactF
               <path d="M45 65 L50 75 L55 65" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" fill="none"/>
             </svg>
         </div>
-        <Form {...form}>
-        <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-8 w-full">
-            <FormField
-            control={form.control}
-            name="name"
-            render={({ field }) => (
-                <FormItem>
-                <FormControl>
-                    <Input placeholder="Name" {...field} className="text-center bg-transparent border-0 border-b border-foreground/30 rounded-none focus-visible:ring-0 focus-visible:ring-offset-0 focus:border-primary transition-colors placeholder:text-foreground/80" />
-                </FormControl>
-                <FormMessage />
-                </FormItem>
-            )}
+        <form ref={formRef} action={formAction} className="space-y-8 w-full">
+            <Input 
+                name="name"
+                placeholder="Name" 
+                className="text-center bg-transparent border-0 border-b border-foreground/30 rounded-none focus-visible:ring-0 focus-visible:ring-offset-0 focus:border-primary transition-colors placeholder:text-foreground/80" 
+                required 
             />
-            <FormField
-            control={form.control}
-            name="email"
-            render={({ field }) => (
-                <FormItem>
-                <FormControl>
-                    <Input type="email" placeholder="Email" {...field} className="text-center bg-transparent border-0 border-b border-foreground/30 rounded-none focus-visible:ring-0 focus-visible:ring-offset-0 focus:border-primary transition-colors placeholder:text-foreground/80" />
-                </FormControl>
-                <FormMessage />
-                </FormItem>
-            )}
+            <Input 
+                name="email"
+                type="email"
+                placeholder="Email" 
+                className="text-center bg-transparent border-0 border-b border-foreground/30 rounded-none focus-visible:ring-0 focus-visible:ring-offset-0 focus:border-primary transition-colors placeholder:text-foreground/80" 
+                required 
             />
-            <FormField
-            control={form.control}
-            name="message"
-            render={({ field }) => (
-                <FormItem>
-                <FormControl>
-                    <Textarea
-                    placeholder="Message"
-                    className="text-center bg-transparent border-0 border-b border-foreground/30 rounded-none focus-visible:ring-0 focus-visible:ring-offset-0 focus:border-primary transition-colors min-h-[100px] placeholder:text-foreground/80"
-                    {...field}
-                    />
-                </FormControl>
-                <FormMessage />
-                </FormItem>
-            )}
+            <Textarea
+                name="message"
+                placeholder="Message"
+                className="text-center bg-transparent border-0 border-b border-foreground/30 rounded-none focus-visible:ring-0 focus-visible:ring-offset-0 focus:border-primary transition-colors min-h-[100px] placeholder:text-foreground/80"
+                defaultValue={defaultMessage}
+                required
             />
-            <Button type="submit" size="lg" className="w-full glass-effect" disabled={isSubmitting}>
-            {isSubmitting ? 'Sending...' : 'Send Message'}
-            </Button>
+            <SubmitButton />
         </form>
-        </Form>
     </div>
   );
 }
