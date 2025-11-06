@@ -4,8 +4,6 @@ import { Resend } from 'resend';
 import { z } from 'zod';
 import { initializeServerApp } from '@/firebase/server-init';
 import admin from 'firebase-admin';
-import fs from 'fs';
-import path from 'path';
 
 const formSchema = z.object({
   name: z.string(),
@@ -18,6 +16,13 @@ interface HomePageSettings {
     emailLogoScale?: number;
     emailHtmlTemplate?: string;
 }
+
+const basicFallbackTemplate = `
+    <p><strong>Name:</strong> {{name}}</p>
+    <p><strong>Email:</strong> {{email}}</p>
+    <p><strong>Message:</strong></p>
+    <p>{{message}}</p>
+`;
 
 export async function POST(req: NextRequest) {
   const apiKey = process.env.RESEND_API_KEY;
@@ -60,16 +65,8 @@ export async function POST(req: NextRequest) {
         }
     }
     
-    let htmlTemplate: string;
-    
-    if (settings.emailHtmlTemplate) {
-        // Use template from Firestore if available
-        htmlTemplate = settings.emailHtmlTemplate;
-    } else {
-        // Fallback to local file
-        const templatePath = path.join(process.cwd(), 'src', 'lib', 'email-templates', 'contact-form.html');
-        htmlTemplate = fs.readFileSync(templatePath, 'utf8');
-    }
+    // Use template from Firestore if available, otherwise use a basic hardcoded fallback.
+    let htmlTemplate = settings.emailHtmlTemplate || basicFallbackTemplate;
 
     // Replace placeholders
     htmlTemplate = htmlTemplate
@@ -99,5 +96,3 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ success: false, message: `An unexpected server error occurred: ${e.message}` }, { status: 500 });
   }
 }
-
-    
