@@ -57,8 +57,8 @@ async function getLatestEmailSettings(): Promise<HomePageSettings> {
             console.warn("Could not find 'homepage/settings' document in Firestore. Using default template.");
             return {
                 emailHtmlTemplate: defaultEmailTemplate,
-                emailLogoUrl: settingsData?.emailLogoUrl || 'https://i.imgur.com/N9c8oEJ.png',
-                emailLogoScale: settingsData?.emailLogoScale || 1,
+                emailLogoUrl: 'https://i.imgur.com/N9c8oEJ.png',
+                emailLogoScale: 1,
             };
         }
     } catch (error) {
@@ -138,3 +138,5 @@ export async function sendContactEmail(
         return { success: false, message: `An unexpected server error occurred: ${e.message}` };
     }
 }
+
+    
