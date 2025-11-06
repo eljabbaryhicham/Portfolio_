@@ -1,3 +1,4 @@
+
 'use server';
 
 import { z } from 'zod';
@@ -6,8 +7,6 @@ import { initializeServerApp } from '@/firebase/server-init';
 import admin from 'firebase-admin';
 import { ContactFormInputSchema } from '@/features/contact/data/contact-form-types';
 import { unstable_noStore as noStore } from 'next/cache';
-
-export const dynamic = 'force-dynamic'; // This is the crucial line to prevent caching of the entire action.
 
 interface HomePageSettings {
     emailLogoUrl?: string;
@@ -57,7 +56,7 @@ const basicFallbackTemplate = `
  * Fetches the latest email settings from Firestore dynamically, bypassing any cache.
  */
 async function getLatestEmailSettings(): Promise<HomePageSettings> {
-    noStore(); // Explicitly tells Next.js not to cache this function's result.
+    noStore(); // This is the crucial line that prevents caching of this function's result.
     console.log("Fetching latest email settings from Firestore dynamically...");
     try {
         const adminApp = await initializeServerApp();
