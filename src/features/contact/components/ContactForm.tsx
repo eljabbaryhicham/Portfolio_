@@ -129,7 +129,7 @@ export default function ContactForm({ onSuccess, defaultMessage = '' }: ContactF
           )}
           {!onSuccess && contactInfo?.whatsApp && (
             <Button asChild className="bg-gradient-to-r from-green-500 to-emerald-600 mt-4">
-                <Link href={`https://wa.me/${contactInfo.whatsApp.replace(/\\D/g, '')}`} target="_blank" rel="noopener noreferrer">
+                <Link href={`https://wa.me/${contactInfo.whatsApp.replace(/\D/g, '')}`} target="_blank" rel="noopener noreferrer">
                     <FontAwesomeIcon icon={faWhatsapp} className="mr-2 h-5 w-5" />
                     Chat on WhatsApp
                 </Link>
@@ -198,5 +198,3 @@ export default function ContactForm({ onSuccess, defaultMessage = '' }: ContactF
     </div>
   );
 }
-
-    

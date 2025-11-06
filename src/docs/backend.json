@@ -72,11 +72,6 @@
       "description": "Stores contact information for the portfolio owner.",
       "type": "object",
       "properties": {
-        "avatarUrl": {
-          "type": "string",
-          "format": "uri",
-          "description": "URL for the avatar image on the contact page."
-        },
         "name": {
           "type": "string"
         },
@@ -122,10 +117,6 @@
         "logoScale": {
             "type": "number",
             "description": "The scale of the site logo in the navigation."
-        },
-        "avatarScale": {
-            "type": "number",
-            "description": "The scale of the avatar image on the contact page."
         }
       },
       "required": [
@@ -485,5 +476,3 @@
     ]
   }
 }
-
-    
