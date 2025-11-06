@@ -2,12 +2,19 @@
 import { type NextRequest, NextResponse } from 'next/server';
 import { Resend } from 'resend';
 import { z } from 'zod';
+import { initializeServerApp } from '@/firebase/server-init';
+import admin from 'firebase-admin';
 
 const formSchema = z.object({
   name: z.string(),
   email: z.string().email(),
   message: z.string(),
 });
+
+interface HomePageSettings {
+    emailLogoUrl?: string;
+    emailLogoScale?: number;
+}
 
 export async function POST(req: NextRequest) {
   const apiKey = process.env.RESEND_API_KEY;
@@ -19,10 +26,6 @@ export async function POST(req: NextRequest) {
       { status: 500 }
     );
   }
-
-  const resend = new Resend(apiKey);
-  const TO_EMAIL = 'eljabbaryhicham@gmail.com';
-  const FROM_EMAIL = 'onboarding@resend.dev'; // Resend requires this for free tier
 
   let body;
   try {
@@ -38,6 +41,33 @@ export async function POST(req: NextRequest) {
   }
 
   const { name, email, message } = parseResult.data;
+  const resend = new Resend(apiKey);
+  const TO_EMAIL = 'eljabbaryhicham@gmail.com';
+  const FROM_EMAIL = 'onboarding@resend.dev'; // Resend requires this for free tier
+
+  let emailLogoUrl = 'https://i.imgur.com/N9c8oEJ.png'; // Default logo
+  let emailLogoScale = 1; // Default scale
+  
+  try {
+      const adminApp = await initializeServerApp();
+      if (adminApp) {
+          const firestore = admin.firestore(adminApp);
+          const settingsDoc = await firestore.collection('homepage').doc('settings').get();
+          if (settingsDoc.exists) {
+              const settings = settingsDoc.data() as HomePageSettings;
+              emailLogoUrl = settings.emailLogoUrl || emailLogoUrl;
+              emailLogoScale = settings.emailLogoScale || emailLogoScale;
+          }
+      } else {
+          console.warn('Could not connect to settings database. Falling back to default email styles.');
+      }
+  } catch (error) {
+      console.error('Error fetching email settings:', error);
+      console.warn('Falling back to default email styles.');
+  }
+
+  const logoWidth = 150 * emailLogoScale;
+
 
   try {
     const { data, error } = await resend.emails.send({
@@ -51,7 +81,7 @@ export async function POST(req: NextRequest) {
             <tr>
               <td style="padding: 32px;">
                 <div style="text-align: center; margin-bottom: 24px;">
-                  <img src="https://i.imgur.com/N9c8oEJ.png" alt="Logo" style="max-width: 150px; height: auto;">
+                  <img src="${emailLogoUrl}" alt="Logo" style="max-width: ${logoWidth}px; height: auto;">
                 </div>
                 <h1 style="font-size: 24px; font-weight: bold; color: #ffffff; margin: 0 0 24px; text-align: center;">Message From BELOFTED</h1>
                 <p style="margin: 0 0 16px; text-align: center;">You have received a new message from your portfolio website.</p>

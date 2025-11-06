@@ -53,6 +53,8 @@ interface HomePageSettings {
     plyrPlayerAssetSource?: 'cdn' | 'local';
     plyrPlayerCdnCssUrl?: string;
     plyrPlayerCdnJsUrl?: string;
+    emailLogoUrl?: string;
+    emailLogoScale?: number;
 }
 
 const settingsSchema = z.object({
@@ -72,6 +74,8 @@ const settingsSchema = z.object({
   plyrPlayerAssetSource: z.enum(['cdn', 'local']).optional(),
   plyrPlayerCdnCssUrl: z.string().url().optional().or(z.literal('')),
   plyrPlayerCdnJsUrl: z.string().url().optional().or(z.literal('')),
+  emailLogoUrl: z.string().url({ message: 'Please enter a valid URL.' }).optional().or(z.literal('')),
+  emailLogoScale: z.number().min(0.05).max(5).optional(),
 });
 
 type SettingsFormValues = z.infer<typeof settingsSchema>;
@@ -128,6 +132,8 @@ export default function HomeAdmin() {
       plyrPlayerAssetSource: 'local',
       plyrPlayerCdnCssUrl: 'https://cdn.plyr.io/3.7.8/plyr.css',
       plyrPlayerCdnJsUrl: 'https://cdn.plyr.io/3.7.8/plyr.js',
+      emailLogoUrl: 'https://i.imgur.com/N9c8oEJ.png',
+      emailLogoScale: 1,
     },
   });
 
@@ -153,6 +159,8 @@ export default function HomeAdmin() {
         plyrPlayerAssetSource: homeSettings.plyrPlayerAssetSource || 'local',
         plyrPlayerCdnCssUrl: homeSettings.plyrPlayerCdnCssUrl || 'https://cdn.plyr.io/3.7.8/plyr.css',
         plyrPlayerCdnJsUrl: homeSettings.plyrPlayerCdnJsUrl || 'https://cdn.plyr.io/3.7.8/plyr.js',
+        emailLogoUrl: homeSettings.emailLogoUrl || 'https://i.imgur.com/N9c8oEJ.png',
+        emailLogoScale: homeSettings.emailLogoScale || 1,
       });
     }
   }, [homeSettings, form]);
@@ -409,6 +417,50 @@ export default function HomeAdmin() {
                                             )}
                                         />
                                     )}
+                                </div>
+                                <Separator />
+
+                                {/* Email Settings */}
+                                <div className="space-y-4 p-4 rounded-lg border glass-effect">
+                                     <h3 className="font-headline text-lg">Email Settings</h3>
+                                     <FormField
+                                        control={control}
+                                        name="emailLogoUrl"
+                                        render={({ field }) => (
+                                            <FormItem>
+                                                <FormLabel>Email Logo URL</FormLabel>
+                                                <FormControl>
+                                                    <Input placeholder="https://example.com/email-logo.png" {...field} />
+                                                </FormControl>
+                                                <FormDescription>
+                                                    The logo to display at the top of notification emails.
+                                                </FormDescription>
+                                                <FormMessage />
+                                            </FormItem>
+                                        )}
+                                     />
+                                     <FormField
+                                        control={control}
+                                        name="emailLogoScale"
+                                        render={({ field }) => (
+                                            <FormItem>
+                                                <FormLabel>Email Logo Scale ({Math.round((field.value || 1) * 100)}%)</FormLabel>
+                                                <FormControl>
+                                                    <Slider
+                                                    value={[field.value || 1]}
+                                                    onValueChange={(value) => field.onChange(value[0])}
+                                                    min={0.05}
+                                                    max={2}
+                                                    step={0.05}
+                                                    />
+                                                </FormControl>
+                                                <FormDescription>
+                                                    Adjust the size of the logo in emails.
+                                                </FormDescription>
+                                                <FormMessage />
+                                            </FormItem>
+                                        )}
+                                     />
                                 </div>
                                 <Separator />
 
