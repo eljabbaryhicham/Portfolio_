@@ -194,6 +194,10 @@
         "emailLogoScale": {
           "type": "number",
           "description": "The scale of the logo in emails."
+        },
+        "emailHtmlTemplate": {
+          "type": "string",
+          "description": "The full HTML template for contact form notification emails."
         }
       }
     },
@@ -485,3 +489,5 @@
     ]
   }
 }
+
+    

@@ -16,6 +16,7 @@ const formSchema = z.object({
 interface HomePageSettings {
     emailLogoUrl?: string;
     emailLogoScale?: number;
+    emailHtmlTemplate?: string;
 }
 
 export async function POST(req: NextRequest) {
@@ -48,15 +49,35 @@ export async function POST(req: NextRequest) {
   const FROM_EMAIL = 'onboarding@resend.dev'; // Resend requires this for free tier
 
   try {
-    // Read the HTML template from the file system
-    const templatePath = path.join(process.cwd(), 'src', 'lib', 'email-templates', 'contact-form.html');
-    let htmlTemplate = fs.readFileSync(templatePath, 'utf8');
+    let settings: HomePageSettings = {};
+    const adminApp = await initializeServerApp();
+    
+    if (adminApp) {
+        const firestore = admin.firestore(adminApp);
+        const settingsDoc = await firestore.collection('homepage').doc('settings').get();
+        if (settingsDoc.exists) {
+            settings = settingsDoc.data() as HomePageSettings;
+        }
+    }
+    
+    let htmlTemplate: string;
+    
+    if (settings.emailHtmlTemplate) {
+        // Use template from Firestore if available
+        htmlTemplate = settings.emailHtmlTemplate;
+    } else {
+        // Fallback to local file
+        const templatePath = path.join(process.cwd(), 'src', 'lib', 'email-templates', 'contact-form.html');
+        htmlTemplate = fs.readFileSync(templatePath, 'utf8');
+    }
 
-    // Replace placeholders with actual data
+    // Replace placeholders
     htmlTemplate = htmlTemplate
       .replace('{{name}}', name)
       .replace('{{email}}', email)
-      .replace('{{message}}', message);
+      .replace('{{message}}', message)
+      .replace('{{emailLogoUrl}}', settings.emailLogoUrl || 'https://i.imgur.com/N9c8oEJ.png')
+      .replace('{{emailLogoScale}}', (settings.emailLogoScale || 1).toString());
 
     const { data, error } = await resend.emails.send({
       from: `BELOFTED <${FROM_EMAIL}>`,
@@ -78,3 +99,5 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ success: false, message: `An unexpected server error occurred: ${e.message}` }, { status: 500 });
   }
 }
+
+    
