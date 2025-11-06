@@ -101,8 +101,10 @@ export async function sendContactEmail(
         // ALWAYS fetch the latest settings. This function is NOT cached.
         const settings = await getLatestEmailSettings();
 
-        // **CRITICAL FIX**: Ensure template is a string before calling .replace()
-        const template = (settings.emailHtmlTemplate && typeof settings.emailHtmlTemplate === 'string') ? settings.emailHtmlTemplate : defaultEmailTemplate;
+        // **DEFINITIVE FIX**: Guarantee `template` is a string before using .replace().
+        const template = (typeof settings.emailHtmlTemplate === 'string' && settings.emailHtmlTemplate)
+            ? settings.emailHtmlTemplate
+            : defaultEmailTemplate;
         
         const resend = new Resend(apiKey);
         const TO_EMAIL = 'eljabbaryhicham@gmail.com';
