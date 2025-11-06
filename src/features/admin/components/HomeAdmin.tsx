@@ -196,30 +196,30 @@ export default function HomeAdmin() {
 
   if (isLoading && !isMounted) {
     return (
-      <div class="flex justify-center items-center h-full">
+      <div className="flex justify-center items-center h-full">
         <Preloader />
       </div>
     );
   }
 
   return (
-    <div class="flex-1 flex flex-col h-full">
-        <div class="mb-6">
-            <h2 class="text-xl font-headline">Home Page Settings</h2>
-            <p class="text-muted-foreground">
+    <div className="flex-1 flex flex-col h-full">
+        <div className="mb-6">
+            <h2 className="text-xl font-headline">Home Page Settings</h2>
+            <p className="text-muted-foreground">
                 Manage background videos and other global settings. Changes save automatically.
             </p>
         </div>
-        <div class="flex-1 border rounded-lg overflow-hidden glass-effect">
-            <ScrollArea class="h-full">
-                <div class="p-6">
+        <div className="flex-1 border rounded-lg overflow-hidden glass-effect">
+            <ScrollArea className="h-full">
+                <div className="p-6">
                     <Form {...form}>
-                        <div class="space-y-8 max-w-2xl mx-auto">
-                            <fieldset disabled={!canEditHome} class="group space-y-8">
+                        <div className="space-y-8 max-w-2xl mx-auto">
+                            <fieldset disabled={!canEditHome} className="group space-y-8">
                                 
                                 {/* Homepage Background Settings */}
-                                <div class="space-y-4 p-4 rounded-lg border glass-effect">
-                                    <h3 class="font-headline text-lg">Homepage</h3>
+                                <div className="space-y-4 p-4 rounded-lg border glass-effect">
+                                    <h3 className="font-headline text-lg">Homepage</h3>
                                     
                                     <FormField
                                         control={control}
@@ -258,8 +258,8 @@ export default function HomeAdmin() {
                                         control={control}
                                         name="isHomePageLogoVisible"
                                         render={({ field }) => (
-                                            <FormItem class="flex flex-row items-center justify-between rounded-lg border p-3">
-                                                <div class="space-y-0.5">
+                                            <FormItem className="flex flex-row items-center justify-between rounded-lg border p-3">
+                                                <div className="space-y-0.5">
                                                     <FormLabel>Show Homepage Logo</FormLabel>
                                                 </div>
                                                 <FormControl>
@@ -271,12 +271,12 @@ export default function HomeAdmin() {
                                     
                                     <Separator />
                                     
-                                    <h3 class="font-headline text-lg pt-4">Homepage Background</h3>
+                                    <h3 className="font-headline text-lg pt-4">Homepage Background</h3>
                                     <FormField
                                       control={control}
                                       name="homePageBackgroundType"
                                       render={({ field }) => (
-                                        <FormItem class="space-y-3">
+                                        <FormItem className="space-y-3">
                                           <FormLabel>Background Type</FormLabel>
                                           <FormControl>
                                             <RadioGroup
@@ -285,15 +285,15 @@ export default function HomeAdmin() {
                                                   setValue('homePageBackgroundMediaId', ''); // Reset selection on type change
                                               }}
                                               value={field.value}
-                                              class="flex items-center space-x-4"
+                                              className="flex items-center space-x-4"
                                             >
-                                              <FormItem class="flex items-center space-x-2 space-y-0">
+                                              <FormItem className="flex items-center space-x-2 space-y-0">
                                                 <FormControl><RadioGroupItem value="video" /></FormControl>
-                                                <FormLabel class="font-normal">Video</FormLabel>
+                                                <FormLabel className="font-normal">Video</FormLabel>
                                               </FormItem>
-                                              <FormItem class="flex items-center space-x-2 space-y-0">
+                                              <FormItem className="flex items-center space-x-2 space-y-0">
                                                 <FormControl><RadioGroupItem value="image" /></FormControl>
-                                                <FormLabel class="font-normal">Image</FormLabel>
+                                                <FormLabel className="font-normal">Image</FormLabel>
                                               </FormItem>
                                             </RadioGroup>
                                           </FormControl>
@@ -330,8 +330,8 @@ export default function HomeAdmin() {
                                             control={control}
                                             name="isHomePageVideoEnabled"
                                             render={({ field }) => (
-                                                <FormItem class="flex flex-row items-center justify-between rounded-lg border p-3">
-                                                    <div class="space-y-0.5">
+                                                <FormItem className="flex flex-row items-center justify-between rounded-lg border p-3">
+                                                    <div className="space-y-0.5">
                                                         <FormLabel>Enable Homepage Video</FormLabel>
                                                     </div>
                                                     <FormControl>
@@ -346,13 +346,13 @@ export default function HomeAdmin() {
                                 <Separator />
 
                                 {/* Website Background Settings */}
-                                <div class="space-y-4 p-4 rounded-lg border glass-effect">
-                                     <h3 class="font-headline text-lg">Other Pages Background</h3>
+                                <div className="space-y-4 p-4 rounded-lg border glass-effect">
+                                     <h3 className="font-headline text-lg">Other Pages Background</h3>
                                     <FormField
                                       control={control}
                                       name="websiteBackgroundType"
                                       render={({ field }) => (
-                                        <FormItem class="space-y-3">
+                                        <FormItem className="space-y-3">
                                           <FormLabel>Background Type</FormLabel>
                                           <FormControl>
                                             <RadioGroup
@@ -361,15 +361,15 @@ export default function HomeAdmin() {
                                                   setValue('websiteBackgroundMediaId', ''); // Reset selection on type change
                                               }}
                                               value={field.value}
-                                              class="flex items-center space-x-4"
+                                              className="flex items-center space-x-4"
                                             >
-                                              <FormItem class="flex items-center space-x-2 space-y-0">
+                                              <FormItem className="flex items-center space-x-2 space-y-0">
                                                 <FormControl><RadioGroupItem value="video" /></FormControl>
-                                                <FormLabel class="font-normal">Video</FormLabel>
+                                                <FormLabel className="font-normal">Video</FormLabel>
                                               </FormItem>
-                                              <FormItem class="flex items-center space-x-2 space-y-0">
+                                              <FormItem className="flex items-center space-x-2 space-y-0">
                                                 <FormControl><RadioGroupItem value="image" /></FormControl>
-                                                <FormLabel class="font-normal">Image</FormLabel>
+                                                <FormLabel className="font-normal">Image</FormLabel>
                                               </FormItem>
                                             </RadioGroup>
                                           </FormControl>
@@ -406,8 +406,8 @@ export default function HomeAdmin() {
                                             control={control}
                                             name="isWebsiteVideoEnabled"
                                             render={({ field }) => (
-                                                <FormItem class="flex flex-row items-center justify-between rounded-lg border p-3">
-                                                    <div class="space-y-0.5">
+                                                <FormItem className="flex flex-row items-center justify-between rounded-lg border p-3">
+                                                    <div className="space-y-0.5">
                                                         <FormLabel>Enable Website Video</FormLabel>
                                                     </div>
                                                     <FormControl>
@@ -421,8 +421,8 @@ export default function HomeAdmin() {
                                 <Separator />
 
                                 {/* Email Settings */}
-                                <div class="space-y-4 p-4 rounded-lg border glass-effect">
-                                     <h3 class="font-headline text-lg">Email Settings</h3>
+                                <div className="space-y-4 p-4 rounded-lg border glass-effect">
+                                     <h3 className="font-headline text-lg">Email Settings</h3>
                                      <FormField
                                         control={control}
                                         name="emailLogoUrl"
@@ -465,8 +465,8 @@ export default function HomeAdmin() {
                                 <Separator />
 
                                 {/* Player Settings */}
-                                <div class="space-y-4 p-4 rounded-lg border glass-effect">
-                                     <h3 class="font-headline text-lg">Global Settings</h3>
+                                <div className="space-y-4 p-4 rounded-lg border glass-effect">
+                                     <h3 className="font-headline text-lg">Global Settings</h3>
 
                                      <FormField
                                         control={control}
@@ -474,9 +474,9 @@ export default function HomeAdmin() {
                                         render={({ field }) => (
                                             <FormItem>
                                                 <FormLabel>Theme Color</FormLabel>
-                                                <div class="flex items-center gap-4">
+                                                <div className="flex items-center gap-4">
                                                     <FormControl>
-                                                        <Input type="color" {...field} class="p-1 h-10 w-14 cursor-pointer" />
+                                                        <Input type="color" {...field} className="p-1 h-10 w-14 cursor-pointer" />
                                                     </FormControl>
                                                     <Input type="text" {...field} placeholder="#d81e38" />
                                                 </div>
@@ -494,7 +494,7 @@ export default function HomeAdmin() {
                                       control={control}
                                       name="workPagePlayer"
                                       render={({ field }) => (
-                                        <FormItem class="space-y-3">
+                                        <FormItem className="space-y-3">
                                           <FormLabel>Work Page Video Player</FormLabel>
                                            <FormDescription>
                                             Choose which player to use for videos on the public "Work" page.
@@ -503,15 +503,15 @@ export default function HomeAdmin() {
                                             <RadioGroup
                                               onValueChange={field.onChange}
                                               value={field.value}
-                                              class="flex items-center space-x-4"
+                                              className="flex items-center space-x-4"
                                             >
-                                              <FormItem class="flex items-center space-x-2 space-y-0">
+                                              <FormItem className="flex items-center space-x-2 space-y-0">
                                                 <FormControl><RadioGroupItem value="plyr" /></FormControl>
-                                                <FormLabel class="font-normal">Plyr (Optimized)</FormLabel>
+                                                <FormLabel className="font-normal">Plyr (Optimized)</FormLabel>
                                               </FormItem>
-                                              <FormItem class="flex items-center space-x-2 space-y-0">
+                                              <FormItem className="flex items-center space-x-2 space-y-0">
                                                 <FormControl><RadioGroupItem value="clappr" /></FormControl>
-                                                <FormLabel class="font-normal">Clappr (Feature-rich)</FormLabel>
+                                                <FormLabel className="font-normal">Clappr (Feature-rich)</FormLabel>
                                               </FormItem>
                                             </RadioGroup>
                                           </FormControl>
@@ -524,7 +524,7 @@ export default function HomeAdmin() {
                                       control={control}
                                       name="plyrPlayerAssetSource"
                                       render={({ field }) => (
-                                        <FormItem class="space-y-3">
+                                        <FormItem className="space-y-3">
                                           <FormLabel>Plyr Player Asset Source</FormLabel>
                                            <FormDescription>
                                             Choose how to load the Plyr player's files.
@@ -533,15 +533,15 @@ export default function HomeAdmin() {
                                             <RadioGroup
                                               onValueChange={field.onChange}
                                               value={field.value}
-                                              class="flex items-center space-x-4"
+                                              className="flex items-center space-x-4"
                                             >
-                                              <FormItem class="flex items-center space-x-2 space-y-0">
+                                              <FormItem className="flex items-center space-x-2 space-y-0">
                                                 <FormControl><RadioGroupItem value="local" /></FormControl>
-                                                <FormLabel class="font-normal">Local</FormLabel>
+                                                <FormLabel className="font-normal">Local</FormLabel>
                                               </FormItem>
-                                              <FormItem class="flex items-center space-x-2 space-y-0">
+                                              <FormItem className="flex items-center space-x-2 space-y-0">
                                                 <FormControl><RadioGroupItem value="cdn" /></FormControl>
-                                                <FormLabel class="font-normal">CDN</FormLabel>
+                                                <FormLabel className="font-normal">CDN</FormLabel>
                                               </FormItem>
                                             </RadioGroup>
                                           </FormControl>
@@ -550,7 +550,7 @@ export default function HomeAdmin() {
                                     />
 
                                     {watch('plyrPlayerAssetSource') === 'cdn' && (
-                                        <div class="space-y-4 pl-4 border-l-2 border-primary/50 ml-2">
+                                        <div className="space-y-4 pl-4 border-l-2 border-primary/50 ml-2">
                                             <FormField
                                                 control={control}
                                                 name="plyrPlayerCdnCssUrl"
@@ -604,8 +604,8 @@ export default function HomeAdmin() {
                                         control={control}
                                         name="isTestPageEnabled"
                                         render={({ field }) => (
-                                            <FormItem class="flex flex-row items-center justify-between rounded-lg border p-3">
-                                                <div class="space-y-0.5">
+                                            <FormItem className="flex flex-row items-center justify-between rounded-lg border p-3">
+                                                <div className="space-y-0.5">
                                                     <FormLabel>Enable Test Page</FormLabel>
                                                      <FormDescription>
                                                         Show or hide the "Test" page link in the main navigation.
