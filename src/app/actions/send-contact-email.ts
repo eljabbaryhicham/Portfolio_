@@ -71,7 +71,9 @@ export async function sendContactEmail(
                 console.warn("Could not find 'homepage/settings' document in Firestore. Using fallback template.");
             }
         } else {
-             console.error("Failed to initialize Firebase Admin SDK. Cannot fetch email settings. Using fallback template.");
+             const errorMessage = "Failed to initialize Firebase Admin SDK. Cannot fetch email settings. Check server logs for details.";
+             console.error(errorMessage);
+             return { success: false, message: errorMessage };
         }
         
         let htmlTemplate = settings.emailHtmlTemplate || basicFallbackTemplate;
