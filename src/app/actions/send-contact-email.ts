@@ -1,9 +1,6 @@
 
 'use server';
 
-import * as dotenv from 'dotenv';
-dotenv.config();
-
 import { z } from 'zod';
 import { Resend } from 'resend';
 import { initializeServerApp } from '@/firebase/server-init';
