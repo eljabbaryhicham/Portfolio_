@@ -7,6 +7,7 @@ import { initializeServerApp } from '@/firebase/server-init';
 import admin from 'firebase-admin';
 import { ContactFormInputSchema } from '@/features/contact/data/contact-form-types';
 import { unstable_noStore as noStore } from 'next/cache';
+import { defaultEmailTemplate } from '@/features/admin/components/HomeAdmin'; // Import the correct default template
 
 interface HomePageSettings {
     emailLogoUrl?: string;
@@ -19,54 +20,22 @@ interface ActionState {
     message: string;
 }
 
-const defaultTemplate = `
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>New Contact Form Message</title>
-</head>
-<body style="background-color: #0d1a2e; color: #e5e7eb; margin: 0; padding: 20px; font-family: Arial, sans-serif; font-size: 16px; line-height: 1.6;">
-    <table align="center" border="0" cellpadding="0" cellspacing="0" width="100%" style="max-width: 600px; margin: 0 auto; background-color: #1a2b42; border-radius: 8px; border: 1px solid #2a3f5f;">
-    <tr>
-        <td style="padding: 32px;">
-        <div style="text-align: center; margin-bottom: 24px;">
-            <img src="{{emailLogoUrl}}" alt="Logo" style="max-width: 150px; height: auto; transform: scale({{emailLogoScale}});">
-        </div>
-        <h1 style="font-size: 24px; font-weight: bold; color: #ffffff; margin: 0 0 24px; text-align: center;">Message From {{name}}</h1>
-        <p style="margin: 0 0 16px; text-align: center;">You have received a new message from your portfolio website.</p>
-        
-        <div style="background-color: #0d1a2e; padding: 20px; border-radius: 8px;">
-            <p style="margin: 0 0 8px;"><strong>Name:</strong> {{name}}</p>
-            <p style="margin: 0 0 16px;"><strong>Email:</strong> <a href="mailto:{{email}}" style="color: #60a5fa; text-decoration: none;">{{email}}</a></p>
-            <hr style="border: none; border-top: 1px solid #2a3f5f; margin: 16px 0;">
-            <p style="margin: 0 0 8px; font-weight: bold; color: #d1d5db;">Message:</p>
-            <p style="margin: 0; white-space: pre-wrap; word-wrap: break-word;">{{message}}</p>
-        </div>
-
-        <p style="margin: 24px 0 0; font-size: 12px; color: #9ca3af; text-align: center;">You can reply directly to this email to contact the user.</p>
-        </td>
-    </tr>
-    </table>
-</body>
-</html>`;
-
-
 /**
  * Fetches the latest email settings from Firestore dynamically.
  * noStore() ensures this function's result is never cached.
  */
 async function getLatestEmailSettings(): Promise<HomePageSettings> {
-    noStore(); // Force dynamic execution.
+    // This is the crucial line to prevent caching of the data fetch.
+    noStore();
+    
     console.log("Attempting to get latest email settings from Firestore...");
 
     const adminApp = await initializeServerApp();
     if (!adminApp) {
-        console.error("sendContactEmail Error: Failed to initialize Firebase Admin SDK. Cannot fetch email settings.");
+        console.error("sendContactEmail Error: Failed to initialize Firebase Admin SDK. Cannot fetch email settings. Using default template.");
         return {
-            emailHtmlTemplate: defaultTemplate,
-            emailLogoUrl: 'https://i.imgur.com/N9c8oEJ.png',
+            emailHtmlTemplate: defaultEmailTemplate,
+            emailLogoUrl: 'https://i.imgur.com/N9c8oEJ.png', // Default fallback logo
             emailLogoScale: 1,
         };
     }
@@ -79,22 +48,22 @@ async function getLatestEmailSettings(): Promise<HomePageSettings> {
             const settings = settingsDoc.data() as HomePageSettings;
             console.log("Successfully fetched dynamic settings from database.");
             return {
-                emailHtmlTemplate: settings.emailHtmlTemplate || defaultTemplate,
+                emailHtmlTemplate: settings.emailHtmlTemplate || defaultEmailTemplate,
                 emailLogoUrl: settings.emailLogoUrl || 'https://i.imgur.com/N9c8oEJ.png',
                 emailLogoScale: settings.emailLogoScale || 1,
             };
         } else {
-            console.warn("Could not find 'homepage/settings' document. Using default values.");
+            console.warn("Could not find 'homepage/settings' document in Firestore. Using default values.");
             return {
-                 emailHtmlTemplate: defaultTemplate,
+                 emailHtmlTemplate: defaultEmailTemplate,
                  emailLogoUrl: 'https://i.imgur.com/N9c8oEJ.png',
                  emailLogoScale: 1,
             };
         }
     } catch (error) {
-        console.error("Error fetching dynamic settings from Firestore:", error);
+        console.error("Error fetching dynamic settings from Firestore. Using default template:", error);
         return {
-             emailHtmlTemplate: defaultTemplate,
+             emailHtmlTemplate: defaultEmailTemplate,
              emailLogoUrl: 'https://i.imgur.com/N9c8oEJ.png',
              emailLogoScale: 1,
         };
@@ -127,13 +96,15 @@ export async function sendContactEmail(
     const { name, email, message } = validatedFields.data;
     
     try {
+        // ALWAYS fetch the latest settings. This function is NOT cached.
         const settings = await getLatestEmailSettings();
         
         const resend = new Resend(apiKey);
         const TO_EMAIL = 'eljabbaryhicham@gmail.com';
         const FROM_EMAIL = 'onboarding@resend.dev';
 
-        const finalHtml = (settings.emailHtmlTemplate || defaultTemplate)
+        // Ensure all placeholders are replaced using the fresh settings
+        const finalHtml = (settings.emailHtmlTemplate || defaultEmailTemplate)
           .replace(/{{name}}/g, name)
           .replace(/{{email}}/g, email)
           .replace(/{{message}}/g, message)

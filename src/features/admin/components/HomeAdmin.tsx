@@ -91,7 +91,7 @@ interface MediaAsset {
     title?: string;
 }
 
-const defaultEmailTemplate = `<!DOCTYPE html>
+export const defaultEmailTemplate = `<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
