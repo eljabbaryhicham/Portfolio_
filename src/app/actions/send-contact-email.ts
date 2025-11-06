@@ -8,7 +8,8 @@ import admin from 'firebase-admin';
 import { ContactFormInputSchema } from '@/features/contact/data/contact-form-types';
 
 // This is the crucial line that prevents caching and ensures fresh data on every run.
-export const revalidate = 0;
+// NOTE: export const revalidate = 0; IS NOT VALID IN SERVER ACTIONS.
+// The dynamic nature is ensured by re-initializing the admin app on each call.
 
 interface HomePageSettings {
     emailLogoUrl?: string;
@@ -35,7 +36,7 @@ export async function sendContactEmail(
     prevState: ActionState,
     formData: FormData
 ): Promise<ActionState> {
-    console.log("sendContactEmail action started. This action is set to be fully dynamic (no caching).");
+    console.log("sendContactEmail action started. This action should run dynamically on the server.");
     const apiKey = process.env.RESEND_API_KEY;
 
     if (!apiKey) {
@@ -63,9 +64,11 @@ export async function sendContactEmail(
 
     try {
         let settings: HomePageSettings = {};
+        // Initialize the admin app on every call to ensure fresh data
         const adminApp = await initializeServerApp();
         
         if (adminApp) {
+            console.log("Firebase Admin SDK initialized successfully for email action.");
             const firestore = admin.firestore(adminApp);
             const settingsDoc = await firestore.collection('homepage').doc('settings').get();
             if (settingsDoc.exists) {
@@ -81,6 +84,7 @@ export async function sendContactEmail(
         } else {
              const errorMessage = "Failed to initialize Firebase Admin SDK. Cannot fetch email settings. Check server logs for details.";
              console.error(errorMessage);
+             // Return the specific error to the user
              return { success: false, message: errorMessage };
         }
         
