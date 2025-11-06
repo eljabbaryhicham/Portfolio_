@@ -1,6 +1,10 @@
 
 'use server';
 import admin from 'firebase-admin';
+import * as dotenv from 'dotenv';
+
+// Load environment variables from .env file
+dotenv.config();
 
 /**
  * Initializes the Firebase Admin SDK for server-side operations if not already initialized.
