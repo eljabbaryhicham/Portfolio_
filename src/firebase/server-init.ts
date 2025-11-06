@@ -19,14 +19,14 @@ export async function initializeServerApp(): Promise<admin.app.App | null> {
   const projectId = process.env.FIREBASE_PROJECT_ID;
   const clientEmail = process.env.FIREBASE_CLIENT_EMAIL;
   // Vercel's build process automatically handles multiline variables.
-  // The .replace() logic is still a good failsafe for different environments.
+  // The .replace() logic is a critical failsafe for different environments and copy-paste errors.
   const privateKey = process.env.FIREBASE_PRIVATE_KEY?.replace(/\\n/g, '\n');
 
   console.log("Attempting to initialize Firebase Admin SDK...");
   console.log("Vercel ENV:", process.env.VERCEL_ENV || 'Not set');
   console.log("FIREBASE_PROJECT_ID:", projectId ? `Present (Value: ${projectId})` : "MISSING or undefined");
   console.log("FIREBASE_CLIENT_EMAIL:", clientEmail ? "Present" : "MISSING or undefined");
-  console.log("FIREBASE_PRIVATE_KEY:", privateKey ? "Present" : "MISSING or undefined");
+  console.log("FIREBASE_PRIVATE_KEY:", privateKey ? `Present (Starts: ${privateKey.substring(0,30)}... Ends: ...${privateKey.substring(privateKey.length - 30)})` : "MISSING or undefined");
 
   // Check if all required environment variables are present and not empty.
   if (projectId && clientEmail && privateKey) {

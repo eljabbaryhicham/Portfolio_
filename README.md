@@ -1,3 +1,4 @@
+
 # myportfolio
 
 This is a Next.js portfolio application built with Firebase, Cloudinary, and Genkit.
@@ -19,6 +20,14 @@ For the application to run correctly, you will need to create a `.env.local` fil
 ### Production Deployment (Vercel)
 
 When deploying to Vercel, you must set all the environment variables listed in `.env.example` in your Vercel project's **Settings > Environment Variables** section. This includes both the `NEXT_PUBLIC_` variables and all the server-side secret keys (Firebase Admin, Cloudinary, Resend, etc.).
+
+**VERY IMPORTANT: Handling `FIREBASE_PRIVATE_KEY`**
+
+The `FIREBASE_PRIVATE_KEY` is a multi-line value that starts with `-----BEGIN PRIVATE KEY-----` and ends with `-----END PRIVATE KEY-----`. When you copy this from your service account file, you must ensure it is pasted into the Vercel environment variable field correctly.
+
+- **Copy the entire key**, including the `-----BEGIN...` and `-----END...` lines.
+- **Paste it directly** into the Vercel value field. Vercel is designed to handle multi-line keys correctly. Do not try to convert it to a single line or remove the newline characters yourself.
+- If you continue to see authentication errors after setting the variable, the most common cause is an error in the copy-paste process. The best solution is to **generate a new private key** in your Google Cloud or Firebase project settings and carefully repeat the copy-paste process into Vercel.
 
 **Important**: Do not commit your `.env.local` file to Git. It contains sensitive credentials and is already included in the `.gitignore` file.
 
