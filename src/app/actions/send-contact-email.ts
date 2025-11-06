@@ -8,6 +8,9 @@ import admin from 'firebase-admin';
 import { ContactFormInputSchema } from '@/features/contact/data/contact-form-types';
 import { unstable_noStore as noStore } from 'next/cache';
 
+// This is the crucial line to prevent caching of the entire action.
+export const dynamic = 'force-dynamic';
+
 interface HomePageSettings {
     emailLogoUrl?: string;
     emailLogoScale?: number;
@@ -19,8 +22,7 @@ interface ActionState {
     message: string;
 }
 
-// This is the correct default template, which will be used as a fallback.
-const correctDefaultTemplate = `
+const defaultTemplate = `
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -59,26 +61,42 @@ const correctDefaultTemplate = `
  */
 async function getLatestEmailSettings(): Promise<HomePageSettings> {
     noStore(); // This is the crucial line that prevents caching of this function's result.
-    console.log("Fetching latest email settings from Firestore dynamically...");
+    console.log("Attempting to get latest email settings...");
+
+    const adminApp = await initializeServerApp();
+    if (!adminApp) {
+        console.error("sendContactEmail Error: Failed to initialize Firebase Admin SDK. Cannot fetch email settings.");
+        // Return default values if Firebase isn't available.
+        return {
+            emailHtmlTemplate: defaultTemplate,
+            emailLogoUrl: 'https://i.imgur.com/N9c8oEJ.png',
+            emailLogoScale: 1,
+        };
+    }
+
     try {
-        const adminApp = await initializeServerApp();
-        if (!adminApp) {
-            throw new Error("Failed to initialize Firebase Admin SDK. Cannot fetch email settings.");
-        }
         const firestore = admin.firestore(adminApp);
         const settingsDoc = await firestore.collection('homepage').doc('settings').get();
         
         if (settingsDoc.exists) {
             const settings = settingsDoc.data() as HomePageSettings;
-            console.log("Successfully fetched dynamic settings:", { hasTemplate: !!settings.emailHtmlTemplate, logoUrl: settings.emailLogoUrl, logoScale: settings.emailLogoScale });
+            console.log("Successfully fetched dynamic settings:", { hasTemplate: !!settings.emailHtmlTemplate });
             return settings;
         } else {
             console.warn("Could not find 'homepage/settings' document. Will use fallback.");
-            return {};
+            return {
+                 emailHtmlTemplate: defaultTemplate,
+                 emailLogoUrl: 'https://i.imgur.com/N9c8oEJ.png',
+                 emailLogoScale: 1,
+            };
         }
     } catch (error) {
-        console.error("Error fetching dynamic settings:", error);
-        return {};
+        console.error("Error fetching dynamic settings from Firestore:", error);
+        return {
+             emailHtmlTemplate: defaultTemplate,
+             emailLogoUrl: 'https://i.imgur.com/N9c8oEJ.png',
+             emailLogoScale: 1,
+        };
     }
 }
 
@@ -86,12 +104,13 @@ export async function sendContactEmail(
     prevState: ActionState,
     formData: FormData
 ): Promise<ActionState> {
-    console.log("sendContactEmail server action started dynamically.");
+    console.log("`sendContactEmail` server action invoked dynamically.");
     
     const apiKey = process.env.RESEND_API_KEY;
     if (!apiKey) {
-        console.error('RESEND_API_KEY is not configured on the server.');
-        return { success: false, message: 'Server is not configured for sending emails.' };
+        const errorMsg = 'Server is not configured for sending emails: RESEND_API_KEY is missing.';
+        console.error(errorMsg);
+        return { success: false, message: errorMsg };
     }
 
     const validatedFields = ContactFormInputSchema.safeParse({
@@ -113,14 +132,13 @@ export async function sendContactEmail(
         const TO_EMAIL = 'eljabbaryhicham@gmail.com';
         const FROM_EMAIL = 'onboarding@resend.dev';
 
-        let htmlTemplate = settings.emailHtmlTemplate || correctDefaultTemplate;
+        let htmlTemplate = settings.emailHtmlTemplate || defaultTemplate;
         const logoUrl = settings.emailLogoUrl || 'https://i.imgur.com/N9c8oEJ.png';
         const logoScale = settings.emailLogoScale || 1;
 
         console.log(`Using template: ${settings.emailHtmlTemplate ? 'Custom DB Template (Live)' : 'Fallback Template'}`);
         console.log(`Using logo URL: ${logoUrl}`);
-        console.log(`Using logo scale: ${logoScale}`);
-        console.log(`Sending email to: ${TO_EMAIL} from: ${FROM_EMAIL}`);
+        console.log(`Sending email to: ${TO_EMAIL}`);
 
 
         const finalHtml = htmlTemplate
@@ -151,3 +169,5 @@ export async function sendContactEmail(
         return { success: false, message: `An unexpected server error occurred: ${e.message}` };
     }
 }
+
+    
