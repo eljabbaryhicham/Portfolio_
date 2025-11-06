@@ -7,7 +7,6 @@ import { initializeServerApp } from '@/firebase/server-init';
 import admin from 'firebase-admin';
 import { ContactFormInputSchema } from '@/features/contact/data/contact-form-types';
 import { unstable_noStore as noStore } from 'next/cache';
-import { defaultEmailTemplate } from '@/features/admin/components/HomeAdmin'; // Import the correct default template
 
 interface HomePageSettings {
     emailLogoUrl?: string;
@@ -24,7 +23,7 @@ interface ActionState {
  * Fetches the latest email settings from Firestore dynamically.
  * noStore() ensures this function's result is never cached.
  */
-async function getLatestEmailSettings(): Promise<HomePageSettings> {
+async function getLatestEmailSettings(): Promise<HomePageSettings | null> {
     // This is the crucial line to prevent caching of the data fetch.
     noStore();
     
@@ -32,41 +31,29 @@ async function getLatestEmailSettings(): Promise<HomePageSettings> {
 
     const adminApp = await initializeServerApp();
     if (!adminApp) {
-        console.error("sendContactEmail Error: Failed to initialize Firebase Admin SDK. Cannot fetch email settings. Using default template.");
-        return {
-            emailHtmlTemplate: defaultEmailTemplate,
-            emailLogoUrl: 'https://i.imgur.com/N9c8oEJ.png', // Default fallback logo
-            emailLogoScale: 1,
-        };
+        console.error("sendContactEmail Error: Failed to initialize Firebase Admin SDK. Cannot fetch email settings.");
+        return null;
     }
 
     try {
         const firestore = admin.firestore(adminApp);
         const settingsDoc = await firestore.collection('homepage').doc('settings').get();
         
-        if (settingsDoc.exists) {
+        if (settingsDoc.exists && settingsDoc.data()?.emailHtmlTemplate) {
             const settings = settingsDoc.data() as HomePageSettings;
             console.log("Successfully fetched dynamic settings from database.");
             return {
-                emailHtmlTemplate: settings.emailHtmlTemplate || defaultEmailTemplate,
+                emailHtmlTemplate: settings.emailHtmlTemplate,
                 emailLogoUrl: settings.emailLogoUrl || 'https://i.imgur.com/N9c8oEJ.png',
                 emailLogoScale: settings.emailLogoScale || 1,
             };
         } else {
-            console.warn("Could not find 'homepage/settings' document in Firestore. Using default values.");
-            return {
-                 emailHtmlTemplate: defaultEmailTemplate,
-                 emailLogoUrl: 'https://i.imgur.com/N9c8oEJ.png',
-                 emailLogoScale: 1,
-            };
+            console.warn("Could not find 'homepage/settings' document in Firestore or `emailHtmlTemplate` is missing.");
+            return null;
         }
     } catch (error) {
-        console.error("Error fetching dynamic settings from Firestore. Using default template:", error);
-        return {
-             emailHtmlTemplate: defaultEmailTemplate,
-             emailLogoUrl: 'https://i.imgur.com/N9c8oEJ.png',
-             emailLogoScale: 1,
-        };
+        console.error("Error fetching dynamic settings from Firestore:", error);
+        return null;
     }
 }
 
@@ -98,13 +85,19 @@ export async function sendContactEmail(
     try {
         // ALWAYS fetch the latest settings. This function is NOT cached.
         const settings = await getLatestEmailSettings();
+
+        if (!settings || !settings.emailHtmlTemplate) {
+             const errorMsg = 'Email template is not configured in the admin panel. Cannot send email.';
+             console.error(errorMsg);
+             return { success: false, message: errorMsg };
+        }
         
         const resend = new Resend(apiKey);
         const TO_EMAIL = 'eljabbaryhicham@gmail.com';
         const FROM_EMAIL = 'onboarding@resend.dev';
 
         // Ensure all placeholders are replaced using the fresh settings
-        const finalHtml = (settings.emailHtmlTemplate || defaultEmailTemplate)
+        const finalHtml = settings.emailHtmlTemplate
           .replace(/{{name}}/g, name)
           .replace(/{{email}}/g, email)
           .replace(/{{message}}/g, message)
