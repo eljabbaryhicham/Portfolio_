@@ -58,7 +58,7 @@ const defaultTemplate = `
  */
 async function getLatestEmailSettings(): Promise<HomePageSettings> {
     noStore(); // This is the crucial line that prevents caching of this function's result.
-    console.log("Attempting to get latest email settings...");
+    console.log("Attempting to get latest email settings from Firestore...");
 
     const adminApp = await initializeServerApp();
     if (!adminApp) {
@@ -78,7 +78,12 @@ async function getLatestEmailSettings(): Promise<HomePageSettings> {
         if (settingsDoc.exists) {
             const settings = settingsDoc.data() as HomePageSettings;
             console.log("Successfully fetched dynamic settings:", { hasTemplate: !!settings.emailHtmlTemplate });
-            return settings;
+            // Return the fetched settings, ensuring no property is undefined
+            return {
+                emailHtmlTemplate: settings.emailHtmlTemplate || defaultTemplate,
+                emailLogoUrl: settings.emailLogoUrl || 'https://i.imgur.com/N9c8oEJ.png',
+                emailLogoScale: settings.emailLogoScale || 1,
+            };
         } else {
             console.warn("Could not find 'homepage/settings' document. Will use fallback.");
             return {
@@ -123,18 +128,20 @@ export async function sendContactEmail(
     const { name, email, message } = validatedFields.data;
     
     try {
+        // Always fetch the latest settings
         const settings = await getLatestEmailSettings();
         
         const resend = new Resend(apiKey);
         const TO_EMAIL = 'eljabbaryhicham@gmail.com';
         const FROM_EMAIL = 'onboarding@resend.dev';
 
-        let htmlTemplate = settings.emailHtmlTemplate || defaultTemplate;
-        const logoUrl = settings.emailLogoUrl || 'https://i.imgur.com/N9c8oEJ.png';
-        const logoScale = settings.emailLogoScale || 1;
+        const htmlTemplate = settings.emailHtmlTemplate;
+        const logoUrl = settings.emailLogoUrl;
+        const logoScale = settings.emailLogoScale;
 
-        console.log(`Using template: ${settings.emailHtmlTemplate ? 'Custom DB Template (Live)' : 'Fallback Template'}`);
+        console.log(`Using template: ${settings.emailHtmlTemplate === defaultTemplate ? 'Fallback Template' : 'Custom DB Template (Live)'}`);
         console.log(`Using logo URL: ${logoUrl}`);
+        console.log(`Using logo scale: ${logoScale}`);
         console.log(`Sending email to: ${TO_EMAIL}`);
 
 
@@ -142,8 +149,8 @@ export async function sendContactEmail(
           .replace(/{{name}}/g, name)
           .replace(/{{email}}/g, email)
           .replace(/{{message}}/g, message)
-          .replace(/{{emailLogoUrl}}/g, logoUrl)
-          .replace(/{{emailLogoScale}}/g, logoScale.toString());
+          .replace(/{{emailLogoUrl}}/g, logoUrl || 'https://i.imgur.com/N9c8oEJ.png')
+          .replace(/{{emailLogoScale}}/g, (logoScale || 1).toString());
 
         const { data, error } = await resend.emails.send({
           from: `BELOFTED <${FROM_EMAIL}>`,
@@ -166,5 +173,6 @@ export async function sendContactEmail(
         return { success: false, message: `An unexpected server error occurred: ${e.message}` };
     }
 }
+    
 
     
