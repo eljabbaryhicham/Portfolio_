@@ -9,10 +9,11 @@ import { motion } from "framer-motion";
 import React from "react";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faHouse, faImage, faCircleInfo, faEnvelope, faShieldHalved, faVial } from "@fortawesome/free-solid-svg-icons";
+import { faHouse, faImage, faCircleInfo, faEnvelope, faShieldHalved, faVial, faGlobe } from "@fortawesome/free-solid-svg-icons";
 import Logo from "../logo";
 import { doc } from "firebase/firestore";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 
 
 const navItems = [
@@ -139,6 +140,63 @@ export function AppNav() {
     )
   };
   
+  const renderLanguageSwitcher = () => {
+    const switcherContent = (
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <motion.div
+            className="relative"
+            initial="rest"
+            whileHover="hover"
+            animate="rest"
+            variants={{
+              rest: { scale: 1, rotate: 0 },
+              hover: { scale: 1.1, rotate: [0, 10, -5, 0] },
+            }}
+            transition={{ duration: 0.3 }}
+          >
+            <Button
+              variant="ghost"
+              size="icon"
+              className={cn(
+                "group relative flex items-center justify-center rounded-full transition-all duration-300 aspect-square glass-effect",
+                isMobile ? 'h-[clamp(2.5rem,10vw,3rem)] w-[clamp(2.5rem,10vw,3rem)]' : "h-10 w-10",
+                "text-white"
+              )}
+            >
+              <FontAwesomeIcon icon={faGlobe} className="h-[50%] w-[50%] relative z-10 transition-colors text-white/70 group-hover:text-white" />
+            </Button>
+          </motion.div>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent className="glass-effect" side={isMobile ? "top" : "right"}>
+          <DropdownMenuItem>ENG</DropdownMenuItem>
+          <DropdownMenuItem>FR</DropdownMenuItem>
+          <DropdownMenuItem>AR</DropdownMenuItem>
+        </DropdownMenuContent>
+      </DropdownMenu>
+    );
+
+     if (isMobile) {
+      return (
+        <div className="h-full flex flex-shrink-0 basis-auto items-center justify-center">
+          {switcherContent}
+        </div>
+      );
+    }
+
+    return (
+      <TooltipProvider>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            {switcherContent}
+          </TooltipTrigger>
+          <TooltipContent side="right" className="glass-effect rounded-md">
+            <p>Language</p>
+          </TooltipContent>
+        </Tooltip>
+      </TooltipProvider>
+    );
+  };
 
   if (isMobile) {
     return (
@@ -153,6 +211,7 @@ export function AppNav() {
           )}>
           <nav className="flex h-full flex-1 items-center justify-between px-[5vw] sm:px-[15vw]">
             {accessibleNavItems.map(renderNavItem)}
+            {renderLanguageSwitcher()}
           </nav>
         </div>
       </motion.div>
@@ -181,6 +240,7 @@ export function AppNav() {
           className="flex flex-row md:flex-col items-center justify-around md:justify-center w-full md:w-auto md:gap-10"
         >
            {accessibleNavItems.map(renderNavItem)}
+           {renderLanguageSwitcher()}
         </nav>
         <div className="flex flex-col items-center gap-4">
           <div className="h-8 w-8 hidden md:block"></div>
