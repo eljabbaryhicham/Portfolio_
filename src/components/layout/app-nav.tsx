@@ -41,7 +41,7 @@ export function AppNav() {
   const { user } = useUser();
   const firestore = useFirestore();
   const isMobile = useIsMobile();
-  const { t, setLanguage } = useI18n();
+  const { setLanguage, t } = useI18n();
 
   const contactDocRef = useMemoFirebase(
     () => (firestore ? doc(firestore, 'contact', 'details') : null),
@@ -163,7 +163,7 @@ export function AppNav() {
               size="icon"
               className={cn(
                 "group relative flex items-center justify-center rounded-full transition-all duration-300 aspect-square glass-effect",
-                isMobile ? 'h-10 w-10' : "h-8 w-8", // Smaller size
+                isMobile ? 'h-[clamp(2.5rem,10vw,3rem)] w-[clamp(2.5rem,10vw,3rem)]' : "h-8 w-8", // Smaller size
                 "text-white"
               )}
             >
@@ -211,7 +211,7 @@ export function AppNav() {
         <div className={cn(
           "flex h-[7vh] min-h-[60px] flex-row items-center justify-between rounded-lg border border-border/50 glass-effect"
           )}>
-          <nav className="flex h-full flex-1 items-center justify-around px-[5vw]">
+          <nav className="flex h-full flex-1 items-center justify-around px-[5vw] gap-4">
             {accessibleNavItems.map(renderNavItem)}
             {renderLanguageSwitcher()}
           </nav>
@@ -244,7 +244,6 @@ export function AppNav() {
            {accessibleNavItems.map(renderNavItem)}
         </nav>
         <div className="flex flex-col items-center gap-4">
-          <div className="h-8 w-8 hidden md:block"></div>
           {renderLanguageSwitcher()}
         </div>
       </div>
