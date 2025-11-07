@@ -14,7 +14,6 @@ import Logo from "../logo";
 import { doc } from "firebase/firestore";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { Button } from "@/components/ui/button";
 import { useI18n } from "@/context/i18n-context";
 
 
@@ -158,17 +157,15 @@ export function AppNav() {
             }}
             transition={{ duration: 0.3 }}
           >
-            <Button
-              variant="ghost"
-              size="icon"
+            <div
               className={cn(
-                "group relative flex items-center justify-center rounded-full transition-all duration-300 aspect-square glass-effect",
+                "group relative flex items-center justify-center rounded-full transition-all duration-300 aspect-square glass-effect cursor-pointer",
                 isMobile ? 'h-[clamp(2.2rem,8vw,2.5rem)] w-[clamp(2.2rem,8vw,2.5rem)]' : "h-8 w-8",
                 "text-white"
               )}
             >
               <FontAwesomeIcon icon={faGlobe} className="h-[50%] w-[50%] relative z-10 transition-colors text-white/70 group-hover:text-white" />
-            </Button>
+            </div>
           </motion.div>
         </DropdownMenuTrigger>
         <DropdownMenuContent className="glass-effect" side={isMobile ? "top" : "right"}>
@@ -211,7 +208,7 @@ export function AppNav() {
         <div className={cn(
           "flex h-[7vh] min-h-[60px] flex-row items-center justify-between rounded-lg border border-border/50 glass-effect"
           )}>
-          <nav className="flex h-full flex-1 items-center justify-center px-[5vw] gap-8">
+          <nav className="flex h-full flex-1 items-center justify-around px-[5vw]">
             {accessibleNavItems.map(renderNavItem)}
             {renderLanguageSwitcher()}
           </nav>
