@@ -163,7 +163,7 @@ export function AppNav() {
               size="icon"
               className={cn(
                 "group relative flex items-center justify-center rounded-full transition-all duration-300 aspect-square glass-effect",
-                isMobile ? 'h-[clamp(2.5rem,10vw,3rem)] w-[clamp(2.5rem,10vw,3rem)]' : "h-10 w-10",
+                isMobile ? 'h-10 w-10' : "h-8 w-8", // Smaller size
                 "text-white"
               )}
             >
@@ -240,12 +240,12 @@ export function AppNav() {
             </div>
         </Link>
         <nav 
-          className="flex flex-row md:flex-col items-center justify-around md:justify-center w-full md:w-auto md:gap-10"
+          className="flex flex-row md:flex-col items-center justify-around md:justify-center w-full md:w-auto md:gap-8"
         >
            {accessibleNavItems.map(renderNavItem)}
-           {renderLanguageSwitcher()}
         </nav>
         <div className="flex flex-col items-center gap-4">
+          {renderLanguageSwitcher()}
           <div className="h-8 w-8 hidden md:block"></div>
         </div>
       </div>

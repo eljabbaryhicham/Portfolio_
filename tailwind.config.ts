@@ -1,3 +1,4 @@
+
 import type {Config} from 'tailwindcss';
 
 export default {
@@ -15,6 +16,7 @@ export default {
         headline: ['Bungee', 'sans-serif'],
         code: ['monospace'],
         handwriting: ['Dancing Script', 'cursive'],
+        arabic: ['Zain', 'sans-serif'],
       },
       colors: {
         background: 'hsl(var(--background))',
