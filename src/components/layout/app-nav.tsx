@@ -174,7 +174,6 @@ export function AppNav() {
         <DropdownMenuContent className="glass-effect" side={isMobile ? "top" : "right"}>
           <DropdownMenuItem onClick={() => setLanguage('en')}>ENG</DropdownMenuItem>
           <DropdownMenuItem onClick={() => setLanguage('fr')}>FR</DropdownMenuItem>
-          <DropdownMenuItem onClick={() => setLanguage('ar')}>AR</DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
     );
@@ -212,7 +211,7 @@ export function AppNav() {
         <div className={cn(
           "flex h-[7vh] min-h-[60px] flex-row items-center justify-between rounded-lg border border-border/50 glass-effect"
           )}>
-          <nav className="flex h-full flex-1 items-center justify-between px-[5vw] sm:px-[15vw]">
+          <nav className="flex h-full flex-1 items-center justify-around px-[5vw]">
             {accessibleNavItems.map(renderNavItem)}
             {renderLanguageSwitcher()}
           </nav>
@@ -240,13 +239,13 @@ export function AppNav() {
             </div>
         </Link>
         <nav 
-          className="flex flex-row md:flex-col items-center justify-around md:justify-center w-full md:w-auto md:gap-8"
+          className="flex flex-row md:flex-col items-center justify-around md:justify-center w-full md:w-auto md:gap-4"
         >
            {accessibleNavItems.map(renderNavItem)}
         </nav>
         <div className="flex flex-col items-center gap-4">
-          {renderLanguageSwitcher()}
           <div className="h-8 w-8 hidden md:block"></div>
+          {renderLanguageSwitcher()}
         </div>
       </div>
     </motion.aside>

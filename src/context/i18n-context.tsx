@@ -5,9 +5,8 @@ import React, { createContext, useContext, useState, useEffect, type ReactNode }
 
 import en from '@/locales/en.json';
 import fr from '@/locales/fr.json';
-import ar from '@/locales/ar.json';
 
-const translations = { en, fr, ar };
+const translations = { en, fr };
 type Language = keyof typeof translations;
 
 interface I18nContextType {

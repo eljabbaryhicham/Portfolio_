@@ -160,7 +160,7 @@ export default function AboutPage() {
                             <Logo src={logoUrl} />
                         </div>
                         <h2 className="text-2xl md:text-3xl font-headline tracking-tight mb-4">{aboutContent?.title}</h2>
-                        <p className="text-foreground/70 leading-relaxed mb-6 text-center text-justify">{t('about.paragraph')}</p>
+                        <p className="text-foreground/70 leading-relaxed mb-6 text-center text-justify">{aboutContent?.content}</p>
                         <div className="hidden sm:flex flex-col sm:flex-row gap-4 justify-center">
                             <Button asChild>
                                 <Link href="/contact">
