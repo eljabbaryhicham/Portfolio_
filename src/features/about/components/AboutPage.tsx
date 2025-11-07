@@ -177,7 +177,10 @@ export default function AboutPage() {
                         </div>
                     </div>
                     <div className="md:w-1/2 flex flex-col justify-center">
-                       <h2 className="text-2xl md:text-3xl font-headline tracking-tight mb-6 text-center">{t('about.what_you_get')}</h2>
+                       <div className="text-center mb-6">
+                        <h2 className="text-2xl md:text-3xl font-headline tracking-tight">{t('about.what_you_get')}</h2>
+                        <Separator className="bg-white/10 max-w-xs mx-auto mt-2" />
+                      </div>
                        <div className="grid grid-cols-6 grid-rows-2 gap-4 h-full">
                         {services.map((service, index) => {
                             let gridClasses = '';
