@@ -12,6 +12,7 @@ import type { PortfolioItem } from '@/features/portfolio/data/portfolio-data';
 import { usePathname } from 'next/navigation';
 import Image from 'next/image';
 import React, { useEffect, useState } from 'react';
+import { I18nProvider } from '@/context/i18n-context';
 
 interface HomePageSettings {
     homePageBackgroundType?: 'video' | 'image';
@@ -202,13 +203,15 @@ export default function RootLayout({
         </FirebaseClientProvider>
       </head>
       <body className={cn('font-body antialiased text-center')} suppressHydrationWarning>
-        <FirebaseClientProvider>
-            <SiteBackground />
-            <LayoutProvider>
-                {children}
-            </LayoutProvider>
-            <Toaster />
-        </FirebaseClientProvider>
+        <I18nProvider>
+          <FirebaseClientProvider>
+              <SiteBackground />
+              <LayoutProvider>
+                  {children}
+              </LayoutProvider>
+              <Toaster />
+          </FirebaseClientProvider>
+        </I18nProvider>
       </body>
     </html>
   );

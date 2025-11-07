@@ -1,0 +1,59 @@
+
+{
+  "nav": {
+    "home": "Home",
+    "work": "Work",
+    "about": "About",
+    "contact": "Contact",
+    "admin": "Admin",
+    "test": "Test",
+    "language": "Language"
+  },
+  "home": {
+    "explore_work": "Explore Work"
+  },
+  "work": {
+    "title": "Our Work",
+    "description": "Browse our collection of projects. Click on any item to view details.",
+    "all_projects": "All Projects",
+    "graphics": "Graphics",
+    "animation": "Animation",
+    "show_more": "Show More",
+    "more_projects": "more projects"
+  },
+  "about": {
+    "title": "About Us",
+    "description": "Learn more about our mission and the brands we've worked with.",
+    "what_you_get": "What You'll Get?",
+    "services": {
+      "brainstorming": "Brainstorming & Scripting",
+      "voiceover": "Voiceover & Sound",
+      "creation": "Content Creation, Animation, Video & Graphics",
+      "social_media": "Social Media Management",
+      "web_dev": "Web Design & Development"
+    },
+    "clients_title": "Our Clients",
+    "clients_description": "Trusted by 1000+ amazing clients worldwide",
+    "contact_us": "Contact Us",
+    "explore_works": "Explore Our Works"
+  },
+  "contact": {
+    "title": "Contact Us",
+    "description": "Let's get in touch! Fill out the form below to send me a message.",
+    "form_title": "send a message we are always avalaible",
+    "name_placeholder": "Name",
+    "email_placeholder": "Email",
+    "message_placeholder": "Message",
+    "send_button": "Send Message",
+    "success_title": "Message Sent!",
+    "success_description": "Thank you for reaching out. We will get back to you shortly.",
+    "send_another": "Send Another Message",
+    "whatsapp_chat": "Chat on WhatsApp"
+  },
+  "dialog": {
+    "previous_project": "Previous Project",
+    "next_project": "Next Project",
+    "show_details": "Show Project Details",
+    "ask_about": "Ask About"
+  }
+}

@@ -19,6 +19,7 @@ import Autoplay from 'embla-carousel-autoplay'
 import { motion } from 'framer-motion';
 import { cn } from '@/lib/utils';
 import { ScrollIndicator } from '@/components/ScrollIndicator';
+import { useI18n } from '@/context/i18n-context';
 
 
 interface Client {
@@ -37,15 +38,6 @@ interface AboutPageContent {
     logoUrl?: string;
     logoScale?: number;
 }
-
-const services = [
-    { title: "Brainstorming & Scripting", icon: BrainCircuit },
-    { title: "Voiceover & Sound", icon: Mic },
-    { title: "Content Creation, Animation, Video & Graphics", icon: Clapperboard },
-    { title: "Social Media Management", icon: Share2 },
-    { title: "Web Design & Development", icon: Code },
-];
-
 
 const MemoizedImage = memo(Image);
 
@@ -88,6 +80,15 @@ const itemVariants = {
 export default function AboutPage() {
   const firestore = useFirestore();
   const scrollRef = useRef<HTMLDivElement>(null);
+  const { t } = useI18n();
+
+  const services = [
+      { title: t('about.services.brainstorming'), icon: BrainCircuit },
+      { title: t('about.services.voiceover'), icon: Mic },
+      { title: t('about.services.creation'), icon: Clapperboard },
+      { title: t('about.services.social_media'), icon: Share2 },
+      { title: t('about.services.web_dev'), icon: Code },
+  ];
 
   const clientsQuery = useMemoFirebase(
     () => firestore ? query(collection(firestore, 'clients'), orderBy('order')) : null,
@@ -128,9 +129,9 @@ export default function AboutPage() {
       <div className="p-8 flex-shrink-0">
         <div className="container mx-auto px-0">
             <div className="mb-8 text-center">
-              <h1 className="text-3xl md:text-4xl font-headline tracking-tight">About Us</h1>
+              <h1 className="text-3xl md:text-4xl font-headline tracking-tight">{t('about.title')}</h1>
               <p className="mt-2 max-w-2xl mx-auto text-base md:text-lg text-foreground/70">
-                Learn more about our mission and the brands we've worked with.
+                {t('about.description')}
               </p>
             </div>
         </div>
@@ -164,19 +165,19 @@ export default function AboutPage() {
                             <Button asChild>
                                 <Link href="/contact">
                                     <FontAwesomeIcon icon={faEnvelope} className="mr-2" />
-                                    Contact Us
+                                    {t('about.contact_us')}
                                 </Link>
                             </Button>
                             <Button asChild variant="destructive">
                                  <Link href="/work">
-                                    Explore Our Works
+                                    {t('about.explore_works')}
                                     <FontAwesomeIcon icon={faArrowRight} className="ml-2" />
                                 </Link>
                             </Button>
                         </div>
                     </div>
                     <div className="md:w-1/2 flex flex-col justify-center">
-                       <h2 className="text-2xl md:text-3xl font-headline tracking-tight mb-6 text-center">What You'll Get?</h2>
+                       <h2 className="text-2xl md:text-3xl font-headline tracking-tight mb-6 text-center">{t('about.what_you_get')}</h2>
                        <div className="grid grid-cols-6 grid-rows-2 gap-4 h-full">
                         {services.map((service, index) => {
                             let gridClasses = '';
@@ -206,7 +207,7 @@ export default function AboutPage() {
 
                 <motion.div variants={itemVariants}>
                   <div className="text-center mb-8">
-                    <h2 className="text-2xl md:text-3xl font-headline tracking-tight">Our Clients</h2>
+                    <h2 className="text-2xl md:text-3xl font-headline tracking-tight">{t('about.clients_title')}</h2>
                     <Separator className="bg-white/10 max-w-xs mx-auto mt-2" />
                   </div>
                   
@@ -228,7 +229,7 @@ export default function AboutPage() {
                   
                   <div className="text-center mt-8 md:mt-12">
                     <p className="text-foreground/70">
-                      Trusted by 1000+ amazing clients worldwide
+                      {t('about.clients_description')}
                     </p>
                   </div>
                 </motion.div>
@@ -237,12 +238,12 @@ export default function AboutPage() {
                     <Button asChild>
                         <Link href="/contact">
                             <FontAwesomeIcon icon={faEnvelope} className="mr-2" />
-                            Contact Us
+                            {t('about.contact_us')}
                         </Link>
                     </Button>
                     <Button asChild variant="destructive">
                             <Link href="/work">
-                            Explore Our Works
+                            {t('about.explore_works')}
                             <FontAwesomeIcon icon={faArrowRight} className="ml-2" />
                         </Link>
                     </Button>

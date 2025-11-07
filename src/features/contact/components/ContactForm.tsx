@@ -17,6 +17,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { sendContactEmail } from '@/app/actions/send-contact-email';
+import { useI18n } from '@/context/i18n-context';
 
 
 interface ContactInfo {
@@ -34,10 +35,11 @@ interface ContactFormProps {
 
 function SubmitButton() {
     const { pending } = useFormStatus();
+    const { t } = useI18n();
     return (
         <Button type="submit" size="lg" className="w-full glass-effect" disabled={pending}>
             {pending && <FontAwesomeIcon icon={faSpinner} className="mr-2 h-4 w-4 animate-spin" />}
-            {pending ? 'Sending...' : 'Send Message'}
+            {pending ? 'Sending...' : t('contact.send_button')}
         </Button>
     );
 }
@@ -55,6 +57,7 @@ export default function ContactForm({
   const firestore = useFirestore();
   const { toast } = useToast();
   const formRef = useRef<HTMLFormElement>(null);
+  const { t } = useI18n();
 
   const contactDocRef = useMemoFirebase(
     () => (firestore ? doc(firestore, 'contact', 'details') : null),
@@ -108,20 +111,20 @@ export default function ContactForm({
            >
             <FontAwesomeIcon icon={faCheckCircle} className="w-16 h-16 text-green-400 mb-4" />
            </motion.div>
-          <h3 className="text-xl font-bold">Message Sent!</h3>
+          <h3 className="text-xl font-bold">{t('contact.success_title')}</h3>
           <p className="text-foreground/80 mt-2 max-w-sm">
-            Thank you for reaching out. We will get back to you shortly.
+            {t('contact.success_description')}
           </p>
           {!onSuccess && ( 
             <Button onClick={() => { setIsSent(false); formRef.current?.reset(); }} className="mt-6">
-              Send Another Message
+              {t('contact.send_another')}
             </Button>
           )}
           {!onSuccess && contactInfo?.whatsApp && (
             <Button asChild className="bg-gradient-to-r from-green-500 to-emerald-600 mt-4">
                 <Link href={`https://wa.me/${contactInfo.whatsApp.replace(/\\D/g, '')}`} target="_blank" rel="noopener noreferrer">
                     <FontAwesomeIcon icon={faWhatsapp} className="mr-2 h-5 w-5" />
-                    Chat on WhatsApp
+                    {t('contact.whatsapp_chat')}
                 </Link>
             </Button>
           )}
@@ -132,7 +135,7 @@ export default function ContactForm({
   return (
     <div className='w-full'>
         <div className="flex flex-col items-center mb-8">
-            <p className="font-handwriting text-xl md:text-2xl text-white transform -rotate-6">send a message we are always avalaible</p>
+            <p className="font-handwriting text-xl md:text-2xl text-white transform -rotate-6">{t('contact.form_title')}</p>
             <svg className="w-12 h-12 md:w-20 md:h-20 text-white" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
               <path d="M50 10 C51 30, 51 50, 50 70" stroke="currentColor" strokeWidth="2" strokeLinecap="round" fill="none"/>
               <path d="M45 65 L50 75 L55 65" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" fill="none"/>
@@ -146,20 +149,20 @@ export default function ContactForm({
 
             <Input 
                 name="name"
-                placeholder="Name" 
+                placeholder={t('contact.name_placeholder')}
                 className="text-center bg-transparent border-0 border-b border-foreground/30 rounded-none focus-visible:ring-0 focus-visible:ring-offset-0 focus:border-primary transition-colors placeholder:text-foreground/80" 
                 required 
             />
             <Input 
                 name="email"
                 type="email"
-                placeholder="Email" 
+                placeholder={t('contact.email_placeholder')}
                 className="text-center bg-transparent border-0 border-b border-foreground/30 rounded-none focus-visible:ring-0 focus-visible:ring-offset-0 focus:border-primary transition-colors placeholder:text-foreground/80" 
                 required 
             />
             <Textarea
                 name="message"
-                placeholder="Message"
+                placeholder={t('contact.message_placeholder')}
                 className="text-center bg-transparent border-0 border-b border-foreground/30 rounded-none focus-visible:ring-0 focus-visible:ring-offset-0 focus:border-primary transition-colors min-h-[100px] placeholder:text-foreground/80"
                 defaultValue={defaultMessage}
                 required

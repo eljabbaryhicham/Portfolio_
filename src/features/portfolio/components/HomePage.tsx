@@ -10,6 +10,7 @@ import Preloader from "@/components/preloader";
 import Logo from "@/components/logo";
 import { useDoc, useFirestore, useMemoFirebase } from "@/firebase";
 import { doc } from "firebase/firestore";
+import { useI18n } from "@/context/i18n-context";
 
 interface ContactInfo {
     logoUrl?: string;
@@ -24,6 +25,7 @@ interface HomePageSettings {
 
 export default function HomePageContent() {
   const firestore = useFirestore();
+  const { t } = useI18n();
 
   const contactDocRef = useMemoFirebase(
     () => (firestore ? doc(firestore, 'contact', 'details') : null),
@@ -61,7 +63,7 @@ export default function HomePageContent() {
         )}
         <Button asChild size="lg" className="group">
           <Link href="/work">
-            Explore Work
+            {t('home.explore_work')}
             <FontAwesomeIcon icon={faArrowRight} className="ml-2 transition-transform group-hover:translate-x-1" />
           </Link>
         </Button>

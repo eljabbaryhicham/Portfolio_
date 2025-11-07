@@ -19,6 +19,7 @@ import { ScrollIndicator } from '@/components/ScrollIndicator';
 import { useRef } from 'react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { defaultEmailTemplate } from '@/features/admin/components/HomeAdmin';
+import { useI18n } from '@/context/i18n-context';
 
 
 interface ContactInfo {
@@ -68,6 +69,7 @@ const itemVariants = {
 export default function ContactPage() {
   const firestore = useFirestore();
   const scrollRef = useRef<HTMLDivElement>(null);
+  const { t } = useI18n();
 
   const contactDocRef = useMemoFirebase(
     () => firestore ? doc(firestore, 'contact', 'details') : null,
@@ -110,9 +112,9 @@ export default function ContactPage() {
       <div className="p-8 flex-shrink-0">
         <div className="container mx-auto px-0">
           <div className="mb-8 text-center">
-            <h1 className="text-3xl md:text-4xl font-headline tracking-tight">Contact Us</h1>
+            <h1 className="text-3xl md:text-4xl font-headline tracking-tight">{t('contact.title')}</h1>
             <p className="mt-2 max-w-2xl mx-auto text-base md:text-lg text-foreground/70">
-              Let&apos;s get in touch! Fill out the form below to send me a message.
+              {t('contact.description')}
             </p>
           </div>
         </div>

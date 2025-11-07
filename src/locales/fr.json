@@ -1,0 +1,59 @@
+
+{
+  "nav": {
+    "home": "Accueil",
+    "work": "Projets",
+    "about": "À Propos",
+    "contact": "Contact",
+    "admin": "Admin",
+    "test": "Test",
+    "language": "Langue"
+  },
+  "home": {
+    "explore_work": "Découvrir Nos Projets"
+  },
+  "work": {
+    "title": "Nos Projets",
+    "description": "Parcourez notre collection de projets. Cliquez sur un élément pour voir les détails.",
+    "all_projects": "Tous les Projets",
+    "graphics": "Graphismes",
+    "animation": "Animation",
+    "show_more": "Afficher Plus",
+    "more_projects": "projets de plus"
+  },
+  "about": {
+    "title": "À Propos de Nous",
+    "description": "Apprenez-en plus sur notre mission et les marques avec lesquelles nous avons travaillé.",
+    "what_you_get": "Qu'obtiendrez-vous?",
+    "services": {
+      "brainstorming": "Brainstorming & Scénarisation",
+      "voiceover": "Voix Off & Son",
+      "creation": "Création de Contenu, Animation, Vidéo & Graphismes",
+      "social_media": "Gestion des Médias Sociaux",
+      "web_dev": "Conception & Développement Web"
+    },
+    "clients_title": "Nos Clients",
+    "clients_description": "Approuvé par plus de 1000 clients exceptionnels dans le monde entier",
+    "contact_us": "Contactez-Nous",
+    "explore_works": "Découvrir Nos Projets"
+  },
+  "contact": {
+    "title": "Contactez-Nous",
+    "description": "Prenons contact ! Remplissez le formulaire ci-dessous pour m'envoyer un message.",
+    "form_title": "envoyez un message, nous sommes toujours disponibles",
+    "name_placeholder": "Nom",
+    "email_placeholder": "Email",
+    "message_placeholder": "Message",
+    "send_button": "Envoyer le Message",
+    "success_title": "Message Envoyé !",
+    "success_description": "Merci de nous avoir contactés. Nous vous répondrons sous peu.",
+    "send_another": "Envoyer un Autre Message",
+    "whatsapp_chat": "Discuter sur WhatsApp"
+  },
+  "dialog": {
+    "previous_project": "Projet Précédent",
+    "next_project": "Projet Suivant",
+    "show_details": "Afficher les Détails du Projet",
+    "ask_about": "Se Renseigner"
+  }
+}

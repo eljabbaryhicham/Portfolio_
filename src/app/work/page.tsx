@@ -34,6 +34,7 @@ import PlyrPlayer from '@/components/PlyrPlayer';
 import CdnClapprPlayer from '@/components/CdnClapprPlayer';
 import { debounce } from 'lodash';
 import { defaultEmailTemplate } from '@/features/admin/components/HomeAdmin';
+import { useI18n } from '@/context/i18n-context';
 
 const MemoizedImage = memo(Image);
 const MemoizedPlyrPlayer = memo(PlyrPlayer);
@@ -242,6 +243,7 @@ export default function WorkPage() {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
+  const { t } = useI18n();
 
   const typedUser = user as AppUser | null;
   const isSuperAdmin = typedUser?.email === 'eljabbaryhicham@example.com';
@@ -589,23 +591,22 @@ export default function WorkPage() {
         <div className="p-8 pb-4">
           <div className="container mx-auto px-0">
             <div className="mb-8 text-center">
-              <h1 className="text-3xl md:text-4xl font-headline tracking-tight">Our Work</h1>
+              <h1 className="text-3xl md:text-4xl font-headline tracking-tight">{t('work.title')}</h1>
               <p className="mt-2 max-w-2xl mx-auto text-base md:text-lg text-foreground/70">
-                Browse our collection of projects. Click on any item to view
-                details.
+                {t('work.description')}
               </p>
             </div>
             <div className="flex flex-wrap justify-center gap-2 mb-4">
               <Button variant={filter === 'all' ? 'destructive' : 'outline'} onClick={() => setFilter('all')}>
-                All Projects
+                {t('work.all_projects')}
               </Button>
               <Button variant={filter === 'image' ? 'destructive' : 'outline'} onClick={() => setFilter('image')}>
                 <FontAwesomeIcon icon={faPalette} className="mr-2 h-4 w-4" />
-                Graphics
+                {t('work.graphics')}
               </Button>
               <Button variant={filter === 'video' ? 'destructive' : 'outline'} onClick={() => setFilter('video')}>
                 <FontAwesomeIcon icon={faFilm} className="mr-2 h-4 w-4" />
-                Animation
+                {t('work.animation')}
               </Button>
             </div>
           </div>
@@ -654,9 +655,9 @@ export default function WorkPage() {
                             >
                               <div className="w-full h-full rounded-md flex flex-col items-center justify-center text-center p-4 transition-colors duration-300 md:group-hover:bg-black/40">
                                 <FontAwesomeIcon icon={faArrowDown} className="h-10 w-10 text-white/70 mb-4 transition-transform duration-300 md:group-hover:translate-y-1" />
-                                <h3 className="font-bold text-white text-lg">Show More</h3>
+                                <h3 className="font-bold text-white text-lg">{t('work.show_more')}</h3>
                                 <p className="text-white/60 text-sm">
-                                  {filteredItems.length - itemsToShow.length} more projects
+                                  {filteredItems.length - itemsToShow.length} {t('work.more_projects')}
                                 </p>
                               </div>
                             </div>
@@ -726,7 +727,7 @@ export default function WorkPage() {
                               className="md:absolute md:left-16 md:top-1/2 md:-translate-y-1/2 h-8 w-8 md:h-10 md:w-10"
                           >
                               <FontAwesomeIcon icon={faArrowLeft} className="h-4 w-4 md:h-5 md:w-5" />
-                              <span className="sr-only">Previous Project</span>
+                              <span className="sr-only">{t('dialog.previous_project')}</span>
                           </Button>
                           <Button
                               variant="outline"
@@ -736,7 +737,7 @@ export default function WorkPage() {
                               className="md:absolute md:right-16 md:top-1/2 md:-translate-y-1/2 h-8 w-8 md:h-10 md:w-10"
                           >
                               <FontAwesomeIcon icon={faArrowRight} className="h-4 w-4 md:h-5 md:w-5" />
-                              <span className="sr-only">Next Project</span>
+                              <span className="sr-only">{t('dialog.next_project')}</span>
                           </Button>
                         </div>
                       </DialogHeader>
@@ -766,7 +767,7 @@ export default function WorkPage() {
                                   onClick={() => setDetailsModalOpen(true)}
                                 >
                                   <FontAwesomeIcon icon={faUpDown} className="mr-2" />
-                                  Show Project Details
+                                  {t('dialog.show_details')}
                                 </Button>
                             )}
                             <Button
@@ -774,7 +775,7 @@ export default function WorkPage() {
                               onClick={() => setIsContactFormOpen(true)}
                               className="h-auto py-2 px-4 leading-tight text-center"
                             >
-                              Ask About
+                              {t('dialog.ask_about')}
                             </Button>
                           </div>
                         </div>
@@ -827,7 +828,7 @@ export default function WorkPage() {
       <Dialog open={isContactFormOpen} onOpenChange={setIsContactFormOpen}>
         <DialogContent className="w-[80vw] max-w-xl glass-effect">
             <DialogHeader>
-              <DialogTitle className="font-headline">Contact Us</DialogTitle>
+              <DialogTitle className="font-headline">{t('contact.title')}</DialogTitle>
               <DialogDescription>
                 Have a question about &quot;{selectedItem?.title}&quot;? Fill out the form below.
               </DialogDescription>

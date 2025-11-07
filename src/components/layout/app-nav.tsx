@@ -15,15 +15,16 @@ import { doc } from "firebase/firestore";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
+import { useI18n } from "@/context/i18n-context";
 
 
 const navItems = [
-  { href: "/", label: "Home", icon: faHouse, public: true },
-  { href: "/work", label: "Work", icon: faImage, public: true },
-  { href: "/about", label: "About", icon: faCircleInfo, public: true },
-  { href: "/contact", label: "Contact", icon: faEnvelope, public: true },
-  { href: "/admin", label: "Admin", icon: faShieldHalved, public: false, adminOnly: true },
-  { href: "/test", label: "Test", icon: faVial, public: false, adminOnly: true },
+  { href: "/", label: "Home", i18nKey: "nav.home", icon: faHouse, public: true },
+  { href: "/work", label: "Work", i18nKey: "nav.work", icon: faImage, public: true },
+  { href: "/about", label: "About", i18nKey: "nav.about", icon: faCircleInfo, public: true },
+  { href: "/contact", label: "Contact", i18nKey: "nav.contact", icon: faEnvelope, public: true },
+  { href: "/admin", label: "Admin", i18nKey: "nav.admin", icon: faShieldHalved, public: false, adminOnly: true },
+  { href: "/test", label: "Test", i18nKey: "nav.test", icon: faVial, public: false, adminOnly: true },
 ];
 
 interface HomePageSettings {
@@ -40,6 +41,7 @@ export function AppNav() {
   const { user } = useUser();
   const firestore = useFirestore();
   const isMobile = useIsMobile();
+  const { t, setLanguage } = useI18n();
 
   const contactDocRef = useMemoFirebase(
     () => (firestore ? doc(firestore, 'contact', 'details') : null),
@@ -134,7 +136,7 @@ export function AppNav() {
             {navButtonContent}
           </TooltipTrigger>
           <TooltipContent side="right" className="glass-effect rounded-md">
-            <p>{item.label}</p>
+            <p>{t(item.i18nKey)}</p>
           </TooltipContent>
         </Tooltip>
       </TooltipProvider>
@@ -170,9 +172,9 @@ export function AppNav() {
           </motion.div>
         </DropdownMenuTrigger>
         <DropdownMenuContent className="glass-effect" side={isMobile ? "top" : "right"}>
-          <DropdownMenuItem>ENG</DropdownMenuItem>
-          <DropdownMenuItem>FR</DropdownMenuItem>
-          <DropdownMenuItem>AR</DropdownMenuItem>
+          <DropdownMenuItem onClick={() => setLanguage('en')}>ENG</DropdownMenuItem>
+          <DropdownMenuItem onClick={() => setLanguage('fr')}>FR</DropdownMenuItem>
+          <DropdownMenuItem onClick={() => setLanguage('ar')}>AR</DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
     );
@@ -192,7 +194,7 @@ export function AppNav() {
             {switcherContent}
           </TooltipTrigger>
           <TooltipContent side="right" className="glass-effect rounded-md">
-            <p>Language</p>
+            <p>{t('nav.language')}</p>
           </TooltipContent>
         </Tooltip>
       </TooltipProvider>
