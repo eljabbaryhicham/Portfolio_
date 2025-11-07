@@ -1,3 +1,4 @@
+
 "use client";
 
 import Link from "next/link";
@@ -210,7 +211,7 @@ export function AppNav() {
         <div className={cn(
           "flex h-[7vh] min-h-[60px] flex-row items-center justify-between rounded-lg border border-border/50 glass-effect"
           )}>
-          <nav className="flex h-full flex-1 items-center justify-center px-[5vw] gap-6">
+          <nav className="flex h-full flex-1 items-center justify-center px-[5vw] gap-8">
             {accessibleNavItems.map(renderNavItem)}
             {renderLanguageSwitcher()}
           </nav>
@@ -238,11 +239,11 @@ export function AppNav() {
             </div>
         </Link>
         <nav 
-          className="flex flex-row md:flex-col items-center justify-center w-full md:w-auto md:gap-6"
+          className="flex flex-row md:flex-col items-center justify-center w-full md:w-auto md:gap-8"
         >
            {accessibleNavItems.map(renderNavItem)}
         </nav>
-        <div className="flex flex-col items-center gap-6">
+        <div className="flex flex-col items-center gap-8">
           {renderLanguageSwitcher()}
         </div>
       </div>
