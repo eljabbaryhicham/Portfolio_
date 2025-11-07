@@ -159,7 +159,8 @@ export default function AboutPage() {
                         <div className="w-32 mx-auto mb-4" style={{ transform: `scale(${logoScale})` }}>
                             <Logo src={logoUrl} />
                         </div>
-                        <h2 className="text-2xl md:text-3xl font-headline tracking-tight mb-4">{aboutContent?.title}</h2>
+                        <h2 className="text-2xl md:text-3xl font-headline tracking-tight">{aboutContent?.title}</h2>
+                        <Separator className="bg-white/10 max-w-xs mx-auto mt-2 mb-4" />
                         <p className="text-foreground/70 leading-relaxed mb-6 text-center text-justify">{aboutContent?.content}</p>
                         <div className="hidden sm:flex flex-col sm:flex-row gap-4 justify-center">
                             <Button asChild>
