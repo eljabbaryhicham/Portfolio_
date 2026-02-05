@@ -40,10 +40,10 @@ import { Slider } from '@/components/ui/slider';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
 const formSchema = z.object({
-  title_en: z.string().min(1, { message: 'Title is required.' }).optional().or(z.literal('')),
-  title_fr: z.string().min(1, { message: 'Title is required.' }).optional().or(z.literal('')),
-  content_en: z.string().min(1, { message: 'Content is required.' }).optional().or(z.literal('')),
-  content_fr: z.string().min(1, { message: 'Content is required.' }).optional().or(z.literal('')),
+  title_en: z.string().optional().or(z.literal('')),
+  title_fr: z.string().optional().or(z.literal('')),
+  content_en: z.string().optional().or(z.literal('')),
+  content_fr: z.string().optional().or(z.literal('')),
   imageUrl: z.string().url({ message: 'Please enter a valid URL.' }).optional().or(z.literal('')),
   logoUrl: z.string().url({ message: 'Please enter a valid URL.' }).optional().or(z.literal('')),
   logoScale: z.number().min(0.05).max(5).optional(),
@@ -105,7 +105,6 @@ export default function AboutAdmin() {
   const onSubmit = (values: AboutFormValues) => {
     if (!aboutContentRef || !canEditAbout) return;
     
-    // Clean values to remove undefined or empty strings that should be null/empty in DB
     const dataToSave = {
       title_en: values.title_en || '',
       title_fr: values.title_fr || '',

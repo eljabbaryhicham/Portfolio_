@@ -117,6 +117,13 @@
         "logoScale": {
             "type": "number",
             "description": "The scale of the site logo in the navigation."
+        },
+        "avatarUrl": {
+          "type": "string",
+          "format": "uri"
+        },
+        "avatarScale": {
+          "type": "number"
         }
       },
       "required": [
