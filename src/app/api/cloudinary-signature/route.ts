@@ -16,16 +16,18 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const suffix = libraryId === 'primary' ? '_1' : '_2';
-    const apiSecret = process.env[`CLOUDINARY_API_SECRET${suffix}`];
-    const apiKey = process.env[`CLOUDINARY_API_KEY${suffix}`];
+    const isPrimary = libraryId === 'primary';
+    
+    // Explicit access is safer and clearer for Next.js server-side environment variables
+    const apiSecret = isPrimary ? process.env.CLOUDINARY_API_SECRET_1 : process.env.CLOUDINARY_API_SECRET_2;
+    const apiKey = isPrimary ? process.env.CLOUDINARY_API_KEY_1 : process.env.CLOUDINARY_API_KEY_2;
 
     if (!apiSecret || !apiKey) {
-      console.error(`Missing Cloudinary credentials for ${libraryId} library. suffix: ${suffix}`);
+      console.error(`Missing Cloudinary credentials for ${libraryId} library.`);
       return NextResponse.json(
         { 
           success: false, 
-          message: `Cloudinary API secret or key for library '${libraryId}' is not configured in environment variables.` 
+          message: `Cloudinary API secret or key for library '${libraryId}' is not configured in environment variables. Please check your Vercel settings.` 
         },
         { status: 500 }
       );

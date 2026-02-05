@@ -324,9 +324,15 @@ export default function MediaAdmin(props: MediaAdminProps) {
     setIsChoosingLibrary(false);
     
     const isPrimary = libraryId === 'primary';
-    const suffix = isPrimary ? '_1' : '_2';
-    const cloudName = process.env[`NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME${suffix}`];
-    const uploadPreset = process.env[`NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET${suffix}`];
+    
+    // EXPLICIT property access is required for NEXT_PUBLIC environment variables to work correctly on Vercel client-side.
+    const cloudName = isPrimary 
+        ? process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME_1 
+        : process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME_2;
+    
+    const uploadPreset = isPrimary 
+        ? process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET_1 
+        : process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET_2;
     
     if (!cloudName || !uploadPreset) {
         toast({
@@ -789,6 +795,9 @@ export default function MediaAdmin(props: MediaAdminProps) {
       );
   }
 
+  const isPrimaryConfigured = !!(process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME_1 && process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET_1);
+  const isExtendedConfigured = !!(process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME_2 && process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET_2);
+
   return (
     <>
       <div className="flex-1 flex flex-col h-full gap-6">
@@ -807,11 +816,11 @@ export default function MediaAdmin(props: MediaAdminProps) {
         <Separator className="bg-white/10" />
         
         {/* Warning if Cloudinary environment variables are missing */}
-        <Alert variant="destructive" className={cn("mb-4", (process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME_1 && process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET_1) ? "hidden" : "block")}>
+        <Alert variant="destructive" className={cn("mb-4", (isPrimaryConfigured || isExtendedConfigured) ? "hidden" : "block")}>
             <FontAwesomeIcon icon={faTriangleExclamation} className="h-4 w-4" />
             <AlertTitle>Cloudinary Not Configured</AlertTitle>
             <AlertDescription>
-                Your Cloudinary environment variables are missing. Please add them to your hosting provider's settings (e.g. Vercel) and redeploy to enable uploads.
+                Your Cloudinary environment variables are missing. Please add them to your hosting provider's settings (e.g. Vercel) and redeploy to enable uploads. Ensure you have NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME_1 and NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET_1 set.
             </AlertDescription>
         </Alert>
 

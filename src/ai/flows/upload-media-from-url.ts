@@ -58,10 +58,11 @@ const uploadMediaFromUrlFlow = ai.defineFlow(
       const { libraryId, videoFormat } = input;
       
       const isPrimary = libraryId === 'primary';
-      const suffix = isPrimary ? '_1' : '_2';
-      const cloudName = process.env[`NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME${suffix}`];
-      const apiKey = process.env[`CLOUDINARY_API_KEY${suffix}`];
-      const apiSecret = process.env[`CLOUDINARY_API_SECRET${suffix}`];
+      
+      // Use explicit access for environment variables
+      const cloudName = isPrimary ? process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME_1 : process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME_2;
+      const apiKey = isPrimary ? process.env.CLOUDINARY_API_KEY_1 : process.env.CLOUDINARY_API_KEY_2;
+      const apiSecret = isPrimary ? process.env.CLOUDINARY_API_SECRET_1 : process.env.CLOUDINARY_API_SECRET_2;
 
       if (!cloudName || !apiKey || !apiSecret) {
         const errorMessage = `Cloudinary credentials for ${libraryId} library are missing. Please check your environment variables.`;
