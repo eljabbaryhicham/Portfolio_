@@ -1,4 +1,3 @@
-
 'use client';
 
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -88,7 +87,7 @@ export default function ContactAdmin() {
     setIsMounted(true);
     if (contactInfo) {
         const values: ContactInfo = {
-            avatarUrl: contactInfo.avatarUrl || 'https://i.imgur.com/N9c8oEJ.png',
+            avatarUrl: contactInfo.avatarUrl || '',
             name: contactInfo.name || '',
             title: contactInfo.title || '',
             email: contactInfo.email || '',
@@ -99,14 +98,11 @@ export default function ContactAdmin() {
             instagramUrl: contactInfo.instagramUrl || '',
             facebookUrl: contactInfo.facebookUrl || '',
             twitterUrl: contactInfo.twitterUrl || '',
-            logoUrl: contactInfo.logoUrl || 'https://i.imgur.com/N9c8oEJ.png',
+            logoUrl: contactInfo.logoUrl || '',
             logoScale: contactInfo.logoScale || 1,
             avatarScale: contactInfo.avatarScale || 1,
         };
       form.reset(values);
-    } else if (!isLoading) {
-        // Set default logo if no data is loaded
-        form.reset({ ...defaultFormValues, logoUrl: 'https://i.imgur.com/N9c8oEJ.png', logoScale: 1, avatarUrl: 'https://i.imgur.com/N9c8oEJ.png', avatarScale: 1 });
     }
   }, [contactInfo, form, isLoading]);
   
@@ -375,7 +371,3 @@ export default function ContactAdmin() {
     </div>
   );
 }
-
-    
-
-    

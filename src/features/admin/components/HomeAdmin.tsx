@@ -172,7 +172,7 @@ export default function HomeAdmin() {
       plyrPlayerCdnCssUrl: 'https://cdn.plyr.io/3.7.8/plyr.css',
       plyrPlayerCdnJsUrl: 'https://cdn.plyr.io/3.7.8/plyr.js',
       emailFromName: 'BELOFTED',
-      emailLogoUrl: 'https://i.imgur.com/N9c8oEJ.png',
+      emailLogoUrl: '',
       emailLogoScale: 1,
       emailHtmlTemplate: defaultEmailTemplate,
     },
@@ -201,7 +201,7 @@ export default function HomeAdmin() {
         plyrPlayerCdnCssUrl: homeSettings.plyrPlayerCdnCssUrl || 'https://cdn.plyr.io/3.7.8/plyr.css',
         plyrPlayerCdnJsUrl: homeSettings.plyrPlayerCdnJsUrl || 'https://cdn.plyr.io/3.7.8/plyr.js',
         emailFromName: homeSettings.emailFromName || 'BELOFTED',
-        emailLogoUrl: homeSettings.emailLogoUrl || 'https://i.imgur.com/N9c8oEJ.png',
+        emailLogoUrl: homeSettings.emailLogoUrl || '',
         emailLogoScale: homeSettings.emailLogoScale || 1,
         emailHtmlTemplate: homeSettings.emailHtmlTemplate || defaultEmailTemplate,
       });

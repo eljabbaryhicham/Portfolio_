@@ -1,4 +1,3 @@
-
 "use client";
 
 import Link from "next/link";
@@ -55,7 +54,7 @@ export function AppNav() {
   const { data: homeSettings } = useDoc<HomePageSettings>(settingsDocRef);
 
 
-  const logoUrl = contactInfo?.logoUrl || "https://i.imgur.com/N9c8oEJ.png";
+  const logoUrl = contactInfo?.logoUrl;
   const logoScale = contactInfo?.logoScale || 1;
 
   const accessibleNavItems = navItems.filter(item => {

@@ -1,4 +1,3 @@
-
 'use client';
 
 import Link from 'next/link';
@@ -98,12 +97,12 @@ export default function ContactPage() {
     { id: 'twitter', href: contactInfo.twitterUrl, icon: faTwitter, hoverColor: 'hover:text-sky-500' },
   ].filter(link => link.href) : [];
 
-  const avatarUrl = contactInfo?.avatarUrl || "https://i.imgur.com/N9c8oEJ.png";
+  const avatarUrl = contactInfo?.avatarUrl;
   const avatarScale = contactInfo?.avatarScale || 1;
 
   const emailFromName = homeSettings?.emailFromName || 'BELOFTED';
   const emailTemplate = homeSettings?.emailHtmlTemplate || defaultEmailTemplate;
-  const emailLogoUrl = homeSettings?.emailLogoUrl || 'https://i.imgur.com/N9c8oEJ.png';
+  const emailLogoUrl = homeSettings?.emailLogoUrl;
   const emailLogoScale = homeSettings?.emailLogoScale || 1;
 
   return (
@@ -140,7 +139,7 @@ export default function ContactPage() {
                           <ContactForm 
                             emailFromName={emailFromName}
                             emailHtmlTemplate={emailTemplate}
-                            emailLogoUrl={emailLogoUrl}
+                            emailLogoUrl={emailLogoUrl || ""}
                             emailLogoScale={emailLogoScale}
                           />
                       </CardContent>
@@ -149,19 +148,21 @@ export default function ContactPage() {
                   <motion.div className="w-full md:w-1/2 flex justify-center" variants={itemVariants}>
                     <Card className="glass-effect p-6 flex flex-col h-full w-full max-w-md">
                       <CardContent className="flex flex-col items-center text-center p-0">
-                        <Avatar className="w-32 h-32 mb-4 border-2 border-primary">
-                           <AvatarImage 
-                              src={avatarUrl} 
-                              alt="Avatar" 
-                              style={{ 
-                                transform: `scale(${avatarScale})`, 
-                                objectFit: 'contain' 
-                              }} 
-                            />
-                          <AvatarFallback>
-                            <Preloader />
-                          </AvatarFallback>
-                        </Avatar>
+                        {avatarUrl && (
+                          <Avatar className="w-32 h-32 mb-4 border-2 border-primary">
+                             <AvatarImage 
+                                src={avatarUrl} 
+                                alt="Avatar" 
+                                style={{ 
+                                  transform: `scale(${avatarScale})`, 
+                                  objectFit: 'contain' 
+                                }} 
+                              />
+                            <AvatarFallback>
+                              <Preloader />
+                            </AvatarFallback>
+                          </Avatar>
+                        )}
                         <h3 className="text-lg md:text-xl font-headline">{contactInfo?.name}</h3>
                         <p className="text-sm md:text-base text-foreground/70">{contactInfo?.title}</p>
                         

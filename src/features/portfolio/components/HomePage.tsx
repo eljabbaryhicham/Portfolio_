@@ -1,4 +1,3 @@
-
 'use client';
 
 import Link from "next/link";
@@ -41,7 +40,7 @@ export default function HomePageContent() {
   
   const isLoading = isLoadingContact || isLoadingSettings;
 
-  const siteLogoUrl = contactInfo?.logoUrl || "https://i.imgur.com/N9c8oEJ.png";
+  const siteLogoUrl = contactInfo?.logoUrl;
   const homeLogoUrl = homeSettings?.homePageLogoUrl || siteLogoUrl;
   const isLogoVisible = homeSettings?.isHomePageLogoVisible ?? true;
   const logoScale = homeSettings?.homePageLogoScale || 1;
@@ -56,7 +55,7 @@ export default function HomePageContent() {
       )}
 
       <div className={cn("relative z-10 flex flex-col items-center justify-center gap-8 transition-opacity duration-1000", isLoading && "opacity-0")}>
-        {isLogoVisible && (
+        {isLogoVisible && homeLogoUrl && (
             <div className="w-full max-w-sm" style={{ transform: `scale(${logoScale})`}}>
                 <Logo src={homeLogoUrl} />
             </div>
