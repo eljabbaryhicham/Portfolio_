@@ -525,11 +525,18 @@ export default function WorkPage() {
   };
   
   const effectiveItemsCount = visibleItemsCount || 0;
-  const itemsToShow = useMemo(() => {
-      return filteredItems.slice(0, effectiveItemsCount);
-  }, [filteredItems, effectiveItemsCount]);
+  const hasMore = visibleItemsCount !== null && filteredItems.length > effectiveItemsCount;
 
-  const showMoreButtonNeeded = visibleItemsCount !== null && filteredItems.length > effectiveItemsCount;
+  const itemsToShow = useMemo(() => {
+      // If there are more items than we are currently showing, 
+      // take the last slot for the "Show More" button to keep the grid balanced.
+      if (hasMore && effectiveItemsCount > 0) {
+          return filteredItems.slice(0, effectiveItemsCount - 1);
+      }
+      return filteredItems.slice(0, effectiveItemsCount);
+  }, [filteredItems, effectiveItemsCount, hasMore]);
+
+  const showMoreButtonNeeded = hasMore;
 
   const isLoading = isPortfolioLoading;
 
