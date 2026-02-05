@@ -37,10 +37,13 @@ import {
 } from '@/components/ui/dialog';
 import type { AppUser } from '@/firebase/auth/use-user';
 import { Slider } from '@/components/ui/slider';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
 const formSchema = z.object({
-  title: z.string().min(2, { message: 'Title must be at least 2 characters.' }),
-  content: z.string().min(10, { message: 'Content must be at least 10 characters.' }),
+  title_en: z.string().min(2, { message: 'Title must be at least 2 characters.' }),
+  title_fr: z.string().min(2, { message: 'Title must be at least 2 characters.' }),
+  content_en: z.string().min(10, { message: 'Content must be at least 10 characters.' }),
+  content_fr: z.string().min(10, { message: 'Content must be at least 10 characters.' }),
   imageUrl: z.string().url({ message: 'Please enter a valid URL.' }),
   logoUrl: z.string().url({ message: 'Please enter a valid URL.' }).optional().or(z.literal('')),
   logoScale: z.number().min(0.05).max(5).optional(),
@@ -75,8 +78,10 @@ export default function AboutAdmin() {
   const form = useForm<AboutFormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      title: '',
-      content: '',
+      title_en: '',
+      title_fr: '',
+      content_en: '',
+      content_fr: '',
       imageUrl: '',
       logoUrl: '',
       logoScale: 1,
@@ -86,8 +91,10 @@ export default function AboutAdmin() {
   useEffect(() => {
     if (aboutContent) {
       form.reset({
-        title: aboutContent.title || '',
-        content: aboutContent.content || '',
+        title_en: aboutContent.title_en || '',
+        title_fr: aboutContent.title_fr || '',
+        content_en: aboutContent.content_en || '',
+        content_fr: aboutContent.content_fr || '',
         imageUrl: aboutContent.imageUrl || '',
         logoUrl: aboutContent.logoUrl || '',
         logoScale: aboutContent.logoScale || 1,
@@ -95,19 +102,11 @@ export default function AboutAdmin() {
     }
   }, [aboutContent, form]);
 
-  useEffect(() => {
-    if (!canEditAbout) {
-      Object.keys(form.getValues()).forEach(key => {
-        form.control.getFieldState(key as keyof AboutFormValues).isDirty = false;
-      });
-    }
-  }, [canEditAbout, form]);
-
   const onSubmit = (values: AboutFormValues) => {
     if (!aboutContentRef || !canEditAbout) return;
     const dataToSave = {
       ...values,
-      logoUrl: values.logoUrl || '', // Ensure logoUrl is not undefined
+      logoUrl: values.logoUrl || '', 
       logoScale: values.logoScale || 1,
     };
     setDocumentNonBlocking(aboutContentRef, dataToSave, { merge: true });
@@ -115,7 +114,7 @@ export default function AboutAdmin() {
       title: 'About Page Updated',
       description: 'Your "About Us" page has been successfully updated.',
     });
-    setIsFormOpen(false); // Close dialog on submit
+    setIsFormOpen(false);
   };
 
   const handleChooseImage = (field: 'imageUrl' | 'logoUrl') => {
@@ -177,7 +176,7 @@ export default function AboutAdmin() {
                               name="logoUrl"
                               render={({ field }) => (
                                 <FormItem>
-                                  <FormLabel>Logo URL</FormLabel>
+                                  <FormLabel>About Page Logo URL</FormLabel>
                                   <div className="flex items-center gap-2">
                                     <FormControl>
                                       <Input placeholder="https://example.com/your-logo.png" {...field} />
@@ -195,7 +194,7 @@ export default function AboutAdmin() {
                               name="logoScale"
                               render={({ field }) => (
                                 <FormItem>
-                                  <FormLabel>Logo Scale ({Math.round((field.value || 1) * 100)}%)</FormLabel>
+                                  <FormLabel>About Page Logo Scale ({Math.round((field.value || 1) * 100)}%)</FormLabel>
                                   <FormControl>
                                     <Slider
                                       value={[field.value || 1]}
@@ -212,38 +211,80 @@ export default function AboutAdmin() {
                                 </FormItem>
                               )}
                             />
-                            <FormField
-                              control={form.control}
-                              name="title"
-                              render={({ field }) => (
-                                <FormItem>
-                                  <FormLabel>Heading</FormLabel>
-                                  <FormControl>
-                                    <Input placeholder="About Section Heading" {...field} />
-                                  </FormControl>
-                                  <FormMessage />
-                                </FormItem>
-                              )}
-                            />
-                            <FormField
-                              control={form.control}
-                              name="content"
-                              render={({ field }) => (
-                                <FormItem>
-                                  <FormLabel>Paragraph</FormLabel>
-                                  <FormControl>
-                                    <Textarea placeholder="Write your paragraph here..." className="min-h-[150px]" {...field} />
-                                  </FormControl>
-                                  <FormMessage />
-                                </FormItem>
-                              )}
-                            />
+
+                            <Separator className="my-8" />
+
+                            <Tabs defaultValue="en" className="w-full">
+                              <TabsList className="grid w-full grid-cols-2">
+                                <TabsTrigger value="en">English Content</TabsTrigger>
+                                <TabsTrigger value="fr">French Content</TabsTrigger>
+                              </TabsList>
+                              <TabsContent value="en" className="space-y-4 pt-4">
+                                <FormField
+                                  control={form.control}
+                                  name="title_en"
+                                  render={({ field }) => (
+                                    <FormItem>
+                                      <FormLabel>Heading (English)</FormLabel>
+                                      <FormControl>
+                                        <Input placeholder="About Section Heading" {...field} />
+                                      </FormControl>
+                                      <FormMessage />
+                                    </FormItem>
+                                  )}
+                                />
+                                <FormField
+                                  control={form.control}
+                                  name="content_en"
+                                  render={({ field }) => (
+                                    <FormItem>
+                                      <FormLabel>Paragraph (English)</FormLabel>
+                                      <FormControl>
+                                        <Textarea placeholder="Write your paragraph here..." className="min-h-[150px]" {...field} />
+                                      </FormControl>
+                                      <FormMessage />
+                                    </FormItem>
+                                  )}
+                                />
+                              </TabsContent>
+                              <TabsContent value="fr" className="space-y-4 pt-4">
+                                <FormField
+                                  control={form.control}
+                                  name="title_fr"
+                                  render={({ field }) => (
+                                    <FormItem>
+                                      <FormLabel>Heading (French)</FormLabel>
+                                      <FormControl>
+                                        <Input placeholder="Titre de la section À propos" {...field} />
+                                      </FormControl>
+                                      <FormMessage />
+                                    </FormItem>
+                                  )}
+                                />
+                                <FormField
+                                  control={form.control}
+                                  name="content_fr"
+                                  render={({ field }) => (
+                                    <FormItem>
+                                      <FormLabel>Paragraph (French)</FormLabel>
+                                      <FormControl>
+                                        <Textarea placeholder="Écrivez votre paragraphe ici..." className="min-h-[150px]" {...field} />
+                                      </FormControl>
+                                      <FormMessage />
+                                    </FormItem>
+                                  )}
+                                />
+                              </TabsContent>
+                            </Tabs>
+
+                            <Separator className="my-8" />
+
                             <FormField
                               control={form.control}
                               name="imageUrl"
                               render={({ field }) => (
                                 <FormItem>
-                                  <FormLabel>Image URL</FormLabel>
+                                  <FormLabel>Side Image URL</FormLabel>
                                   <div className="flex items-center gap-2">
                                     <FormControl>
                                       <Input placeholder="https://example.com/your-image.png" {...field} />

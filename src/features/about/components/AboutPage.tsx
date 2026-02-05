@@ -32,8 +32,10 @@ interface Client {
 }
 
 interface AboutPageContent {
-    title: string;
-    content: string;
+    title_en: string;
+    title_fr: string;
+    content_en: string;
+    content_fr: string;
     imageUrl: string;
     logoUrl?: string;
     logoScale?: number;
@@ -80,7 +82,7 @@ const itemVariants = {
 export default function AboutPage() {
   const firestore = useFirestore();
   const scrollRef = useRef<HTMLDivElement>(null);
-  const { t } = useI18n();
+  const { t, language } = useI18n();
 
   const services = [
       { title: t('about.services.brainstorming'), icon: BrainCircuit },
@@ -123,6 +125,9 @@ export default function AboutPage() {
     return [];
   }, [clients]);
 
+  const displayedTitle = language === 'fr' ? aboutContent?.title_fr : aboutContent?.title_en;
+  const displayedContent = language === 'fr' ? aboutContent?.content_fr : aboutContent?.content_en;
+
   return (
     <div className="h-full w-full flex flex-col">
       {!isLoading && <ScrollIndicator scrollRef={scrollRef} />}
@@ -159,9 +164,9 @@ export default function AboutPage() {
                         <div className="w-32 mx-auto mb-4" style={{ transform: `scale(${logoScale})` }}>
                             <Logo src={logoUrl} />
                         </div>
-                        <h2 className="text-2xl md:text-3xl font-headline tracking-tight">{aboutContent?.title}</h2>
+                        <h2 className="text-2xl md:text-3xl font-headline tracking-tight">{displayedTitle || 'About Us'}</h2>
                         <Separator className="bg-white/10 max-w-xs mx-auto mt-2 mb-4" />
-                        <p className="text-foreground/70 leading-relaxed mb-6 text-center text-justify">{aboutContent?.content}</p>
+                        <p className="text-foreground/70 leading-relaxed mb-6 text-center text-justify">{displayedContent}</p>
                         <div className="hidden sm:flex flex-col sm:flex-row gap-4 justify-center">
                             <Button asChild>
                                 <Link href="/contact">

@@ -276,7 +276,8 @@ export default function WorkPage() {
   const [selectedItemForEdit, setSelectedItemForEdit] = useState<PortfolioItem | null>(null);
   const [isFormSheetOpen, setIsFormSheetOpen] = useState(false);
   
-  const [visibleItemsCount, setVisibleItemsCount] = useState<number | null>(null);
+  // Initialize with a default value to avoid the deadlock in the isLoading check
+  const [visibleItemsCount, setVisibleItemsCount] = useState<number | null>(12);
   const [itemsPerLoad, setItemsPerLoad] = useState<number>(12);
 
   const [fullscreenImageUrl, setFullscreenImageUrl] = useState<string | null>(null);
@@ -314,13 +315,13 @@ export default function WorkPage() {
     if (isMobile) {
         const mobileInitialLoad = 8;
         setItemsPerLoad(mobileInitialLoad);
-        setVisibleItemsCount(prev => prev === null ? mobileInitialLoad - 1 : prev);
+        setVisibleItemsCount(prev => prev === null ? mobileInitialLoad : prev);
         return;
     }
 
     if (gridRef.current) {
-        const itemMinWidth = 300; // Corresponds to `minmax(300px, 1fr)`
-        const gridGap = 16; // Corresponds to `gap-4`
+        const itemMinWidth = 300; 
+        const gridGap = 16; 
 
         const gridWidth = gridRef.current.offsetWidth;
         const columnCount = Math.max(1, Math.floor((gridWidth + gridGap) / (itemMinWidth + gridGap)));
@@ -332,12 +333,11 @@ export default function WorkPage() {
         
         const calculatedCount = columnCount * rowCount;
         setItemsPerLoad(calculatedCount);
-        setVisibleItemsCount(prev => prev === null ? calculatedCount - 1 : prev);
+        setVisibleItemsCount(prev => prev === null ? calculatedCount : prev);
     }
   }, 200), [isMobile]);
 
   useEffect(() => {
-    // Only run this on the client
     setIsClient(true);
     calculateAndSetItems();
 
@@ -348,9 +348,8 @@ export default function WorkPage() {
     };
   }, [calculateAndSetItems]);
 
-  // When filters change, reset the visible count
   useEffect(() => {
-    setVisibleItemsCount(prev => (prev === null ? null : itemsPerLoad -1));
+    setVisibleItemsCount(prev => (prev === null ? null : itemsPerLoad));
   }, [filter, itemsPerLoad]);
 
   useEffect(() => {
@@ -367,7 +366,6 @@ export default function WorkPage() {
     setVisibleItemsCount(prev => (prev || 0) + itemsPerLoad);
   };
 
-  // Effect to set selected item based on URL
   useEffect(() => {
     if (selectedSlug && portfolioItems) {
       const item = portfolioItems.find(p => slugify(p.title) === selectedSlug);
@@ -379,7 +377,6 @@ export default function WorkPage() {
     } else {
       setSelectedItem(null);
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedSlug, portfolioItems]);
   
   const updateUrl = (slug: string | null) => {
@@ -529,13 +526,12 @@ export default function WorkPage() {
   
   const effectiveItemsCount = visibleItemsCount || 0;
   const itemsToShow = useMemo(() => {
-      if (visibleItemsCount === null) return [];
       return filteredItems.slice(0, effectiveItemsCount);
-  }, [filteredItems, effectiveItemsCount, visibleItemsCount]);
+  }, [filteredItems, effectiveItemsCount]);
 
   const showMoreButtonNeeded = visibleItemsCount !== null && filteredItems.length > effectiveItemsCount;
 
-  const isLoading = isPortfolioLoading || visibleItemsCount === null;
+  const isLoading = isPortfolioLoading;
 
   const variants = {
     enter: (direction: 'next' | 'prev' | null) => ({

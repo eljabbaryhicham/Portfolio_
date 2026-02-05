@@ -1,3 +1,4 @@
+
 'use client';
 
 import './globals.css';
@@ -106,10 +107,9 @@ function SiteBackground() {
 
 function hexToHsl(hex: string): string | null {
     if (!hex.startsWith('#') || (hex.length !== 4 && hex.length !== 7)) {
-        return null; // Invalid hex code
+        return null; 
     }
 
-    // Expand shorthand form (e.g. "03F") to full form (e.g. "0033FF")
     const shorthandRegex = /^#?([a-f\d])([a-f\d])([a-f\d])$/i;
     hex = hex.replace(shorthandRegex, (m, r, g, b) => r + r + g + g + b + b);
 
@@ -186,8 +186,6 @@ function AppContent({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const { language } = useI18n();
-
   return (
     <html lang="en" className="dark h-full" suppressHydrationWarning>
       <head>
@@ -195,9 +193,6 @@ function AppContent({
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="" />
         <link href="https://fonts.googleapis.com/css2?family=Bungee&family=Quicksand:wght@400;500;700&family=Dancing+Script:wght@700&display=swap" rel="stylesheet" />
-        {language === 'ar' && (
-          <link href="https://fonts.googleapis.com/css2?family=Zain:wght@400;700&display=swap" rel="stylesheet" />
-        )}
         <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined" rel="stylesheet" />
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" integrity="sha512-SnH5WK+bZxgPHs44uWIX+LLJAJ9/2PkPKZ5QiAj6Ta86w+fsb2TkcmfRyVX3pBnMFcV7oQPJkl9QevSCWr3W6A==" crossOrigin="anonymous" referrerPolicy="no-referrer" />
         <title>Liquid Folio</title>
@@ -205,7 +200,7 @@ function AppContent({
             <DynamicThemeStyles />
         </FirebaseClientProvider>
       </head>
-      <body className={cn('font-body antialiased text-center', language === 'ar' && 'font-arabic')} suppressHydrationWarning>
+      <body className={cn('font-body antialiased text-center')} suppressHydrationWarning>
           <FirebaseClientProvider>
               <SiteBackground />
               <LayoutProvider>

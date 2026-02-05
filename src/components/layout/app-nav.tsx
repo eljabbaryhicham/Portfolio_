@@ -160,7 +160,7 @@ export function AppNav() {
             <div
               className={cn(
                 "group relative flex items-center justify-center rounded-full transition-all duration-300 aspect-square glass-effect cursor-pointer",
-                isMobile ? 'h-[clamp(2.2rem,8vw,2.5rem)] w-[clamp(2.2rem,8vw,2.5rem)]' : "h-8 w-8",
+                isMobile ? 'h-[clamp(2rem,7vw,2.2rem)] w-[clamp(2rem,7vw,2.2rem)]' : "h-7 w-7",
                 "text-white"
               )}
             >
@@ -236,11 +236,11 @@ export function AppNav() {
             </div>
         </Link>
         <nav 
-          className="flex flex-row md:flex-col items-center justify-center w-full md:w-auto md:gap-8"
+          className="flex flex-row md:flex-col items-center justify-center w-full md:w-auto md:gap-12"
         >
            {accessibleNavItems.map(renderNavItem)}
         </nav>
-        <div className="flex flex-col items-center gap-8">
+        <div className="flex flex-col items-center mb-4">
           {renderLanguageSwitcher()}
         </div>
       </div>

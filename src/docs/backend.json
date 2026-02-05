@@ -210,13 +210,21 @@
       "description": "Stores the editable content for the About Us page.",
       "type": "object",
       "properties": {
-        "title": {
+        "title_en": {
           "type": "string",
-          "description": "The main heading for the about section."
+          "description": "The main heading for the about section (English)."
         },
-        "content": {
+        "title_fr": {
           "type": "string",
-          "description": "The paragraph content for the about section."
+          "description": "The main heading for the about section (French)."
+        },
+        "content_en": {
+          "type": "string",
+          "description": "The paragraph content for the about section (English)."
+        },
+        "content_fr": {
+          "type": "string",
+          "description": "The paragraph content for the about section (French)."
         },
         "imageUrl": {
           "type": "string",
@@ -232,12 +240,7 @@
             "type": "number",
             "description": "The scale of the logo on the about page."
         }
-      },
-      "required": [
-        "title",
-        "content",
-        "imageUrl"
-      ]
+      }
     },
     "MediaAsset": {
       "title": "Media Asset",
