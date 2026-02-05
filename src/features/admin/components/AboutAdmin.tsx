@@ -40,11 +40,11 @@ import { Slider } from '@/components/ui/slider';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
 const formSchema = z.object({
-  title_en: z.string().min(2, { message: 'Title must be at least 2 characters.' }),
-  title_fr: z.string().min(2, { message: 'Title must be at least 2 characters.' }),
-  content_en: z.string().min(10, { message: 'Content must be at least 10 characters.' }),
-  content_fr: z.string().min(10, { message: 'Content must be at least 10 characters.' }),
-  imageUrl: z.string().url({ message: 'Please enter a valid URL.' }),
+  title_en: z.string().min(1, { message: 'Title is required.' }).optional().or(z.literal('')),
+  title_fr: z.string().min(1, { message: 'Title is required.' }).optional().or(z.literal('')),
+  content_en: z.string().min(1, { message: 'Content is required.' }).optional().or(z.literal('')),
+  content_fr: z.string().min(1, { message: 'Content is required.' }).optional().or(z.literal('')),
+  imageUrl: z.string().url({ message: 'Please enter a valid URL.' }).optional().or(z.literal('')),
   logoUrl: z.string().url({ message: 'Please enter a valid URL.' }).optional().or(z.literal('')),
   logoScale: z.number().min(0.05).max(5).optional(),
 });
@@ -104,11 +104,18 @@ export default function AboutAdmin() {
 
   const onSubmit = (values: AboutFormValues) => {
     if (!aboutContentRef || !canEditAbout) return;
+    
+    // Clean values to remove undefined or empty strings that should be null/empty in DB
     const dataToSave = {
-      ...values,
+      title_en: values.title_en || '',
+      title_fr: values.title_fr || '',
+      content_en: values.content_en || '',
+      content_fr: values.content_fr || '',
+      imageUrl: values.imageUrl || '',
       logoUrl: values.logoUrl || '', 
       logoScale: values.logoScale || 1,
     };
+
     setDocumentNonBlocking(aboutContentRef, dataToSave, { merge: true });
     toast({
       title: 'About Page Updated',
@@ -122,7 +129,7 @@ export default function AboutAdmin() {
     setLibrarySelectionConfig({
       onSelect: (url, type) => {
         if (type === 'image') {
-          form.setValue(field, url, { shouldValidate: true });
+          form.setValue(field, url, { shouldValidate: true, shouldDirty: true });
         } else {
           toast({ variant: 'destructive', title: 'Invalid File Type', description: 'Please select an image.' });
         }
