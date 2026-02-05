@@ -9,7 +9,7 @@ import { useToast } from '@/hooks/use-toast';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import Image from 'next/image';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faCloudUploadAlt, faCopy, faTrash, faFilm, faFileImage, faImages, faXmark, faPlus, faEye, faFolderOpen, faLink, faUniversity, faStar, faPhotoFilm, faFileLines, faExclamationTriangle } from '@fortawesome/free-solid-svg-icons';
+import { faCloudUploadAlt, faCopy, faTrash, faFilm, faFileImage, faImages, faXmark, faPlus, faEye, faFolderOpen, faLink, faUniversity, faStar, faPhotoFilm, faFileLines, faExclamationTriangle, faTriangleExclamation } from '@fortawesome/free-solid-svg-icons';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogClose, DialogDescription, DialogFooter } from '@/components/ui/dialog';
 import { cn } from '@/lib/utils';
@@ -24,6 +24,7 @@ import CdnClapprPlayer from '@/components/CdnClapprPlayer';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Label } from '@/components/ui/label';
 import { deleteFromCloudinary } from '@/api/cloudinary-delete/route';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 
 
 // Type for the media stored in Firestore
@@ -199,7 +200,7 @@ const MediaFileCard = ({
 interface StandaloneMediaAdminProps {
   isDialog?: false;
   onMediaSelect: (url: string, type: 'image' | 'video' | 'raw', filename: string) => void;
-  onUploadComplete: (docId: string, resourceType: 'image' | 'video' | 'raw', libraryId: 'primary' | 'extented') => void;
+  onUploadComplete: (mediaId: string, resourceType: 'image' | 'video' | 'raw', libraryId: 'primary' | 'extented') => void;
   onLibraryOpenRequest: () => void;
   isOpen?: never;
   onOpenChange?: never;
@@ -323,13 +324,15 @@ export default function MediaAdmin(props: MediaAdminProps) {
     setIsChoosingLibrary(false);
     
     const isPrimary = libraryId === 'primary';
-    const cloudName = isPrimary ? process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME_1 : process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME_2;
+    const suffix = isPrimary ? '_1' : '_2';
+    const cloudName = process.env[`NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME${suffix}`];
+    const uploadPreset = process.env[`NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET${suffix}`];
     
-    if (!cloudName) {
+    if (!cloudName || !uploadPreset) {
         toast({
             variant: 'destructive',
             title: 'Configuration Error',
-            description: `Cloudinary cloud name for library '${libraryId}' is not set.`,
+            description: `Cloudinary settings for library '${libraryId}' are missing in environment variables. Please check your hosting provider settings (e.g. Vercel).`,
             duration: 10000,
         });
         setFilesToUpload([]);
@@ -344,13 +347,9 @@ export default function MediaAdmin(props: MediaAdminProps) {
 
         const timestamp = Math.round((new Date()).getTime() / 1000);
         
-        const uploadPreset = isPrimary
-            ? process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET_1
-            : process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET_2;
-
         const paramsToSign = {
             timestamp: timestamp,
-            upload_preset: uploadPreset || '',
+            upload_preset: uploadPreset,
         };
         
         let signatureResponse, apiKey;
@@ -360,7 +359,10 @@ export default function MediaAdmin(props: MediaAdminProps) {
                 body: JSON.stringify({ paramsToSign, libraryId }),
                 headers: { 'Content-Type': 'application/json' },
             });
-            if (!sigRes.ok) throw new Error('Failed to get signature from server.');
+            if (!sigRes.ok) {
+                const errData = await sigRes.json();
+                throw new Error(errData.message || 'Failed to get signature from server.');
+            }
             const sigData = await sigRes.json();
             if (!sigData.success) throw new Error(sigData.message);
             signatureResponse = sigData.signature;
@@ -427,11 +429,16 @@ export default function MediaAdmin(props: MediaAdminProps) {
                     description: `${file.name} has been uploaded to ${libraryId === 'primary' ? 'Library Primary' : 'Library Extented'}.`,
                 });
             } else {
-                const error = JSON.parse(xhr.responseText).error;
+                let errorMessage = 'An unknown error occurred.';
+                try {
+                    const error = JSON.parse(xhr.responseText).error;
+                    errorMessage = error.message || errorMessage;
+                } catch(e) {}
+                
                 toast({
                     variant: 'destructive',
                     title: `Upload Failed for ${file.name}`,
-                    description: error.message || 'An unknown error occurred.',
+                    description: errorMessage,
                 });
             }
         };
@@ -440,7 +447,7 @@ export default function MediaAdmin(props: MediaAdminProps) {
             toast({
                 variant: 'destructive',
                 title: `Upload Failed for ${file.name}`,
-                description: 'A network error occurred during upload.',
+                description: 'A network error occurred during upload. Please check your internet connection and verify that your Cloudinary account is active.',
             });
         };
 
@@ -798,6 +805,16 @@ export default function MediaAdmin(props: MediaAdminProps) {
             </div>
         </div>
         <Separator className="bg-white/10" />
+        
+        {/* Warning if Cloudinary environment variables are missing */}
+        <Alert variant="destructive" className={cn("mb-4", (process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME_1 && process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET_1) ? "hidden" : "block")}>
+            <FontAwesomeIcon icon={faTriangleExclamation} className="h-4 w-4" />
+            <AlertTitle>Cloudinary Not Configured</AlertTitle>
+            <AlertDescription>
+                Your Cloudinary environment variables are missing. Please add them to your hosting provider's settings (e.g. Vercel) and redeploy to enable uploads.
+            </AlertDescription>
+        </Alert>
+
         <div className="border rounded-lg p-6 glass-effect flex flex-col gap-4">
             <div 
                 {...getRootProps()} 
