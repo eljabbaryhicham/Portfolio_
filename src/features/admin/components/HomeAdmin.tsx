@@ -1,4 +1,3 @@
-
 'use client';
 
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -167,7 +166,7 @@ export default function HomeAdmin() {
       homePageLogoUrl: '',
       isHomePageLogoVisible: true,
       homePageLogoScale: 1,
-      themeColor: '#d81e38',
+      themeColor: '#2563eb',
       registrationSecretCode: 'BELOFTED',
       plyrPlayerAssetSource: 'local',
       plyrPlayerCdnCssUrl: 'https://cdn.plyr.io/3.7.8/plyr.css',
@@ -196,7 +195,7 @@ export default function HomeAdmin() {
         homePageLogoUrl: homeSettings.homePageLogoUrl || '',
         isHomePageLogoVisible: homeSettings.isHomePageLogoVisible ?? true,
         homePageLogoScale: homeSettings.homePageLogoScale || 1,
-        themeColor: homeSettings.themeColor || '#d81e38',
+        themeColor: homeSettings.themeColor || '#2563eb',
         registrationSecretCode: homeSettings.registrationSecretCode || 'BELOFTED',
         plyrPlayerAssetSource: homeSettings.plyrPlayerAssetSource || 'local',
         plyrPlayerCdnCssUrl: homeSettings.plyrPlayerCdnCssUrl || 'https://cdn.plyr.io/3.7.8/plyr.css',
@@ -556,7 +555,7 @@ export default function HomeAdmin() {
                                                     <FormControl>
                                                         <Input type="color" {...field} className="p-1 h-10 w-14 cursor-pointer" />
                                                     </FormControl>
-                                                    <Input type="text" {...field} placeholder="#d81e38" />
+                                                    <Input type="text" {...field} placeholder="#2563eb" />
                                                 </div>
                                                 <FormDescription>
                                                     Set the primary color for the website theme.

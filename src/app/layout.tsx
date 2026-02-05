@@ -1,4 +1,3 @@
-
 'use client';
 
 import './globals.css';
@@ -154,7 +153,7 @@ function DynamicThemeStyles() {
     );
     const { data: homeSettings } = useDoc<HomePageSettings>(settingsDocRef);
     
-    const [themeColor, setThemeColor] = useState('#d81e38');
+    const [themeColor, setThemeColor] = useState('#2563eb');
     
     useEffect(() => {
         if (homeSettings?.themeColor) {
@@ -231,4 +230,3 @@ export default function RootLayout({
     </I18nProvider>
   );
 }
-
