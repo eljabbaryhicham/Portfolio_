@@ -46,14 +46,7 @@ interface Client {
   logoScale?: number;
 }
 
-const defaultClients: Omit<Client, 'id'>[] = [
-    { name: 'QuantumLeap', logoUrl: 'https://res.cloudinary.com/da1srnoer/image/upload/v1760834216/nqnqvmroqxngfamrcpuf.png', order: 0, isVisible: true, logoScale: 1 },
-    { name: 'StellarForge', logoUrl: 'https://res.cloudinary.com/da1srnoer/image/upload/v1760834216/nqnqvmroqxngfamrcpuf.png', order: 1, isVisible: true, logoScale: 1 },
-    { name: 'ApexInnovate', logoUrl: 'https://res.cloudinary.com/da1srnoer/image/upload/v1760834216/nqnqvmroqxngfamrcpuf.png', order: 2, isVisible: true, logoScale: 1 },
-    { name: 'NexusCore', logoUrl: 'https://res.cloudinary.com/da1srnoer/image/upload/v1760834216/nqnqvmroqxngfamrcpuf.png', order: 3, isVisible: true, logoScale: 1 },
-    { name: 'VertexDynamics', logoUrl: 'https://res.cloudinary.com/da1srnoer/image/upload/v1760834216/nqnqvmroqxngfamrcpuf.png', order: 4, isVisible: true, logoScale: 1 },
-    { name: 'MomentumSuite', logoUrl: 'https://res.cloudinary.com/da1srnoer/image/upload/v1760834216/nqnqvmroqxngfamrcpuf.png', order: 5, isVisible: true, logoScale: 1 },
-];
+const defaultClients: Omit<Client, 'id'>[] = [];
 
 
 const formSchema = z.object({
